@@ -149,14 +149,16 @@
                 <h2 class="text-2xl font-bold text-gray-800">
                     캠페인 목표 & 성과 검증 항목 입력
                 </h2>
+                <!-- Initial text is now '입력 테이블 접기' -->
                 <button id="toggle-validation-table" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 text-sm font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
-                    <span id="toggle-text">입력 테이블 열기</span>
-                    <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 ml-1 transform rotate-0 transition-transform"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
+                    <span id="toggle-text">입력 테이블 접기</span> 
+                    <!-- Initial icon is now 'rotate-180' (handled in JS for consistency) -->
+                    <svg id="toggle-icon" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 ml-1 transform transition-transform rotate-180"><path fill-rule="evenodd" d="M5.23 7.21a.75.75 0 011.06.02L10 10.94l3.71-3.71a.75.75 0 111.06 1.06l-4.25 4.25a.75.75 0 01-1.06 0L5.23 8.27a.75.75 0 01.02-1.06z" clip-rule="evenodd" /></svg>
                 </button>
             </div>
 
-            <!-- Collapsible Input Table Container -->
-            <div id="validation-table-content" class="hidden transition-all duration-300 overflow-hidden">
+            <!-- Collapsible Input Table Container (Removed 'hidden' class) -->
+            <div id="validation-table-content" class="transition-all duration-300 overflow-hidden">
                 <div class="bg-gray-50 p-4 rounded-xl shadow-inner border">
                     <div class="flex justify-between items-center mb-4">
                         <p class="text-sm text-gray-600">
@@ -180,100 +182,112 @@
                 </div>
             </div>
         </div>
-
-        <!-- 1. Overall Performance Summary Table -->
-        <div class="mb-10">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">종합 성과 요약 <span id="summary-title" class="text-indigo-600 text-lg ml-2"></span></h2>
-            <div class="overflow-hidden rounded-xl shadow-lg border">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-indigo-50">
-                        <tr id="summary-header" class="text-sm font-semibold text-indigo-700 uppercase tracking-wider">
-                            <!-- Summary Headers -->
-                        </tr>
-                    </thead>
-                    <tbody id="summary-body" class="bg-white divide-y divide-gray-200">
-                        <!-- Summary Data -->
-                    </tbody>
-                </table>
-            </div>
-        </div>
-
-        <!-- 2. Visualization and Insights (3-Column Layout) -->
-        <div class="grid grid-cols-1 xl:grid-cols-3 gap-10">
-            
-            <!-- Left 2/3: 4-Quadrant Matrix (Existing Logic) -->
-            <div class="xl:col-span-2 space-y-6">
-                <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                    <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                        소재 성과 도식화 (4분면 매트릭스)
-                        <span id="chart-axes-label" class="ml-3 text-sm text-gray-500"></span>
-                    </h2>
-                    
-                    <div class="quadrant-matrix" id="quadrant-matrix">
-                        <!-- Quadrant Lines (NEW) -->
-                        <div class="matrix-lines">
-                            <div class="v-line"></div>
-                            <div class="h-line"></div>
-                        </div>
-
-                        <!-- Quadrant 1: Top Right (Top) -->
-                        <div class="quadrant quadrant-top-right">
-                            <div class="quadrant-label text-green-700">Top Zone</div>
-                        </div>
-                        <!-- Quadrant 2: Top Left (Potential) -->
-                        <div class="quadrant quadrant-top-left">
-                            <div class="quadrant-label text-blue-700">Potential Zone</div>
-                        </div>
-                        <!-- Quadrant 3: Bottom Left (Low) -->
-                        <div class="quadrant quadrant-bottom-left">
-                            <div class="quadrant-label text-red-700">Low Zone</div>
-                        </div>
-                        <!-- Quadrant 4: Bottom Right (Focus) -->
-                        <div class="quadrant quadrant-bottom-right">
-                            <div class="quadrant-label text-amber-700">Focus Zone</div>
-                        </div>
-
-                        <!-- Dots are injected here -->
-                    </div>
-                    
-                    <div id="matrix-info" class="mt-4 flex justify-between text-sm text-gray-600 font-medium">
-                        <span id="y-low-label"></span>
-                        <span id="y-high-label"></span>
-                    </div>
-                    <p class="text-sm text-gray-500 mt-2 text-center">X축: <span id="x-axis-label" class="font-semibold text-gray-700"></span></p>
-                    <p class="text-xs text-gray-400 mt-1 text-center">중앙 기준선: 5점 척도 중 2.5점 (총점 2.5점 미만은 OFF/교체 고려)</p>
-                </div>
-            </div>
-
-            <!-- Right 1/3: Key Insights (Existing Logic) -->
-            <div class="xl:col-span-1 space-y-6">
-                <div class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200 h-full">
-                    <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
-                        <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                        매체/등급별 핵심 인사이트
-                    </h2>
-                    <ul id="insight-list" class="space-y-4 text-gray-700 text-sm">
-                        <!-- Insights will be injected here -->
-                    </ul>
-                </div>
-            </div>
-        </div>
         
-        <!-- 3. Efficiency Data Table (Existing Logic) -->
-        <div class="mt-10">
-            <h2 class="text-2xl font-bold text-gray-800 mb-4">캠페인 상세 효율 지표 (소재별)</h2>
-            <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-100 sticky top-0">
-                        <tr id="table-header" class="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                            <!-- Headers will be injected here -->
-                        </tr>
-                    </thead>
-                    <tbody id="table-body" class="bg-white divide-y divide-gray-200">
-                        <!-- Data rows will be injected here -->
-                    </tbody>
-                </table>
+        <!-- Analysis Trigger Button (Keep for manual re-run) -->
+        <div class="mb-10 text-center">
+            <button id="run-analysis-button" class="bg-blue-600 text-white hover:bg-blue-700 text-xl font-bold py-3 px-8 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]">
+                📊 입력 데이터 기반 인사이트 분석 재실행
+            </button>
+        </div>
+
+        <!-- Analysis Results Container (REMOVED 'hidden' class) -->
+        <div id="analysis-results"> 
+
+            <!-- 1. Overall Performance Summary Table -->
+            <div class="mb-10">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">종합 성과 요약 <span id="summary-title" class="text-indigo-600 text-lg ml-2"></span></h2>
+                <div class="overflow-hidden rounded-xl shadow-lg border">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-indigo-50">
+                            <tr id="summary-header" class="text-sm font-semibold text-indigo-700 uppercase tracking-wider">
+                                <!-- Summary Headers -->
+                            </tr>
+                        </thead>
+                        <tbody id="summary-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Summary Data -->
+                        </tbody>
+                    </table>
+                </div>
             </div>
+
+            <!-- 2. Visualization and Insights (3-Column Layout) -->
+            <div class="grid grid-cols-1 xl:grid-cols-3 gap-10">
+                
+                <!-- Left 2/3: 4-Quadrant Matrix (Existing Logic) -->
+                <div class="xl:col-span-2 space-y-6">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
+                            소재 성과 도식화 (4분면 매트릭스)
+                            <span id="chart-axes-label" class="ml-3 text-sm text-gray-500"></span>
+                        </h2>
+                        
+                        <div class="quadrant-matrix" id="quadrant-matrix">
+                            <!-- Quadrant Lines (NEW) -->
+                            <div class="matrix-lines">
+                                <div class="v-line"></div>
+                                <div class="h-line"></div>
+                            </div>
+
+                            <!-- Quadrant 1: Top Right (Top) -->
+                            <div class="quadrant quadrant-top-right">
+                                <div class="quadrant-label text-green-700">Top Zone</div>
+                            </div>
+                            <!-- Quadrant 2: Top Left (Potential) -->
+                            <div class="quadrant quadrant-top-left">
+                                <div class="quadrant-label text-blue-700">Potential Zone</div>
+                            </div>
+                            <!-- Quadrant 3: Bottom Left (Low) -->
+                            <div class="quadrant quadrant-bottom-left">
+                                <div class="quadrant-label text-red-700">Low Zone</div>
+                            </div>
+                            <!-- Quadrant 4: Bottom Right (Focus) -->
+                            <div class="quadrant quadrant-bottom-right">
+                                <div class="quadrant-label text-amber-700">Focus Zone</div>
+                            </div>
+
+                            <!-- Dots are injected here -->
+                        </div>
+                        
+                        <div id="matrix-info" class="mt-4 flex justify-between text-sm text-gray-600 font-medium">
+                            <span id="y-low-label"></span>
+                            <span id="y-high-label"></span>
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2 text-center">X축: <span id="x-axis-label" class="font-semibold text-gray-700"></span></p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">중앙 기준선: 5점 척도 중 2.5점 (총점 2.5점 미만은 OFF/교체 고려)</p>
+                    </div>
+                </div>
+
+                <!-- Right 1/3: Key Insights (Existing Logic) -->
+                <div class="xl:col-span-1 space-y-6">
+                    <div class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200 h-full">
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
+                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                            매체/등급별 핵심 인사이트
+                        </h2>
+                        <ul id="insight-list" class="space-y-4 text-gray-700 text-sm">
+                            <!-- Insights will be injected here -->
+                        </ul>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- 3. Efficiency Data Table (Existing Logic) -->
+            <div class="mt-10">
+                <h2 class="text-2xl font-bold text-gray-800 mb-4">캠페인 상세 효율 지표 (소재별)</h2>
+                <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100 sticky top-0">
+                            <tr id="table-header" class="text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                <!-- Headers will be injected here -->
+                            </tr>
+                        </thead>
+                        <tbody id="table-body" class="bg-white divide-y divide-gray-200">
+                            <!-- Data rows will be injected here -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            
         </div>
     </div>
 
@@ -291,52 +305,49 @@
             return parseInt(cleanValue, 10).toLocaleString('ko-KR');
         };
 
-        // Mock data structure (unchanged)
+        // Helper function for formatting numbers for display
+        const formatNumber = (num, type) => {
+            if (typeof num !== 'number' || isNaN(num) || num === null) return '-';
+            switch (type) {
+                case 'percent': return `${(num * 100).toFixed(2)}%`; // Assumes num is fraction (e.g., 0.005)
+                case 'currency': return `${Math.round(num).toLocaleString('ko-KR')}원`;
+                case 'score': return num.toFixed(2);
+                default: return num.toLocaleString('ko-KR');
+            }
+        };
+
+        // Mock data structure (only used for headers to maintain consistency)
         const campaignData = {
             'DA': {
                 name: 'DA 캠페인 (반응 목표)',
                 metrics: { xAxis: '소재 관심도 (B)', yAxis: '유효 노출 기여도 (A)' },
-                summary: [
-                    { label: '총 광고비', key: 'cost', value: 4500000, type: 'currency' },
-                    { label: '총 노출수', key: 'imp', value: 9500000, type: 'number' },
-                    { label: '평균 CPM', key: 'cpm_avg', value: 473.68, type: 'currency' },
-                    { label: '평균 CTR', key: 'ctr_avg', value: 0.42, type: 'percent' },
-                    { label: '평균 CPC', key: 'cpc_avg', value: 112.5, type: 'currency' },
-                ],
                 headers: [
                     { name: '매체', key: 'media' }, { name: '소재 구분', key: 'creative' }, 
                     { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, 
                     { name: '광고비(원)', key: 'cost' }, { name: 'CPM(원)', key: 'cpm' }, 
                     { name: 'CTR(%)', key: 'ctr' }, { name: 'CPC(원)', key: 'cpc' }, 
-                    { name: 'A (노출 기여도)', key: 'scoreA' }, { name: 'B (소재 관심도)', key: 'scoreB' }, 
+                    { name: 'A 점수', key: 'scoreA' }, { name: 'B 점수', key: 'scoreB' }, 
                     { name: '총점', key: 'total' }, { name: 'INSIGHT', key: 'insight' }, 
                     { name: '교체 유무', key: 'action' }
                 ],
                 data: [
+                    // Mock data kept for prefill, values will be overwritten by calculated metrics
                     { media: '네이버 GFA', creative: '소재A_블랙', cost: 1200000, imp: 2500000, click: 12500, cpm: 480, ctr: 0.0050, cpc: 96, scoreA: 4.8, scoreB: 4.5, total: 4.65, insight: 'Top 소재', color: '#10b981', mediaInsight: 'GFA Top 소재는 노출과 관심도 모두 높습니다. 예산 집중(확대).' },
                     { media: '카카오 비즈보드', creative: '소재B_레드', cost: 1000000, imp: 2200000, click: 8800, cpm: 454.5, ctr: 0.0040, cpc: 113.6, scoreA: 4.0, scoreB: 4.0, total: 4.0, insight: 'Top 소재', color: '#10b981', mediaInsight: '비즈보드 Top 소재는 안정적입니다. A/B 테스트로 관심도(B) 개선 시도.' },
                     { media: '구글 GDN', creative: '소재C_그린', cost: 1500000, imp: 3000000, click: 9000, cpm: 500, ctr: 0.0030, cpc: 166.7, scoreA: 3.5, scoreB: 2.0, total: 2.75, insight: 'Focus 소재', color: '#f59e0b', mediaInsight: 'GDN은 노출 효율(A)은 괜찮으나 소재 관심도(B)가 낮습니다. 소재 교체/타겟팅 정교화.' },
                     { media: '네이버 GFA', creative: '소재D_옐로우', cost: 800000, imp: 1800000, click: 4500, cpm: 444.4, ctr: 0.0025, cpc: 177.8, scoreA: 2.0, scoreB: 1.5, total: 1.75, insight: 'Low 소재', color: '#ef4444', mediaInsight: 'Low 소재는 즉시 OFF 및 예산을 Top 소재로 이관해야 합니다.' },
-                    { media: '카카오 비즈보드', creative: '소재E_블루', cost: 600000, imp: 1000000, click: 3500, cpm: 600, ctr: 0.0035, cpc: 171.4, scoreA: 2.8, scoreB: 3.2, total: 3.0, insight: 'Potential 소재', color: '#3b82f6', mediaInsight: '비즈보드 Potential 소재는 CPM이 높습니다. 노출 기여도(A) 개선을 위해 타겟팅 확대 고려.' },
                 ],
             },
             'PERF': {
                 name: '퍼포먼스 캠페인 (전환 목표)',
                 metrics: { xAxis: '전환 기여도 (B)', yAxis: '광고 관심도 (A)' },
-                summary: [
-                    { label: '총 광고비', key: 'cost', value: 6000000, type: 'currency' },
-                    { label: '총 매출액', key: 'revenue', value: 30000000, type: 'currency' },
-                    { label: '총 전환수', key: 'conv', value: 250, type: 'number' },
-                    { label: '평균 CPA', key: 'cpa_avg', value: 24000, type: 'currency' },
-                    { label: '평균 ROAS', key: 'roas_avg', value: 500, type: 'percent' },
-                ],
                 headers: [
                     { name: '매체', key: 'media' }, { name: '소재 구분', key: 'creative' }, 
                     { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, 
                     { name: '전환수', key: 'conv' }, { name: '매출액(원)', key: 'revenue' }, 
                     { name: '광고비(원)', key: 'cost' }, { name: 'CTR(%)', key: 'ctr' }, 
                     { name: 'CPA(원)', key: 'cpa' }, { name: 'ROAS(%)', key: 'roas' },
-                    { name: 'A (광고 관심도)', key: 'scoreA' }, { name: 'B (전환 기여도)', key: 'scoreB' }, 
+                    { name: 'A 점수', key: 'scoreA' }, { name: 'B 점수', key: 'scoreB' }, 
                     { name: '총점', key: 'total' }, { name: 'INSIGHT', key: 'insight' }, 
                     { name: '교체 유무', key: 'action' }
                 ],
@@ -345,7 +356,6 @@
                     { media: '페이스북/인스타', creative: '소재_여성타겟', cost: 1800000, imp: 500000, click: 4000, conv: 80, revenue: 8000000, ctr: 0.008, cpa: 22500, roas: 444, scoreA: 4.0, scoreB: 4.5, total: 4.25, insight: 'Top 소재', color: '#10b981', mediaInsight: 'SNS는 관심도(A)는 우수하나, CPA 개선을 위해 랜딩페이지 최적화(LPO)가 필요합니다.' },
                     { media: '네이버 쇼핑검색', creative: '소재_상품A', cost: 1200000, imp: 200000, click: 1500, conv: 50, revenue: 5000000, ctr: 0.0075, cpa: 24000, roas: 416, scoreA: 3.5, scoreB: 3.0, total: 3.25, insight: 'Potential 소재', color: '#3b82f6', mediaInsight: '쇼핑검색은 전환 볼륨(B)을 늘려야 합니다. 예산 증액보다는 소재(A) 개선 필요.' },
                     { media: '구글 GDN', creative: '소재_리타겟팅', cost: 1000000, imp: 400000, click: 500, conv: 20, revenue: 2000000, ctr: 0.00125, cpa: 50000, roas: 200, scoreA: 1.5, scoreB: 1.0, total: 1.25, insight: 'Low 소재', color: '#ef4444', mediaInsight: 'Low 효율 리타겟팅 캠페인은 즉시 OFF하거나 타겟팅 세그먼트를 매우 좁게 재설정해야 합니다.' },
-                    { media: '페이스북/인스타', creative: '소재_영상A', cost: 1500000, imp: 700000, click: 3000, conv: 45, revenue: 6500000, ctr: 0.0043, cpa: 33333, roas: 433, scoreA: 3.8, scoreB: 2.2, total: 3.0, insight: 'Focus 소재', color: '#f59e0b', mediaInsight: 'SNS 영상 소재는 광고 관심도(A)가 높은 편이나, 낮은 전환 기여도(B)를 보입니다. 소재 메시지의 Call-to-Action(CTA) 명확화 필요.' },
                 ],
             }
         };
@@ -353,6 +363,7 @@
         let sortColumn = 'total';
         let sortDirection = 'desc';
         let currentCampaign = 'DA';
+        let liveAnalysisData = null; // New variable to hold calculated data
 
         // --- NEW: Validation Table Logic & Data Setup (Updated for 2-level header) ---
         
@@ -374,17 +385,18 @@
                     { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true, group: '기본 정보' }, 
                     { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '기본 정보' }, 
                     
-                    { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24', group: '노출 성과 (CPM)' },
+                    // 목표 CPM, CPC, CPV에 isLargeNumber: true 적용 (요청 사항 반영)
+                    { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24', isLargeNumber: true, group: '노출 성과 (CPM)' },
                     { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true, group: '노출 성과 (CPM)' },
                     
                     { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' }, 
-                    { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
+                    { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' },
                     { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
                     { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
                     { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
                     
                     { name: '조회수', key: 'view', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '조회 성과 (CPV)' }, 
-                    { name: '목표 CPV(원)', key: 'targetCpv', type: 'currency', placeholder: '목표CPV', width: 'w-24', group: '조회 성과 (CPV)' },
+                    { name: '목표 CPV(원)', key: 'targetCpv', type: 'currency', placeholder: '목표CPV', width: 'w-24', isLargeNumber: true, group: '조회 성과 (CPV)' },
                     { name: '성과 CPV(원)', key: 'actualCpv', type: 'currency', placeholder: '성과CPV', width: 'w-24', calculated: true, group: '조회 성과 (CPV)' },
                 ],
             },
@@ -405,36 +417,88 @@
                     { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true, group: '기본 정보' }, 
                     { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '기본 정보' }, 
                     
-                    { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24', group: '노출 성과 (CPM)' },
+                    // 목표 CPM, CPC, CPA에 isLargeNumber: true 적용 (요청 사항 반영)
+                    { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24', isLargeNumber: true, group: '노출 성과 (CPM)' },
                     { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true, group: '노출 성과 (CPM)' },
                     
                     { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' }, 
-                    { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
+                    { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' },
                     { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
                     { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
                     { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
                     
                     { name: '전환수', key: 'conv', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '전환 성과 (CPA)' }, 
-                    { name: '목표 CPA(원)', key: 'targetCpa', type: 'currency', placeholder: '목표CPA', width: 'w-24', group: '전환 성과 (CPA)' },
+                    { name: '목표 CPA(원)', key: 'targetCpa', type: 'currency', placeholder: '목표CPA', width: 'w-24', isLargeNumber: true, group: '전환 성과 (CPA)' },
                     { name: '성과 CPA(원)', key: 'actualCpa', type: 'currency', placeholder: '성과CPA', width: 'w-24', calculated: true, group: '전환 성과 (CPA)' },
                     { name: '구매/가입액(원)', key: 'revenue', type: 'currency', placeholder: '금액', width: 'w-24', isLargeNumber: true, group: '전환 성과 (CPA)' }, 
                 ],
             }
         };
 
-        let isValidationTableOpen = false;
-        const validationData = { 'DA': [], 'PERF': [] };
+        /**
+         * Converts core campaign data into the structure required for the validation input table.
+         * Takes the first 4 items and initializes them with core performance metrics and mock targets.
+         */
+        const mapCampaignDataToValidation = (sourceData, campaignType) => {
+            // Only take the first 4 rows as requested
+            const dataToMap = sourceData.slice(0, 4); 
+            const configCols = validationTableConfigs[campaignType].cols;
+            
+            return dataToMap.map((sourceItem) => {
+                const row = { id: crypto.randomUUID() };
+                
+                configCols.forEach(col => {
+                    row[col.key] = null; // Initialize all fields to null
+                });
+                
+                // --- Core Metric Mapping (DA/PERF Common) ---
+                row.media = sourceItem.media || '';
+                const parts = sourceItem.creative ? sourceItem.creative.split('_') : ['', ''];
+                row.creativeName = parts[0] || '소재'; 
+                row.placement = parts[1] || '상품'; 
 
-        const getEmptyRow = (campaign) => {
-            const row = { id: crypto.randomUUID() };
-            validationTableConfigs[campaign].cols.forEach(col => {
-                // Ensure the new 'creativeName' field is initialized to ''
-                row[col.key] = col.type === 'number' || col.type === 'currency' || col.type === 'percent' ? null : '';
+                // Raw Performance Data
+                row.cost = sourceItem.cost;
+                row.imp = sourceItem.imp;
+                row.click = sourceItem.click;
+                
+                // --- Campaign Specific Mapping & Defaults ---
+                if (campaignType === 'DA') {
+                    // Mock a view count for CPV calculation (e.g., Imp/50)
+                    row.view = Math.round(sourceItem.imp / 50) || null; 
+                    
+                    // Dummy Target Values for DA
+                    row.targetCpm = 450;
+                    row.targetCpc = 120;
+                    row.targetCtr = 0.004; // Use fraction for consistency
+                    row.targetCpv = 100;
+                    
+                } else if (campaignType === 'PERF') {
+                    row.conv = sourceItem.conv;
+                    row.revenue = sourceItem.revenue;
+                    
+                    // Dummy Target Values for PERF
+                    row.targetCpm = 5000; 
+                    row.targetCpa = 25000;
+                    row.targetCpc = 2000;
+                    row.targetCtr = 0.01; // Use fraction for consistency
+                }
+                
+                return row;
             });
-            return row;
         };
-        validationData.DA.push(getEmptyRow('DA'));
-        validationData.PERF.push(getEmptyRow('PERF'));
+
+        // 1. Generate Prefilled Data
+        const prefillDaData = mapCampaignDataToValidation(campaignData.DA.data, 'DA');
+        const prefillPerfData = mapCampaignDataToValidation(campaignData.PERF.data, 'PERF');
+
+        // 2. Initialize validationData with the prefilled rows (4 rows for each)
+        let isValidationTableOpen = true; 
+        const validationData = { 'DA': prefillDaData, 'PERF': prefillPerfData };
+
+        // --- NEW Element references ---
+        const runAnalysisButton = document.getElementById('run-analysis-button');
+        const analysisResults = document.getElementById('analysis-results'); 
 
         const validationTableContent = document.getElementById('validation-table-content');
         const toggleValidationTableButton = document.getElementById('toggle-validation-table');
@@ -468,7 +532,8 @@
 
             // Helper to handle division by zero or invalid input
             const safeDivide = (numerator, denominator) => {
-                if (typeof numerator !== 'number' || typeof denominator !== 'number' || denominator === 0 || isNaN(numerator) || isNaN(denominator) || numerator === null || denominator === null) {
+                // Ensure numerator and denominator are valid positive numbers before division
+                if (typeof numerator !== 'number' || typeof denominator !== 'number' || denominator <= 0 || isNaN(numerator) || isNaN(denominator) || numerator === null || denominator === null) {
                     return null;
                 }
                 return numerator / denominator;
@@ -485,17 +550,16 @@
             if (campaignType === 'DA') {
                 // CPV = Cost / View
                 row.actualCpv = safeDivide(cost, view);
-                row.actualCpa = null; // Ensure CPA is null for DA
+                row.actualCpa = null; 
             } else if (campaignType === 'PERF') {
                 // CPA = Cost / Conversion
                 row.actualCpa = safeDivide(cost, conv);
-                row.actualCpv = null; // Ensure CPV is null for PERF
+                row.actualCpv = null; 
             }
         }
 
         /**
          * Updates only the calculated columns in the DOM without destroying input focus.
-         * FIX: Removed +1 index offset since the '결과' column is deleted.
          * @param {string} rowId - The unique ID of the row.
          * @param {object} rowData - The data object for the row.
          */
@@ -509,7 +573,7 @@
             // Iterate through columns to find calculated fields
             config.cols.forEach((col, colIndex) => {
                 if (col.calculated) {
-                    // FIX: Since the '결과' column is removed, the DOM child index now directly matches colIndex.
+                    // Find the TD based on the column index (colIndex). This relies on the order being consistent.
                     const td = rowElement.children[colIndex]; 
                     const inputElement = td.querySelector('input');
                     if (!inputElement) return;
@@ -519,10 +583,8 @@
                     
                     if (rawValue !== null) {
                         if (col.type === 'currency') {
-                            // Display as formatted currency number (without '원' in the input field)
-                            displayValue = formatNumber(rawValue, 'currency').replace('원', ''); 
+                            displayValue = formatNumber(Math.round(rawValue), 'currency').replace('원', ''); 
                         } else if (col.type === 'percent') {
-                            // Display as percentage with 2 decimal places
                             displayValue = `${(rawValue * 100).toFixed(2)}%`; 
                         } else {
                             displayValue = rawValue.toFixed(2);
@@ -544,22 +606,17 @@
                 
                 // --- Input Parsing and Storage ---
                 if (config.isLargeNumber) {
-                    // --- Cursor Position Preservation Logic (REFINED) ---
                     const originalCursorPos = event.target.selectionStart;
                     const originalValue = event.target.value; 
                     
-                    // 1. Clean the input (remove all non-digits)
                     const cleanValue = inputValue.replace(/[^\d]/g, ''); 
                     
-                    // 2. Identify the prefix (digits only) up to the cursor in the original value
                     const originalValuePrefix = originalValue.substring(0, originalCursorPos);
                     const cleanPrefix = originalValuePrefix.replace(/[^\d]/g, '');
                     
-                    // 3. Format the clean value for display (inserts commas)
                     const formattedValue = formatNumericInput(cleanValue);
                     event.target.value = formattedValue;
                     
-                    // 4. Calculate the new cursor position
                     let newCursorPos = 0;
                     let digitCount = 0;
                     
@@ -574,21 +631,21 @@
                         newCursorPos = i + 1;
                     }
                     
-                    // 5. Restore cursor position
-                    // This is the key fix that prevents the cursor from jumping
-                    event.target.setSelectionRange(newCursorPos, newCursorPos);
+                    setTimeout(() => event.target.setSelectionRange(newCursorPos, newCursorPos), 0);
                     
-                    // 6. Determine the raw value to store (parsed number or null)
                     rawValueToStore = cleanValue === '' ? null : parseInt(cleanValue, 10);
-                } else if (config.type === 'number' || config.type === 'currency') {
-                    // For non-large number/currency fields (e.g., targetCpm, targetCpc), allow decimals
+                } else if (config.type === 'number' || config.type === 'currency' || config.type === 'percent') {
+                    // For other numeric fields, allow decimals
                     const cleanValue = inputValue.replace(/[^\d.]/g, ''); 
                     rawValueToStore = cleanValue === '' || cleanValue === '.' ? null : parseFloat(cleanValue);
-                } else if (config.type === 'percent') {
-                    // For percentage inputs
-                    const cleanValue = inputValue.replace(/[^\d.]/g, ''); 
-                    rawValueToStore = cleanValue === '' || cleanValue === '.' ? null : parseFloat(cleanValue);
-                } 
+                    
+                    // Convert displayed percentage back to fraction for internal storage if it's a target CTR
+                    if (key.includes('targetCtr') && rawValueToStore !== null) {
+                        rawValueToStore = rawValueToStore / 100;
+                    }
+                } else if (config.type === 'text') {
+                    rawValueToStore = inputValue;
+                }
                 
                 // Update the stored data with the cleaned/parsed value
                 validationData[currentCampaign][index][key] = rawValueToStore;
@@ -596,31 +653,34 @@
                 // --- Targeted Calculation and DOM Update ---
                 const baseMetrics = ['cost', 'imp', 'click', 'view', 'conv', 'revenue'];
                 
-                // Only update calculated fields if a base input metric changes
+                // Recalculate and update calculated fields if a base metric changes
                 if (baseMetrics.includes(key)) {
                     calculateValidationMetrics(validationData[currentCampaign][index], currentCampaign);
-                    // CRITICAL FIX: Only update the calculated columns in the DOM
                     updateCalculatedColumnsInDOM(rowId, validationData[currentCampaign][index]);
                 }
             }
         }
         
         function addValidationRow() {
-            validationData[currentCampaign].push(getEmptyRow(currentCampaign));
+            // Get an empty row template, using the current campaign type
+            const row = mapCampaignDataToValidation([{}], currentCampaign)[0];
+            validationData[currentCampaign].push(row);
             renderValidationTable();
         }
 
         function removeValidationRow(rowId) {
             validationData[currentCampaign] = validationData[currentCampaign].filter(r => r.id !== rowId);
             if (validationData[currentCampaign].length === 0) {
-                 validationData[currentCampaign].push(getEmptyRow(currentCampaign));
+                 // Ensure at least one row exists
+                 validationData[currentCampaign].push(mapCampaignDataToValidation([{}], currentCampaign)[0]);
             }
+            // Re-render the table and re-run analysis
             renderValidationTable();
+            runAnalysis();
         }
 
         /**
-         * Renders the validation input table with 2-level headers based on the image provided.
-         * FIX: Removed the '결과' column header and body cell.
+         * Renders the validation input table with 2-level headers.
          */
         function renderValidationTable() {
             const config = validationTableConfigs[currentCampaign];
@@ -631,8 +691,6 @@
             // --- 1. Render Level 1 Header (Groups) ---
             const trGroup = document.createElement('tr');
             trGroup.className = 'bg-gray-200 border-b-2 border-gray-300';
-            
-            // First column ('결과') REMOVED. Group headers start immediately.
             
             // Generate Group Headers (Level 1)
             config.headerGroups.forEach(group => {
@@ -671,11 +729,9 @@
             validationTableBody.innerHTML = '';
             validationData[currentCampaign].forEach(row => {
                 const tr = document.createElement('tr');
-                tr.className = 'border-t border-gray-200';
+                tr.className = 'hover:bg-gray-50 transition-colors'; // Changed hover color to gray for input section
                 tr.dataset.rowId = row.id; 
                 
-                // First column ('결과') cell REMOVED.
-
                 config.cols.forEach(col => {
                     const td = document.createElement('td');
                     td.className = 'p-1 text-xs whitespace-nowrap border-r border-gray-100';
@@ -689,8 +745,8 @@
                         // Calculated fields: Read-only, centered, specific styling
                         if (rawValue !== null) {
                             if (col.type === 'currency') {
-                                // Remove '원' for a cleaner look in the input field
-                                displayValue = formatNumber(rawValue, 'currency').replace('원', '');
+                                // Round to nearest won and format for display
+                                displayValue = formatNumber(Math.round(rawValue), 'currency').replace('원', '');
                             } else if (col.type === 'percent') {
                                 displayValue = `${(rawValue * 100).toFixed(2)}%`; 
                             } else {
@@ -703,23 +759,8 @@
                         const inputElement = document.createElement('input');
                         inputElement.type = 'text';
                         inputElement.readOnly = true;
-                        // Added custom styling for calculated fields to make them stand out
                         inputElement.className = 'w-full p-1 border rounded-md text-xs bg-indigo-50 font-semibold text-indigo-700 pointer-events-none text-center'; 
                         inputElement.value = displayValue;
-                        td.appendChild(inputElement);
-
-                    } else if (col.type === 'select') {
-                        // Select input (Unchanged)
-                        const inputElement = document.createElement('select');
-                        inputElement.className = 'w-full p-1 border rounded-md text-xs bg-white';
-                        col.options.forEach(option => {
-                            const opt = document.createElement('option');
-                            opt.value = option;
-                            opt.textContent = option;
-                            if (rawValue === option) opt.selected = true;
-                            inputElement.appendChild(opt);
-                        });
-                        inputElement.addEventListener('input', (e) => handleValidationInputChange(row.id, col.key, e));
                         td.appendChild(inputElement);
 
                     } else {
@@ -727,13 +768,15 @@
                         const inputElement = document.createElement('input');
                         inputElement.type = 'text'; 
                         inputElement.placeholder = col.placeholder;
-                        inputElement.className = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' ? 'text-right' : 'text-left'}`;
+                        inputElement.className = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' || col.isLargeNumber ? 'text-right' : 'text-left'}`;
                         
+                        // Display the formatted number in the input field
                         if (col.isLargeNumber && typeof rawValue === 'number') {
-                            // Display the formatted number in the input field
                             inputElement.value = formatNumericInput(rawValue);
                         } else if (col.type === 'percent' && typeof rawValue === 'number') {
-                            // For percent fields, we display the raw number the user entered
+                            // Display target CTR as percentage (e.g., 0.004 -> 0.4)
+                            inputElement.value = (rawValue * 100).toFixed(2).replace(/\.00$/, '');
+                        } else if ((col.type === 'currency' || col.type === 'number') && typeof rawValue === 'number') {
                             inputElement.value = rawValue;
                         } else {
                             inputElement.value = displayValue;
@@ -762,16 +805,185 @@
         }
         // --- END Validation Table Logic ---
 
-        // Number formatting function (unchanged)
-        const formatNumber = (num, type) => {
-            if (typeof num !== 'number' || isNaN(num)) return '-'; // Added NaN check
-            switch (type) {
-                case 'percent': return `${(num * 100).toFixed(2)}%`; // Assumes num is fraction (e.g., 0.005)
-                case 'currency': return `${Math.round(num).toLocaleString('ko-KR')}원`;
-                case 'score': return num.toFixed(2);
-                default: return num.toLocaleString('ko-KR');
+        // --- NEW: Data Aggregation and Scoring Logic ---
+
+        /**
+         * Calculates all scores (A, B, Total) and insight labels based on input data and targets.
+         */
+        function calculateScoresAndInsight(row, campaignType) {
+            let scoreA = 0;
+            let scoreB = 0;
+            
+            // Helper to calculate score for metrics where 'Higher is Better' (e.g., CTR)
+            // Formula: 2.5 + 2.5 * ( (Actual - Target) / Target ). Target met = 2.5
+            const scoreHigherIsBetter = (actual, target) => {
+                if (actual === null || target === null || target <= 0) return 0;
+                const ratioDelta = (actual - target) / target;
+                return Math.max(0, Math.min(5, 2.5 + 2.5 * ratioDelta));
+            };
+
+            // Helper to calculate score for metrics where 'Lower is Better' (e.g., CPM, CPA)
+            // Formula: 2.5 * ( 2 - (Actual / Target) ). Target met = 2.5
+            const scoreLowerIsBetter = (actual, target) => {
+                if (actual === null || target === null || target <= 0) return 0;
+                const ratio = actual / target;
+                return Math.max(0, Math.min(5, 2.5 * (2 - ratio)));
+            };
+            
+            // Check for critical missing data (no cost/imp or primary target)
+            const criticalMissing = row.cost === null || row.imp === null || row.cost === 0 || row.imp === 0;
+            
+            if (campaignType === 'DA') {
+                // DA: A(유효 노출) = CPM (Lower is better), B(소재 관심도) = CTR (Higher is better)
+                scoreA = criticalMissing ? 0 : scoreLowerIsBetter(row.actualCpm, row.targetCpm);
+                scoreB = criticalMissing ? 0 : scoreHigherIsBetter(row.actualCtr, row.targetCtr);
+                
+            } else if (campaignType === 'PERF') {
+                // PERF: A(광고 관심도) = CTR (Higher is better), B(전환 기여도) = CPA (Lower is better)
+                scoreA = criticalMissing ? 0 : scoreHigherIsBetter(row.actualCtr, row.targetCtr);
+                scoreB = criticalMissing ? 0 : scoreLowerIsBetter(row.actualCpa, row.targetCpa);
             }
-        };
+            
+            const totalScore = (scoreA + scoreB) / 2;
+            
+            // --- Insight Grouping & Color Assignment ---
+            let insight = 'Low 소재';
+            let color = '#ef4444'; // Red
+
+            if (totalScore >= 4.0 && scoreA >= 2.5 && scoreB >= 2.5) {
+                insight = 'Top 소재';
+                color = '#10b981'; // Green (Top Right)
+            } else if (totalScore >= 2.5 && scoreA >= 2.5 && scoreB < 2.5) {
+                insight = 'Focus 소재';
+                color = '#f59e0b'; // Amber (Bottom Right) - High A, Low B
+            } else if (totalScore >= 2.5 && scoreA < 2.5 && scoreB >= 2.5) {
+                insight = 'Potential 소재';
+                color = '#3b82f6'; // Blue (Top Left) - Low A, High B
+            } 
+            
+            if (criticalMissing && totalScore === 0) {
+                insight = '데이터 부족';
+                color = '#94a3b8'; // Gray
+            }
+
+            // --- Dynamic Insight Message Generation ---
+            let mediaInsight = `${row.media}: ${insight}에 해당됩니다. 세부 지표 확인 후 개선 전략을 도출하세요.`;
+            const mediaCreative = row.creativeName + '_' + row.placement;
+
+            if (insight === 'Top 소재') {
+                mediaInsight = `${row.media}/${mediaCreative}: 효율이 매우 높습니다. 예산을 확대하고 A/B 테스트를 통해 추가 개선점을 찾으세요.`;
+            } else if (insight === 'Focus 소재') {
+                const focusMetric = (campaignType === 'DA' ? 'CTR(소재 관심도)' : 'CPA(전환 기여도)');
+                mediaInsight = `${row.media}/${mediaCreative}: ${focusMetric} 목표 달성이 미흡합니다. 해당 지표 개선에 집중하여 Top 소재로 육성해야 합니다.`;
+            } else if (insight === 'Potential 소재') {
+                const potentialMetric = (campaignType === 'DA' ? 'CPM(노출 기여도)' : 'CTR(광고 관심도)');
+                mediaInsight = `${row.media}/${mediaCreative}: 전환 효율은 좋으나 ${potentialMetric}이 낮습니다. 타겟팅 확대를 통해 노출 기여도(A)를 개선해야 잠재력을 발휘합니다.`;
+            } else if (insight === 'Low 소재') {
+                mediaInsight = `${row.media}/${mediaCreative}: 효율 기준치(총점 2.5점) 미달입니다. 즉시 OFF/교체를 고려하고, 예산을 Top 소재로 이관하세요.`;
+            }
+            
+            // Final Scored Row Structure
+            return {
+                // Scores
+                scoreA: parseFloat(scoreA.toFixed(2)),
+                scoreB: parseFloat(scoreB.toFixed(2)),
+                total: parseFloat(totalScore.toFixed(2)),
+                insight: insight,
+                color: color,
+                mediaInsight: mediaInsight,
+                // Raw/Calculated Metrics for Detail Table
+                media: row.media,
+                creative: mediaCreative,
+                cost: row.cost || 0,
+                imp: row.imp || 0,
+                click: row.click || 0,
+                conv: row.conv || 0,
+                revenue: row.revenue || 0,
+                ctr: row.actualCtr || 0, // fraction
+                cpm: row.actualCpm || 0, // won
+                cpc: row.actualCpc || 0, // won
+                cpa: row.actualCpa || 0, // won
+                roas: (campaignType === 'PERF' && row.cost > 0) ? (row.revenue / row.cost) * 100 : 0 // percentage
+            };
+        }
+
+        /**
+         * Aggregates input data, calculates scores/insights, and computes summary metrics.
+         * Sets the global 'liveAnalysisData'.
+         */
+        function aggregateAndScoreData() {
+            const rawInputData = validationData[currentCampaign];
+            const campaignType = currentCampaign;
+            
+            const scoredData = rawInputData
+                .filter(row => row.media || row.creativeName || row.cost > 0 || row.imp > 0)
+                .map(row => {
+                     // 1. Recalculate actual metrics (ensure all numbers are fresh)
+                     calculateValidationMetrics(row, campaignType); 
+                     // 2. Calculate scores and insight
+                     return calculateScoresAndInsight(row, campaignType);
+                });
+
+            // --- Calculate Summary Metrics ---
+            let totalCost = 0;
+            let totalImp = 0;
+            let totalClick = 0;
+            let totalConv = 0;
+            let totalRevenue = 0;
+            
+            scoredData.forEach(item => {
+                totalCost += item.cost;
+                totalImp += item.imp;
+                totalClick += item.click;
+                totalConv += item.conv;
+                totalRevenue += item.revenue;
+            });
+            
+            const avgCpm = totalImp > 0 ? (totalCost / totalImp) * 1000 : 0;
+            const avgCtr = totalImp > 0 ? (totalClick / totalImp) : 0; // fraction
+            const avgCpc = totalClick > 0 ? (totalCost / totalClick) : 0;
+            const avgCpa = totalConv > 0 ? (totalCost / totalConv) : 0;
+            const avgRoas = totalCost > 0 ? (totalRevenue / totalCost) * 100 : 0; // percentage
+
+            let summaryMetrics = [];
+            let metricsAxes = {};
+            let campaignName = validationTableConfigs[campaignType].label;
+            
+            if (campaignType === 'DA') {
+                campaignName += ' (반응 목표)';
+                metricsAxes = { xAxis: '소재 관심도 (B) - CTR 기반', yAxis: '유효 노출 기여도 (A) - CPM 기반' };
+                summaryMetrics = [
+                    { label: '총 광고비', key: 'cost', value: totalCost, type: 'currency' },
+                    { label: '총 노출수', key: 'imp', value: totalImp, type: 'number' },
+                    { label: '평균 CPM', key: 'cpm_avg', value: avgCpm, type: 'currency' },
+                    { label: '평균 CTR', key: 'ctr_avg', value: avgCtr, type: 'percent' },
+                    { label: '평균 CPC', key: 'cpc_avg', value: avgCpc, type: 'currency' },
+                ];
+            } else if (campaignType === 'PERF') {
+                campaignName += ' (전환 목표)';
+                metricsAxes = { xAxis: '전환 기여도 (B) - CPA 기반', yAxis: '광고 관심도 (A) - CTR 기반' };
+                summaryMetrics = [
+                    { label: '총 광고비', key: 'cost', value: totalCost, type: 'currency' },
+                    { label: '총 매출액', key: 'revenue', value: totalRevenue, type: 'currency' },
+                    { label: '총 전환수', key: 'conv', value: totalConv, type: 'number' },
+                    { label: '평균 CPA', key: 'cpa_avg', value: avgCpa, type: 'currency' },
+                    { label: '평균 ROAS', key: 'roas_avg', value: avgRoas, type: 'percent' },
+                ];
+            }
+            
+            // Set global data source for rendering
+            liveAnalysisData = { 
+                data: scoredData, 
+                summary: summaryMetrics, 
+                metrics: metricsAxes,
+                headers: campaignData[campaignType].headers, // Reuse mock headers structure
+                name: campaignName
+            };
+
+            return liveAnalysisData;
+        }
+
+        // --- Rendering Functions (Updated to use liveAnalysisData) ---
 
         const matrixContainer = document.getElementById('quadrant-matrix');
         const tableBody = document.getElementById('table-body');
@@ -780,10 +992,14 @@
         tooltip.className = 'absolute p-2 bg-gray-800 text-white text-xs rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 z-[100] whitespace-nowrap';
         document.body.appendChild(tooltip);
 
-        // [Chart/Summary/Table/Insight Logic - unchanged from previous version]
-
         function renderChart() {
-            const data = campaignData[currentCampaign];
+            // Use liveAnalysisData
+            if (!liveAnalysisData || liveAnalysisData.data.length === 0) {
+                 matrixContainer.querySelectorAll('.chart-dot').forEach(dot => dot.remove());
+                 document.getElementById('chart-axes-label').textContent = '데이터를 입력해주세요.';
+                 return;
+            }
+            const data = liveAnalysisData;
             const matrixRect = matrixContainer.getBoundingClientRect();
             const W = matrixRect.width;
             const H = matrixRect.height;
@@ -850,7 +1066,6 @@
             let x = e.pageX + 15;
             let y = e.pageY - 15;
             
-            // Boundary checks (basic)
             const tooltipRect = tooltip.getBoundingClientRect();
             if (x + tooltipRect.width > window.innerWidth) {
                 x = e.pageX - tooltipRect.width - 15;
@@ -867,7 +1082,9 @@
         }
 
         function renderSummaryTable() {
-            const data = campaignData[currentCampaign];
+             if (!liveAnalysisData || liveAnalysisData.summary.length === 0) return;
+
+            const data = liveAnalysisData;
             const headerRow = document.getElementById('summary-header');
             const body = document.getElementById('summary-body');
             headerRow.innerHTML = '';
@@ -888,8 +1105,14 @@
                 
                 let displayValue = metric.value;
                 if (metric.type === 'percent') {
-                    // This assumes summary value (e.g., 500 for 500% ROAS) is already scaled.
-                    td.textContent = `${displayValue.toLocaleString('ko-KR')}%`; 
+                    // Display value is a fraction (e.g., 0.005) or a percentage (e.g., 500)
+                    // If the value is for ROAS (already scaled in aggregateAndScoreData)
+                    if (metric.key === 'roas_avg') {
+                         td.textContent = `${Math.round(displayValue).toLocaleString('ko-KR')}%`;
+                    } else {
+                        // For CTR (fraction)
+                        td.textContent = formatNumber(displayValue, 'percent');
+                    }
                 } else if (metric.type === 'currency' || metric.type === 'number') {
                     td.textContent = formatNumber(displayValue, metric.type);
                 } else {
@@ -909,7 +1132,7 @@
                 sortDirection = 'desc';
             }
 
-            const data = campaignData[currentCampaign].data;
+            const data = liveAnalysisData.data;
 
             data.sort((a, b) => {
                 const aVal = a[key];
@@ -929,7 +1152,13 @@
         }
 
         function renderTable() {
-            const data = campaignData[currentCampaign];
+            if (!liveAnalysisData || liveAnalysisData.data.length === 0) {
+                 tableBody.innerHTML = '<tr><td colspan="15" class="text-center py-4 text-gray-500">입력 데이터가 없습니다. 검증 항목을 채워주세요.</td></tr>';
+                 document.getElementById('table-header').innerHTML = '';
+                 return;
+            }
+            
+            const data = liveAnalysisData;
             const headerRow = document.getElementById('table-header');
             tableBody.innerHTML = '';
             headerRow.innerHTML = '';
@@ -977,7 +1206,7 @@
                             td.textContent = formatNumber(cellValue, 'percent');
                             break;
                         case 'roas':
-                            td.textContent = `${cellValue.toLocaleString('ko-KR')}%`;
+                            td.textContent = `${Math.round(cellValue).toLocaleString('ko-KR')}%`; // ROAS is stored as a percentage (e.g., 500)
                             break;
                         case 'scoreA':
                         case 'scoreB':
@@ -1007,7 +1236,12 @@
         }
 
         function renderInsights() {
-            const data = campaignData[currentCampaign];
+            if (!liveAnalysisData || liveAnalysisData.data.length === 0) {
+                 document.getElementById('insight-list').innerHTML = '<li class="text-gray-500">분석을 위해 입력 데이터가 필요합니다.</li>';
+                 return;
+            }
+
+            const data = liveAnalysisData;
             const insightList = document.getElementById('insight-list');
             insightList.innerHTML = '';
 
@@ -1023,7 +1257,7 @@
                 });
             });
 
-            const insightOrder = ['Top 소재', 'Potential 소재', 'Focus 소재', 'Low 소재'];
+            const insightOrder = ['Top 소재', 'Potential 소재', 'Focus 소재', 'Low 소재', '데이터 부족'];
 
             insightOrder.forEach(grade => {
                 const items = gradeInsights[grade];
@@ -1041,12 +1275,23 @@
                         li.className = 'text-gray-700 text-sm flex items-start';
                         li.innerHTML = `
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 mr-2 flex-shrink-0" style="color:${gradeColor}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span class="font-semibold text-gray-900">${item.media}:</span> <span>${item.insight}</span>
+                            <span>${item.insight}</span>
                         `;
                         insightList.appendChild(li);
                     });
                 }
             });
+        }
+        
+        /**
+         * Runs all analysis and renders the results section.
+         */
+        function runAnalysis() {
+            aggregateAndScoreData(); // Calculate and set liveAnalysisData
+            renderSummaryTable();
+            renderTable();
+            renderChart();
+            renderInsights();
         }
 
         function renderDashboard() {
@@ -1067,13 +1312,11 @@
                 }
             });
 
-            // New: Render Validation Table for the current campaign
+            // 1. Render Validation Table for the current campaign
             renderValidationTable();
-
-            renderSummaryTable();
-            renderTable();
-            renderChart();
-            renderInsights();
+            
+            // 2. Automatically run analysis
+            runAnalysis();
         }
 
         // --- Event Listeners and Initialization ---
@@ -1081,20 +1324,31 @@
             document.querySelectorAll('.campaign-tab').forEach(tab => {
                 tab.addEventListener('click', (e) => {
                     currentCampaign = e.target.dataset.camp;
-                    renderDashboard();
+                    renderDashboard(); 
                 });
             });
             
             toggleValidationTableButton.addEventListener('click', toggleValidationTable);
             addValidationRowButton.addEventListener('click', addValidationRow);
+            
+            // Event listener for the analysis button (manual re-run after input)
+            runAnalysisButton.addEventListener('click', runAnalysis);
 
-            // Initial render
-            // Before initial render, calculate metrics for default rows
+            // Initial calculation for prefilled data rows
             validationData.DA.forEach(row => calculateValidationMetrics(row, 'DA'));
             validationData.PERF.forEach(row => calculateValidationMetrics(row, 'PERF'));
             
-            renderDashboard();
-
+            renderDashboard(); // Initial render
+            
+            // Initial UI Setup for Open Table (isValidationTableOpen = true)
+            const toggleIcon = document.getElementById('toggle-icon');
+            const toggleText = document.getElementById('toggle-text');
+            
+            if (isValidationTableOpen) {
+                toggleText.textContent = '입력 테이블 접기';
+                toggleIcon.classList.add('rotate-180');
+            }
+            
             // Handle window resize for chart responsiveness
             window.addEventListener('resize', renderChart);
         });
