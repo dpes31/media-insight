@@ -107,9 +107,9 @@
         }
     </style>
 </head>
-<body class="p-6 md:p-12">
+<body class="p-4 md:p-8"> <!-- 좌우 패딩을 줄였습니다 -->
 
-    <div id="app" class="max-w-screen-xl mx-auto bg-white rounded-xl shadow-2xl p-8 md:p-12">
+    <div id="app" class="w-full mx-auto bg-white rounded-xl shadow-2xl p-8 md:p-12"> <!-- max-w-screen-xl 대신 w-full을 사용하여 화면을 꽉 채웁니다 -->
 
         <!-- Header and Campaign Selector -->
         <header class="mb-8 border-b pb-4">
@@ -345,15 +345,15 @@
                     { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24' },
                     { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20' },
                     { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24' },
-                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24' },
+                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true }, // CALCULATED
                     { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20' },
                     { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24' },
-                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24' },
+                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true }, // CALCULATED
                     { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24' },
-                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24' },
+                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true }, // CALCULATED
                     { name: '조회수', key: 'view', type: 'number', placeholder: '횟수', width: 'w-20' },
                     { name: '목표 CPV(원)', key: 'targetCpv', type: 'currency', placeholder: '목표CPV', width: 'w-24' },
-                    { name: '성과 CPV(원)', key: 'actualCpv', type: 'currency', placeholder: '성과CPV', width: 'w-24' },
+                    { name: '성과 CPV(원)', key: 'actualCpv', type: 'currency', placeholder: '성과CPV', width: 'w-24', calculated: true }, // CALCULATED
                 ],
             },
             'PERF': {
@@ -366,16 +366,16 @@
                     { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24' },
                     { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20' },
                     { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24' },
-                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24' },
+                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true }, // CALCULATED
                     { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20' },
                     { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24' },
-                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24' },
+                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true }, // CALCULATED
                     { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24' },
-                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24' },
+                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true }, // CALCULATED
                     // PERF Additions
                     { name: '전환수', key: 'conv', type: 'number', placeholder: '횟수', width: 'w-20' },
                     { name: '목표 CPA(원)', key: 'targetCpa', type: 'currency', placeholder: '목표CPA', width: 'w-24' },
-                    { name: '성과 CPA(원)', key: 'actualCpa', type: 'currency', placeholder: '성과CPA', width: 'w-24' },
+                    { name: '성과 CPA(원)', key: 'actualCpa', type: 'currency', placeholder: '성과CPA', width: 'w-24', calculated: true }, // CALCULATED
                     { name: '구매/가입액(원)', key: 'revenue', type: 'currency', placeholder: '금액', width: 'w-24' },
                 ],
             }
@@ -387,7 +387,7 @@
         const getEmptyRow = (campaign) => {
             const row = { id: crypto.randomUUID() };
             validationTableConfigs[campaign].cols.forEach(col => {
-                row[col.key] = col.type === 'number' || col.type === 'currency' ? null : '';
+                row[col.key] = col.type === 'number' || col.type === 'currency' || col.type === 'percent' ? null : '';
             });
             return row;
         };
@@ -416,6 +416,39 @@
                 toggleIcon.classList.remove('rotate-180');
             }
         }
+        
+        /**
+         * Calculates actual performance metrics (CPM, CPC, CTR, CPV, CPA) for a given row.
+         */
+        function calculateValidationMetrics(row, campaignType) {
+            const { cost, imp, click, view, conv } = row;
+
+            // Helper to handle division by zero or invalid input
+            const safeDivide = (numerator, denominator) => {
+                if (numerator === null || denominator === null || denominator === 0 || isNaN(numerator) || isNaN(denominator)) {
+                    return null;
+                }
+                return numerator / denominator;
+            };
+
+            // Common metrics
+            // CPM = (Cost / Imp) * 1000
+            row.actualCpm = safeDivide(cost, imp) !== null ? safeDivide(cost, imp) * 1000 : null;
+            // CPC = Cost / Click
+            row.actualCpc = safeDivide(cost, click);
+            // CTR = Click / Imp (Stored as fraction, e.g., 0.005)
+            row.actualCtr = safeDivide(click, imp); 
+
+            if (campaignType === 'DA') {
+                // CPV = Cost / View
+                row.actualCpv = safeDivide(cost, view);
+                row.actualCpa = null; // Ensure CPA is null for DA
+            } else if (campaignType === 'PERF') {
+                // CPA = Cost / Conversion
+                row.actualCpa = safeDivide(cost, conv);
+                row.actualCpv = null; // Ensure CPV is null for PERF
+            }
+        }
 
         function handleValidationInputChange(rowId, key, event) {
             const index = validationData[currentCampaign].findIndex(r => r.id === rowId);
@@ -423,16 +456,29 @@
                 const config = validationTableConfigs[currentCampaign].cols.find(c => c.key === key);
                 let value = event.target.value;
                 
+                // --- Input Parsing and Storage ---
                 if (config.type === 'number' || config.type === 'currency' || config.type === 'percent') {
-                    // Remove non-numeric characters except decimal point for currency/number
-                    value = value.replace(/[^0-9.]/g, '');
-                    validationData[currentCampaign][index][key] = value === '' ? null : parseFloat(value);
+                    // Remove non-numeric characters except decimal point
+                    value = value.replace(/[^\d.]/g, ''); 
+                    
+                    // Handle edge case where input is just a '.'
+                    if (value === '.') value = null; 
+
+                    // Store null if empty, otherwise parse float
+                    validationData[currentCampaign][index][key] = value === '' || value === null ? null : parseFloat(value);
                 } else {
                     validationData[currentCampaign][index][key] = value;
                 }
                 
-                // For demonstration, re-render to reflect data changes (though not strictly necessary for simple input)
-                // renderValidationTable();
+                // --- Calculation and Re-render ---
+                // Trigger recalculation if a base input metric is changed
+                const baseMetrics = ['cost', 'imp', 'click', 'view', 'conv'];
+                
+                if (baseMetrics.includes(key) || config.type === 'select') {
+                    calculateValidationMetrics(validationData[currentCampaign][index], currentCampaign);
+                    // Re-render the table to reflect the calculated values
+                    renderValidationTable();
+                }
             }
         }
         
@@ -477,27 +523,53 @@
                     td.className = 'p-1 text-xs whitespace-nowrap border-r border-gray-100';
                     
                     let inputElement;
-                    const value = row[col.key] !== null ? row[col.key] : '';
+                    const rawValue = row[col.key] !== null ? row[col.key] : '';
+                    
+                    const isCalculated = col.calculated;
+                    let displayValue = row[col.key];
 
-                    if (col.type === 'select') {
+                    if (isCalculated) {
+                        // Calculated fields: Read-only, centered, specific styling
+                        if (displayValue !== null) {
+                            if (col.type === 'currency') {
+                                displayValue = formatNumber(displayValue, 'currency');
+                            } else if (col.type === 'percent') {
+                                displayValue = formatNumber(displayValue, 'percent'); // CTR stored as fraction (e.g., 0.005)
+                            } else {
+                                displayValue = displayValue.toFixed(2);
+                            }
+                        } else {
+                            displayValue = '-';
+                        }
+                        
+                        inputElement = document.createElement('input');
+                        inputElement.type = 'text';
+                        inputElement.readOnly = true;
+                        inputElement.className = 'w-full p-1 border rounded-md text-xs bg-gray-200 font-semibold text-gray-700 pointer-events-none text-center';
+                        inputElement.value = displayValue;
+
+                    } else if (col.type === 'select') {
+                        // Select input
                         inputElement = document.createElement('select');
                         inputElement.className = 'w-full p-1 border rounded-md text-xs bg-white';
                         col.options.forEach(option => {
                             const opt = document.createElement('option');
                             opt.value = option;
                             opt.textContent = option;
-                            if (value === option) opt.selected = true;
+                            if (rawValue === option) opt.selected = true;
                             inputElement.appendChild(opt);
                         });
+                        inputElement.addEventListener('input', (e) => handleValidationInputChange(row.id, col.key, e));
                     } else {
+                        // Regular input (text/number)
                         inputElement = document.createElement('input');
-                        inputElement.type = col.type === 'number' || col.type === 'currency' || col.type === 'percent' ? 'text' : 'text'; // Use text for better number input control
+                        inputElement.type = 'text'; // Use text for better number input control
                         inputElement.placeholder = col.placeholder;
-                        inputElement.className = 'w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500';
-                        inputElement.value = value;
+                        inputElement.className = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' ? 'text-right' : 'text-left'}`;
+                        inputElement.value = rawValue;
+                        inputElement.addEventListener('input', (e) => handleValidationInputChange(row.id, col.key, e));
                     }
 
-                    inputElement.addEventListener('input', (e) => handleValidationInputChange(row.id, col.key, e));
                     td.appendChild(inputElement);
                     tr.appendChild(td);
                 });
@@ -519,9 +591,9 @@
 
         // Number formatting function (unchanged)
         const formatNumber = (num, type) => {
-            if (typeof num !== 'number') return num;
+            if (typeof num !== 'number' || isNaN(num)) return '-'; // Added NaN check
             switch (type) {
-                case 'percent': return `${(num * 100).toFixed(2)}%`;
+                case 'percent': return `${(num * 100).toFixed(2)}%`; // Assumes num is fraction (e.g., 0.005)
                 case 'currency': return `${Math.round(num).toLocaleString('ko-KR')}원`;
                 case 'score': return num.toFixed(2);
                 default: return num.toLocaleString('ko-KR');
@@ -590,9 +662,36 @@
             });
         }
         
-        function showTooltip(e) { /* ... unchanged ... */ }
-        function moveTooltip(e) { /* ... unchanged ... */ }
-        function hideTooltip() { /* ... unchanged ... */ }
+        function showTooltip(e) { 
+            const item = e.target.dataset;
+            const tooltipContent = `
+                <div class="font-bold text-base">${item.creative}</div>
+                <div class="mt-1">등급: ${item.insight}</div>
+                <div class="mt-0.5 text-xs text-indigo-300">A Score: ${item.scoreA} | B Score: ${item.scoreB} | Total: ${item.total}</div>
+            `;
+            tooltip.innerHTML = tooltipContent;
+            tooltip.classList.add('opacity-100');
+            moveTooltip(e);
+        }
+        function moveTooltip(e) {
+            let x = e.pageX + 15;
+            let y = e.pageY - 15;
+            
+            // Boundary checks (basic)
+            const tooltipRect = tooltip.getBoundingClientRect();
+            if (x + tooltipRect.width > window.innerWidth) {
+                x = e.pageX - tooltipRect.width - 15;
+            }
+            if (y + tooltipRect.height > window.innerHeight) {
+                y = window.innerHeight - tooltipRect.height - 10;
+            }
+
+            tooltip.style.left = `${x}px`;
+            tooltip.style.top = `${y}px`;
+        }
+        function hideTooltip() { 
+            tooltip.classList.remove('opacity-100');
+        }
 
         function renderSummaryTable() {
             const data = campaignData[currentCampaign];
@@ -616,7 +715,8 @@
                 
                 let displayValue = metric.value;
                 if (metric.type === 'percent') {
-                    td.textContent = `${displayValue.toLocaleString('ko-KR')}%`; // Assuming summary value is already % scaled (e.g., 500 for 500%)
+                    // This assumes summary value (e.g., 500 for 500% ROAS) is already scaled.
+                    td.textContent = `${displayValue.toLocaleString('ko-KR')}%`; 
                 } else if (metric.type === 'currency' || metric.type === 'number') {
                     td.textContent = formatNumber(displayValue, metric.type);
                 } else {
@@ -816,6 +916,10 @@
             addValidationRowButton.addEventListener('click', addValidationRow);
 
             // Initial render
+            // Before initial render, calculate metrics for default rows
+            validationData.DA.forEach(row => calculateValidationMetrics(row, 'DA'));
+            validationData.PERF.forEach(row => calculateValidationMetrics(row, 'PERF'));
+            
             renderDashboard();
 
             // Handle window resize for chart responsiveness
