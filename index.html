@@ -349,16 +349,16 @@
                 cols: [
                     { name: '매체명', key: 'media', type: 'text', placeholder: '매체명', width: 'w-24' },
                     { name: '지면', key: 'placement', type: 'text', placeholder: '지면', width: 'w-24' },
-                    { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true }, // isLargeNumber: true
-                    { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, // isLargeNumber: true
+                    { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true }, 
+                    { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
                     { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24' },
                     { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true },
-                    { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, // isLargeNumber: true
+                    { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
                     { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24' },
                     { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true },
                     { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24' },
                     { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true },
-                    { name: '조회수', key: 'view', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, // isLargeNumber: true
+                    { name: '조회수', key: 'view', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
                     { name: '목표 CPV(원)', key: 'targetCpv', type: 'currency', placeholder: '목표CPV', width: 'w-24' },
                     { name: '성과 CPV(원)', key: 'actualCpv', type: 'currency', placeholder: '성과CPV', width: 'w-24', calculated: true },
                 ],
@@ -368,20 +368,20 @@
                 cols: [
                     { name: '매체명', key: 'media', type: 'text', placeholder: '매체명', width: 'w-24' },
                     { name: '지면', key: 'placement', type: 'text', placeholder: '지면', width: 'w-24' },
-                    { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true }, // isLargeNumber: true
-                    { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, // isLargeNumber: true
+                    { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true }, 
+                    { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
                     { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24' },
                     { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true },
-                    { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, // isLargeNumber: true
+                    { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
                     { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24' },
                     { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true },
                     { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24' },
                     { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true },
                     // PERF Additions
-                    { name: '전환수', key: 'conv', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, // isLargeNumber: true
+                    { name: '전환수', key: 'conv', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
                     { name: '목표 CPA(원)', key: 'targetCpa', type: 'currency', placeholder: '목표CPA', width: 'w-24' },
                     { name: '성과 CPA(원)', key: 'actualCpa', type: 'currency', placeholder: '성과CPA', width: 'w-24', calculated: true },
-                    { name: '구매/가입액(원)', key: 'revenue', type: 'currency', placeholder: '금액', width: 'w-24', isLargeNumber: true }, // isLargeNumber: true
+                    { name: '구매/가입액(원)', key: 'revenue', type: 'currency', placeholder: '금액', width: 'w-24', isLargeNumber: true }, 
                 ],
             }
         };
@@ -431,7 +431,7 @@
 
             // Helper to handle division by zero or invalid input
             const safeDivide = (numerator, denominator) => {
-                if (typeof numerator !== 'number' || typeof denominator !== 'number' || denominator === 0 || isNaN(numerator) || isNaN(denominator)) {
+                if (typeof numerator !== 'number' || typeof denominator !== 'number' || denominator === 0 || isNaN(numerator) || isNaN(denominator) || numerator === null || denominator === null) {
                     return null;
                 }
                 return numerator / denominator;
@@ -456,44 +456,99 @@
             }
         }
 
+        /**
+         * CRITICAL FIX: Updates only the calculated columns in the DOM without destroying input focus.
+         * @param {string} rowId - The unique ID of the row.
+         * @param {object} rowData - The data object for the row.
+         */
+        function updateCalculatedColumnsInDOM(rowId, rowData) {
+            // Find the table row element using the data-row-id attribute
+            const rowElement = document.querySelector(`#validation-table-body tr[data-row-id="${rowId}"]`);
+            if (!rowElement) return;
+
+            const config = validationTableConfigs[currentCampaign];
+            
+            // Iterate through columns to find calculated fields
+            config.cols.forEach((col, colIndex) => {
+                if (col.calculated) {
+                    // Get the cell element. (The first child of the row is index 0)
+                    const td = rowElement.children[colIndex];
+                    const inputElement = td.querySelector('input');
+                    if (!inputElement) return;
+
+                    const rawValue = rowData[col.key];
+                    let displayValue = '-';
+                    
+                    if (rawValue !== null) {
+                        if (col.type === 'currency') {
+                            // Display as formatted currency number (without '원' in the input field)
+                            displayValue = formatNumber(rawValue, 'currency').replace('원', ''); 
+                        } else if (col.type === 'percent') {
+                            // Display as percentage with 2 decimal places
+                            displayValue = `${(rawValue * 100).toFixed(2)}%`; 
+                        } else {
+                            displayValue = rawValue.toFixed(2);
+                        }
+                    }
+
+                    // Update the input field value
+                    inputElement.value = displayValue;
+                }
+            });
+        }
+
+
         function handleValidationInputChange(rowId, key, event) {
             const index = validationData[currentCampaign].findIndex(r => r.id === rowId);
             if (index > -1) {
                 const config = validationTableConfigs[currentCampaign].cols.find(c => c.key === key);
                 let inputValue = event.target.value;
-                let rawValueToStore = inputValue; // Default: store the raw string input
+                let rawValueToStore = inputValue; 
                 
                 // --- Input Parsing and Storage ---
                 if (config.isLargeNumber) {
-                    // ** FIX: Capture and restore cursor position for smooth typing **
-                    const cursorPosition = event.target.selectionStart;
-                    const oldLength = event.target.value.length;
+                    // --- Cursor Position Preservation Logic (REFINED) ---
+                    const originalCursorPos = event.target.selectionStart;
+                    const originalValue = event.target.value; 
                     
-                    // 1. Clean the input (remove all non-digits, including commas)
+                    // 1. Clean the input (remove all non-digits)
                     const cleanValue = inputValue.replace(/[^\d]/g, ''); 
                     
-                    // 2. Format the input field for display (with commas)
+                    // 2. Identify the prefix (digits only) up to the cursor in the original value
+                    const originalValuePrefix = originalValue.substring(0, originalCursorPos);
+                    const cleanPrefix = originalValuePrefix.replace(/[^\d]/g, '');
+                    
+                    // 3. Format the clean value for display (inserts commas)
                     const formattedValue = formatNumericInput(cleanValue);
                     event.target.value = formattedValue;
                     
-                    // 3. Restore cursor position
-                    const newLength = event.target.value.length;
-                    const lengthDifference = newLength - oldLength;
+                    // 4. Calculate the new cursor position
+                    let newCursorPos = 0;
+                    let digitCount = 0;
                     
-                    if (cursorPosition !== null && cursorPosition !== undefined) {
-                        // Adjust cursor position based on added/removed characters (commas)
-                        event.target.setSelectionRange(cursorPosition + lengthDifference, cursorPosition + lengthDifference);
+                    for (let i = 0; i < formattedValue.length; i++) {
+                        if (digitCount === cleanPrefix.length) {
+                            newCursorPos = i;
+                            break;
+                        }
+                        if (/\d/.test(formattedValue[i])) {
+                            digitCount++;
+                        }
+                        newCursorPos = i + 1;
                     }
-                    // ** END FIX **
-
-                    // 4. Determine the raw value to store (parsed number or null)
+                    
+                    // 5. Restore cursor position
+                    // This is the key fix that prevents the cursor from jumping
+                    event.target.setSelectionRange(newCursorPos, newCursorPos);
+                    
+                    // 6. Determine the raw value to store (parsed number or null)
                     rawValueToStore = cleanValue === '' ? null : parseInt(cleanValue, 10);
                 } else if (config.type === 'number' || config.type === 'currency') {
                     // For non-large number/currency fields (e.g., targetCpm, targetCpc), allow decimals
                     const cleanValue = inputValue.replace(/[^\d.]/g, ''); 
                     rawValueToStore = cleanValue === '' || cleanValue === '.' ? null : parseFloat(cleanValue);
                 } else if (config.type === 'percent') {
-                    // For percentage inputs, store as a fraction (e.g., 50% -> 0.5)
+                    // For percentage inputs
                     const cleanValue = inputValue.replace(/[^\d.]/g, ''); 
                     rawValueToStore = cleanValue === '' || cleanValue === '.' ? null : parseFloat(cleanValue);
                 } 
@@ -501,14 +556,14 @@
                 // Update the stored data with the cleaned/parsed value
                 validationData[currentCampaign][index][key] = rawValueToStore;
                 
-                // --- Calculation and Re-render ---
-                // Trigger recalculation if a base input metric is changed
+                // --- Targeted Calculation and DOM Update ---
                 const baseMetrics = ['cost', 'imp', 'click', 'view', 'conv', 'revenue'];
                 
-                if (baseMetrics.includes(key) || config.type === 'select') {
+                // Only update calculated fields if a base input metric changes
+                if (baseMetrics.includes(key)) {
                     calculateValidationMetrics(validationData[currentCampaign][index], currentCampaign);
-                    // Re-render the table to reflect the calculated values (only needed for calculated columns update)
-                    renderValidationTable();
+                    // CRITICAL FIX: Only update the calculated columns in the DOM
+                    updateCalculatedColumnsInDOM(rowId, validationData[currentCampaign][index]);
                 }
             }
         }
@@ -530,7 +585,7 @@
             const config = validationTableConfigs[currentCampaign];
             validationCampaignLabel.textContent = config.label;
             
-            // 1. Render Header
+            // 1. Render Header (Unchanged)
             validationTableHeader.innerHTML = '';
             config.cols.forEach(col => {
                 const th = document.createElement('th');
@@ -548,6 +603,8 @@
             validationData[currentCampaign].forEach(row => {
                 const tr = document.createElement('tr');
                 tr.className = 'border-t border-gray-200';
+                tr.dataset.rowId = row.id; // Added for targeted DOM updates
+                
 
                 config.cols.forEach(col => {
                     const td = document.createElement('td');
@@ -562,9 +619,9 @@
                         // Calculated fields: Read-only, centered, specific styling
                         if (rawValue !== null) {
                             if (col.type === 'currency') {
-                                displayValue = formatNumber(rawValue, 'currency');
+                                // Remove '원' for a cleaner look in the input field
+                                displayValue = formatNumber(rawValue, 'currency').replace('원', '');
                             } else if (col.type === 'percent') {
-                                // CTR, ROAS are stored as fractions in main data, but validation metrics need two fixed digits
                                 displayValue = `${(rawValue * 100).toFixed(2)}%`; 
                             } else {
                                 displayValue = rawValue.toFixed(2);
@@ -581,7 +638,7 @@
                         td.appendChild(inputElement);
 
                     } else if (col.type === 'select') {
-                        // Select input
+                        // Select input (Unchanged)
                         const inputElement = document.createElement('select');
                         inputElement.className = 'w-full p-1 border rounded-md text-xs bg-white';
                         col.options.forEach(option => {
@@ -605,12 +662,13 @@
                             // Display the formatted number in the input field
                             inputElement.value = formatNumericInput(rawValue);
                         } else if (col.type === 'percent' && typeof rawValue === 'number') {
-                            // For percent fields, we display the raw number the user entered (e.g. 0.5, 50, 1.25)
+                            // For percent fields, we display the raw number the user entered
                             inputElement.value = rawValue;
                         } else {
                             inputElement.value = displayValue;
                         }
 
+                        // Attach the input handler
                         inputElement.addEventListener('input', (e) => handleValidationInputChange(row.id, col.key, e));
                         td.appendChild(inputElement);
                     }
@@ -631,7 +689,7 @@
                 validationTableBody.appendChild(tr);
             });
         }
-        // --- END NEW Logic ---
+        // --- END Validation Table Logic ---
 
         // Number formatting function (unchanged)
         const formatNumber = (num, type) => {
