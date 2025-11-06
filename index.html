@@ -17,7 +17,7 @@
         .quadrant-matrix {
             position: relative;
             width: 100%;
-            height: 480px; /* PC 환경에 맞게 높이 확대 */
+            height: 480px; 
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
@@ -37,22 +37,49 @@
         }
 
         /* Quadrant Colors & Labels for Intuitive Interpretation */
-        .quadrant-top-right { background-color: rgba(16, 185, 129, 0.05); border-left: 2px solid #e5e7eb; border-bottom: 2px solid #e5e7eb; } /* Top: Green */
-        .quadrant-top-left { background-color: rgba(59, 130, 246, 0.05); border-bottom: 2px solid #e5e7eb; } /* Potential: Blue */
-        .quadrant-bottom-right { background-color: rgba(245, 158, 11, 0.05); border-left: 2px solid #e5e7eb; } /* Focus: Amber */
+        .quadrant-top-right { background-color: rgba(16, 185, 129, 0.05); } /* Top: Green */
+        .quadrant-top-left { background-color: rgba(59, 130, 246, 0.05); } /* Potential: Blue */
+        .quadrant-bottom-right { background-color: rgba(245, 158, 11, 0.05); } /* Focus: Amber */
         .quadrant-bottom-left { background-color: rgba(239, 68, 68, 0.05); } /* Low: Red */
 
         .quadrant-label {
             font-weight: 700;
             font-size: 1.5rem;
             position: absolute;
-            opacity: 0.1; /* 배경 레이블로 처리 */
+            opacity: 0.1; 
             top: 50%;
             left: 50%;
             transform: translate(-50%, -50%);
             pointer-events: none;
             user-select: none;
         }
+        
+        /* Quadrant Middle Lines (New Improvement) */
+        .matrix-lines {
+            position: absolute;
+            top: 0; left: 0; right: 0; bottom: 0;
+            pointer-events: none;
+            z-index: 20;
+        }
+        .v-line {
+            position: absolute;
+            left: 50%;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            border-left: 2px dashed #9ca3af; /* Gray dashed line for mid-point */
+            transform: translateX(-1px);
+        }
+        .h-line {
+            position: absolute;
+            top: 50%;
+            left: 0;
+            right: 0;
+            height: 2px;
+            border-top: 2px dashed #9ca3af; /* Gray dashed line for mid-point */
+            transform: translateY(-1px);
+        }
+
 
         .chart-dot {
             position: absolute;
@@ -70,6 +97,14 @@
             transform: scale(1.5);
             z-index: 60;
             box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+        }
+        
+        .sortable {
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+        .sortable:hover {
+            background-color: #e5e7eb;
         }
     </style>
 </head>
@@ -93,7 +128,7 @@
             </button>
         </div>
 
-        <!-- 1. Overall Performance Summary Table (NEW) -->
+        <!-- 1. Overall Performance Summary Table -->
         <div class="mb-10">
             <h2 class="text-2xl font-bold text-gray-800 mb-4">종합 성과 요약 <span id="summary-title" class="text-indigo-600 text-lg ml-2"></span></h2>
             <div class="overflow-hidden rounded-xl shadow-lg border">
@@ -122,6 +157,12 @@
                     </h2>
                     
                     <div class="quadrant-matrix" id="quadrant-matrix">
+                        <!-- Quadrant Lines (NEW) -->
+                        <div class="matrix-lines">
+                            <div class="v-line"></div>
+                            <div class="h-line"></div>
+                        </div>
+
                         <!-- Quadrant 1: Top Right (Top) -->
                         <div class="quadrant quadrant-top-right">
                             <div class="quadrant-label text-green-700">Top Zone</div>
@@ -147,6 +188,7 @@
                         <span id="y-high-label"></span>
                     </div>
                     <p class="text-sm text-gray-500 mt-2 text-center">X축: <span id="x-axis-label" class="font-semibold text-gray-700"></span></p>
+                    <p class="text-xs text-gray-400 mt-1 text-center">중앙 기준선: 5점 척도 중 2.5점 (총점 2.5점 미만은 OFF/교체 고려)</p>
                 </div>
             </div>
 
@@ -183,68 +225,85 @@
     </div>
 
     <script>
-        // Firebase Config (Mandatory for Canvas Environment)
+        // Firebase Config (Mandatory, though not used for persistence here)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
-        // Note: Firestore is not used in this template as it is a pure visualization tool, but the mandatory variables are kept.
 
-        // Mock data structure including Overall Summary
+        // Mock data structure including Overall Summary - Enhanced to match provided metrics
         const campaignData = {
             'DA': {
                 name: 'DA 캠페인 (반응 목표)',
                 metrics: { xAxis: '소재 관심도 (B)', yAxis: '유효 노출 기여도 (A)' },
                 summary: [
-                    { label: '총 광고비', value: 4500000, type: 'currency' },
-                    { label: '총 노출수', value: 9500000, type: 'number' },
-                    { label: '평균 CPM', value: 473.68, type: 'currency' },
-                    { label: '평균 CTR', value: 0.42, type: 'percent' },
-                    { label: '평균 CPC', value: 112.5, type: 'currency' },
+                    { label: '총 광고비', key: 'cost', value: 4500000, type: 'currency' },
+                    { label: '총 노출수', key: 'imp', value: 9500000, type: 'number' },
+                    { label: '평균 CPM', key: 'cpm_avg', value: 473.68, type: 'currency' },
+                    { label: '평균 CTR', key: 'ctr_avg', value: 0.42, type: 'percent' },
+                    { label: '평균 CPC', key: 'cpc_avg', value: 112.5, type: 'currency' },
                 ],
                 headers: [
-                    '매체', '소재 구분', '노출수', '클릭수', '광고비', 'CPM(원)', 'CTR(%)', 'CPC(원)', '노출 기여도(A)', '소재 관심도(B)', '총점', 'INSIGHT', '교체 유무'
+                    { name: '매체', key: 'media' }, { name: '소재 구분', key: 'creative' }, 
+                    { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, 
+                    { name: '광고비(원)', key: 'cost' }, { name: 'CPM(원)', key: 'cpm' }, 
+                    { name: 'CTR(%)', key: 'ctr' }, { name: 'CPC(원)', key: 'cpc' }, 
+                    { name: 'A (노출 기여도)', key: 'scoreA' }, { name: 'B (소재 관심도)', key: 'scoreB' }, 
+                    { name: '총점', key: 'total' }, { name: 'INSIGHT', key: 'insight' }, 
+                    { name: '교체 유무', key: 'action' }
                 ],
                 data: [
-                    { media: '네이버 GFA', creative: '소재A_블랙', cost: 1200000, imp: 2500000, click: 12500, cpm: 480, ctr: 0.50, cpc: 96, scoreA: 4.8, scoreB: 4.5, total: 4.65, insight: 'Top 소재', color: '#10b981', mediaInsight: 'GFA Top 소재는 노출과 관심도 모두 높습니다. 예산 집중(확대).' },
-                    { media: '카카오 비즈보드', creative: '소재B_레드', cost: 1000000, imp: 2200000, click: 8800, cpm: 454.5, ctr: 0.40, cpc: 113.6, scoreA: 4.0, scoreB: 4.0, total: 4.0, insight: 'Top 소재', color: '#10b981', mediaInsight: '비즈보드 Top 소재는 안정적입니다. A/B 테스트로 관심도(B) 개선 시도.' },
-                    { media: '구글 GDN', creative: '소재C_그린', cost: 1500000, imp: 3000000, click: 9000, cpm: 500, ctr: 0.30, cpc: 166.7, scoreA: 3.5, scoreB: 2.0, total: 2.75, insight: 'Focus 소재', color: '#f59e0b', mediaInsight: 'GDN은 노출 효율(A)은 괜찮으나 소재 관심도(B)가 낮습니다. 소재 교체/타겟팅 정교화.' },
-                    { media: '네이버 GFA', creative: '소재D_옐로우', cost: 800000, imp: 1800000, click: 4500, cpm: 444.4, ctr: 0.25, cpc: 177.8, scoreA: 2.0, scoreB: 1.5, total: 1.75, insight: 'Low 소재', color: '#ef4444', mediaInsight: 'Low 소재는 즉시 OFF 및 예산을 Top 소재로 이관해야 합니다.' },
+                    { media: '네이버 GFA', creative: '소재A_블랙', cost: 1200000, imp: 2500000, click: 12500, cpm: 480, ctr: 0.0050, cpc: 96, scoreA: 4.8, scoreB: 4.5, total: 4.65, insight: 'Top 소재', color: '#10b981', mediaInsight: 'GFA Top 소재는 노출과 관심도 모두 높습니다. 예산 집중(확대).' },
+                    { media: '카카오 비즈보드', creative: '소재B_레드', cost: 1000000, imp: 2200000, click: 8800, cpm: 454.5, ctr: 0.0040, cpc: 113.6, scoreA: 4.0, scoreB: 4.0, total: 4.0, insight: 'Top 소재', color: '#10b981', mediaInsight: '비즈보드 Top 소재는 안정적입니다. A/B 테스트로 관심도(B) 개선 시도.' },
+                    { media: '구글 GDN', creative: '소재C_그린', cost: 1500000, imp: 3000000, click: 9000, cpm: 500, ctr: 0.0030, cpc: 166.7, scoreA: 3.5, scoreB: 2.0, total: 2.75, insight: 'Focus 소재', color: '#f59e0b', mediaInsight: 'GDN은 노출 효율(A)은 괜찮으나 소재 관심도(B)가 낮습니다. 소재 교체/타겟팅 정교화.' },
+                    { media: '네이버 GFA', creative: '소재D_옐로우', cost: 800000, imp: 1800000, click: 4500, cpm: 444.4, ctr: 0.0025, cpc: 177.8, scoreA: 2.0, scoreB: 1.5, total: 1.75, insight: 'Low 소재', color: '#ef4444', mediaInsight: 'Low 소재는 즉시 OFF 및 예산을 Top 소재로 이관해야 합니다.' },
+                    { media: '카카오 비즈보드', creative: '소재E_블루', cost: 600000, imp: 1000000, click: 3500, cpm: 600, ctr: 0.0035, cpc: 171.4, scoreA: 2.8, scoreB: 3.2, total: 3.0, insight: 'Potential 소재', color: '#3b82f6', mediaInsight: '비즈보드 Potential 소재는 CPM이 높습니다. 노출 기여도(A) 개선을 위해 타겟팅 확대 고려.' },
                 ],
             },
             'PERF': {
                 name: '퍼포먼스 캠페인 (전환 목표)',
                 metrics: { xAxis: '전환 기여도 (B)', yAxis: '광고 관심도 (A)' },
                 summary: [
-                    { label: '총 광고비', value: 6000000, type: 'currency' },
-                    { label: '총 매출액', value: 30000000, type: 'currency' },
-                    { label: '총 전환수', value: 250, type: 'number' },
-                    { label: '평균 CPA', value: 24000, type: 'currency' },
-                    { label: '평균 ROAS', value: 500, type: 'percent' },
+                    { label: '총 광고비', key: 'cost', value: 6000000, type: 'currency' },
+                    { label: '총 매출액', key: 'revenue', value: 30000000, type: 'currency' },
+                    { label: '총 전환수', key: 'conv', value: 250, type: 'number' },
+                    { label: '평균 CPA', key: 'cpa_avg', value: 24000, type: 'currency' },
+                    { label: '평균 ROAS', key: 'roas_avg', value: 500, type: 'percent' },
                 ],
                 headers: [
-                    '매체', '소재 구분', '노출수', '클릭수', '전환수', '매출액', '광고비', 'CTR(%)', 'CPA(원)', 'ROAS(%)', '광고 관심도(A)', '전환 기여도(B)', '총점', 'INSIGHT', '교체 유무'
+                    { name: '매체', key: 'media' }, { name: '소재 구분', key: 'creative' }, 
+                    { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, 
+                    { name: '전환수', key: 'conv' }, { name: '매출액(원)', key: 'revenue' }, 
+                    { name: '광고비(원)', key: 'cost' }, { name: 'CTR(%)', key: 'ctr' }, 
+                    { name: 'CPA(원)', key: 'cpa' }, { name: 'ROAS(%)', key: 'roas' },
+                    { name: 'A (광고 관심도)', key: 'scoreA' }, { name: 'B (전환 기여도)', key: 'scoreB' }, 
+                    { name: '총점', key: 'total' }, { name: 'INSIGHT', key: 'insight' }, 
+                    { name: '교체 유무', key: 'action' }
                 ],
                 data: [
-                    { media: '구글 SA', creative: '소재_키워드1', cost: 2000000, imp: 150000, click: 7500, conv: 100, revenue: 15000000, ctr: 5.0, cpa: 20000, roas: 750, scoreA: 5.0, scoreB: 4.8, total: 4.9, insight: 'Top 소재', color: '#10b981', mediaInsight: 'SA Top 키워드는 독보적인 효율입니다. 예산 최대 확대를 고려.' },
-                    { media: '페이스북/인스타', creative: '소재_여성타겟', cost: 1800000, imp: 500000, click: 4000, conv: 80, revenue: 8000000, ctr: 0.8, cpa: 22500, roas: 444, scoreA: 4.0, scoreB: 4.5, total: 4.25, insight: 'Top 소재', color: '#10b981', mediaInsight: 'SNS는 관심도(A)는 우수하나, CPA 개선을 위해 랜딩페이지 최적화(LPO)가 필요합니다.' },
-                    { media: '네이버 쇼핑검색', creative: '소재_상품A', cost: 1200000, imp: 200000, click: 1500, conv: 50, revenue: 5000000, ctr: 0.75, cpa: 24000, roas: 416, scoreA: 3.5, scoreB: 3.0, total: 3.25, insight: 'Potential 소재', color: '#3b82f6', mediaInsight: '쇼핑검색은 전환 볼륨(B)을 늘려야 합니다. 예산 증액보다는 소재(A) 개선 필요.' },
-                    { media: '구글 GDN', creative: '소재_리타겟팅', cost: 1000000, imp: 400000, click: 500, conv: 20, revenue: 2000000, ctr: 0.125, cpa: 50000, roas: 200, scoreA: 1.5, scoreB: 1.0, total: 1.25, insight: 'Low 소재', color: '#ef4444', mediaInsight: 'Low 효율 리타겟팅 캠페인은 즉시 OFF하거나 타겟팅 세그먼트를 매우 좁게 재설정해야 합니다.' },
+                    { media: '구글 SA', creative: '소재_키워드1', cost: 2000000, imp: 150000, click: 7500, conv: 100, revenue: 15000000, ctr: 0.050, cpa: 20000, roas: 750, scoreA: 5.0, scoreB: 4.8, total: 4.9, insight: 'Top 소재', color: '#10b981', mediaInsight: 'SA Top 키워드는 독보적인 효율입니다. 예산 최대 확대를 고려.' },
+                    { media: '페이스북/인스타', creative: '소재_여성타겟', cost: 1800000, imp: 500000, click: 4000, conv: 80, revenue: 8000000, ctr: 0.008, cpa: 22500, roas: 444, scoreA: 4.0, scoreB: 4.5, total: 4.25, insight: 'Top 소재', color: '#10b981', mediaInsight: 'SNS는 관심도(A)는 우수하나, CPA 개선을 위해 랜딩페이지 최적화(LPO)가 필요합니다.' },
+                    { media: '네이버 쇼핑검색', creative: '소재_상품A', cost: 1200000, imp: 200000, click: 1500, conv: 50, revenue: 5000000, ctr: 0.0075, cpa: 24000, roas: 416, scoreA: 3.5, scoreB: 3.0, total: 3.25, insight: 'Potential 소재', color: '#3b82f6', mediaInsight: '쇼핑검색은 전환 볼륨(B)을 늘려야 합니다. 예산 증액보다는 소재(A) 개선 필요.' },
+                    { media: '구글 GDN', creative: '소재_리타겟팅', cost: 1000000, imp: 400000, click: 500, conv: 20, revenue: 2000000, ctr: 0.00125, cpa: 50000, roas: 200, scoreA: 1.5, scoreB: 1.0, total: 1.25, insight: 'Low 소재', color: '#ef4444', mediaInsight: 'Low 효율 리타겟팅 캠페인은 즉시 OFF하거나 타겟팅 세그먼트를 매우 좁게 재설정해야 합니다.' },
+                    { media: '페이스북/인스타', creative: '소재_영상A', cost: 1500000, imp: 700000, click: 3000, conv: 45, revenue: 6500000, ctr: 0.0043, cpa: 33333, roas: 433, scoreA: 3.8, scoreB: 2.2, total: 3.0, insight: 'Focus 소재', color: '#f59e0b', mediaInsight: 'SNS 영상 소재는 광고 관심도(A)가 높은 편이나, 낮은 전환 기여도(B)를 보입니다. 소재 메시지의 Call-to-Action(CTA) 명확화 필요.' },
                 ],
             }
         };
 
         let currentCampaign = 'DA';
         const matrixContainer = document.getElementById('quadrant-matrix');
+        const tableBody = document.getElementById('table-body');
         const tooltip = document.createElement('div');
         tooltip.id = 'chart-tooltip';
         tooltip.className = 'absolute p-2 bg-gray-800 text-white text-xs rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 z-[100] whitespace-nowrap';
         document.body.appendChild(tooltip);
 
+        let sortColumn = 'total';
+        let sortDirection = 'desc';
 
         // Number formatting function
         const formatNumber = (num, type) => {
             if (typeof num !== 'number') return num;
             switch (type) {
-                case 'percent': return `${num.toFixed(2)}%`;
+                case 'percent': return `${(num * 100).toFixed(2)}%`;
                 case 'currency': return `${Math.round(num).toLocaleString('ko-KR')}원`;
                 case 'score': return num.toFixed(2);
                 default: return num.toLocaleString('ko-KR');
@@ -263,7 +322,8 @@
             // Define min/max scores (0 to 5)
             const MIN_SCORE = 0;
             const MAX_SCORE = 5;
-            const MID_SCORE = 2.5;
+            // Central line is at 2.5
+            const MID_SCORE_RATIO = 0.5; 
 
             // Padding inside the matrix container
             const PADDING = 25;
@@ -281,16 +341,11 @@
             document.getElementById('y-high-label').textContent = data.metrics.yAxis + ' (높음)';
             document.getElementById('y-low-label').textContent = data.metrics.yAxis + ' (낮음)';
 
-
             // Draw Data Points (Dots - using DOM for tooltips)
             data.data.forEach((item, index) => {
-                // Calculate position relative to the 0,0 point (top-left of plot area)
                 // X (Score B) moves from Left (MIN) to Right (MAX)
-                // Y (Score A) moves from Bottom (MIN) to Top (MAX) - requires inversion for CSS top property
-                
-                // X position: 
                 let x = PADDING + (item.scoreB - MIN_SCORE) * scaleX; 
-                // Y position: Inverted from bottom to top
+                // Y (Score A) moves from Bottom (MIN) to Top (MAX) - requires inversion for CSS top property
                 let y = H - PADDING - (item.scoreA - MIN_SCORE) * scaleY;
 
                 // Create a DOM element for the dot
@@ -300,8 +355,8 @@
                 
                 // Clamp coordinates to prevent dots from escaping the plot area edges
                 const DOT_SIZE = 14;
-                x = Math.max(PADDING + DOT_SIZE/2, Math.min(W - PADDING - DOT_SIZE/2, x));
-                y = Math.max(PADDING + DOT_SIZE/2, Math.min(H - PADDING - DOT_SIZE/2, y));
+                x = Math.max(PADDING + DOT_SIZE / 2, Math.min(W - PADDING - DOT_SIZE / 2, x));
+                y = Math.max(PADDING + DOT_SIZE / 2, Math.min(H - PADDING - DOT_SIZE / 2, y));
 
                 dot.style.left = `${x - DOT_SIZE / 2}px`; // Center dot
                 dot.style.top = `${y - DOT_SIZE / 2}px`;  // Center dot
@@ -340,11 +395,9 @@
         }
 
         function moveTooltip(e) {
-            // Position relative to the whole window
             const x = e.clientX + 15;
             let y = e.clientY + 15;
             
-            // Boundary check: move up if near bottom edge
             if (y + tooltip.offsetHeight > window.innerHeight) {
                 y = e.clientY - tooltip.offsetHeight - 15;
             }
@@ -357,7 +410,7 @@
             tooltip.style.opacity = 0;
         }
 
-        // --- Summary Table Logic (NEW) ---
+        // --- Summary Table Logic ---
         function renderSummaryTable() {
             const data = campaignData[currentCampaign];
             const headerRow = document.getElementById('summary-header');
@@ -379,27 +432,71 @@
             data.summary.forEach(metric => {
                 const td = document.createElement('td');
                 td.className = 'px-6 py-4 whitespace-nowrap text-center text-lg font-bold';
-                td.textContent = metric.type === 'percent' 
-                    ? formatNumber(metric.value, metric.type) 
-                    : formatNumber(metric.value, metric.type);
+                
+                let displayValue = metric.value;
+                if (metric.type === 'percent') {
+                    // Check if the value is already scaled (e.g., 500 for 500%) or not (e.g., 0.0042)
+                    // Assuming summary values are already pre-calculated for display purposes (e.g., 500 for ROAS 500%)
+                    td.textContent = formatNumber(displayValue, metric.type === 'percent' ? 'percent_display' : metric.type);
+                } else if (metric.type === 'currency' || metric.type === 'number') {
+                    td.textContent = formatNumber(displayValue, metric.type);
+                } else {
+                    td.textContent = displayValue;
+                }
+
                 tr.appendChild(td);
             });
             body.appendChild(tr);
         }
 
-        // --- Detailed Table & Insight Rendering Logic ---
+        // --- Detailed Table Logic with Sorting ---
+        function sortData(key) {
+            if (sortColumn === key) {
+                sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
+            } else {
+                sortColumn = key;
+                sortDirection = 'desc'; // Default descending for performance metrics
+            }
+
+            const data = campaignData[currentCampaign].data;
+
+            // Simple sorting logic
+            data.sort((a, b) => {
+                const aVal = a[key];
+                const bVal = b[key];
+
+                let comparison = 0;
+                if (aVal > bVal) {
+                    comparison = 1;
+                } else if (aVal < bVal) {
+                    comparison = -1;
+                }
+
+                return sortDirection === 'asc' ? comparison : comparison * -1;
+            });
+
+            renderTable();
+        }
+
         function renderTable() {
             const data = campaignData[currentCampaign];
             const headerRow = document.getElementById('table-header');
-            const body = document.getElementById('table-body');
+            tableBody.innerHTML = '';
             headerRow.innerHTML = '';
-            body.innerHTML = '';
 
-            // Render Header
+            // Render Header with Sorting capability
             data.headers.forEach(header => {
                 const th = document.createElement('th');
-                th.className = 'px-4 py-3 text-left border-b border-gray-200';
-                th.textContent = header;
+                th.className = 'px-4 py-3 text-left border-b border-gray-200 text-center sortable whitespace-nowrap';
+                th.textContent = header.name;
+                th.dataset.key = header.key;
+                th.addEventListener('click', () => sortData(header.key));
+                
+                // Add sort indicator
+                if (sortColumn === header.key) {
+                    th.textContent += sortDirection === 'asc' ? ' ▲' : ' ▼';
+                }
+
                 headerRow.appendChild(th);
             });
 
@@ -408,74 +505,88 @@
                 const tr = document.createElement('tr');
                 tr.className = 'hover:bg-indigo-50 transition-colors';
                 
-                const getCellValue = (key) => {
-                    const value = item[key];
-                    // Mapping keys to types for formatting
-                    const formatMap = {
-                        'cost': 'currency', 'revenue': 'currency', 'cpa': 'currency', 'cpc': 'currency', 'cpm': 'currency',
-                        'roas': 'percent',
-                        'ctr': 'percent',
-                        'scoreA': 'score', 'scoreB': 'score', 'total': 'score',
-                        'imp': 'number', 'click': 'number', 'conv': 'number'
-                    };
-
-                    if (formatMap[key]) {
-                        // CTR and ROAS need pre-multiplication by 100 if they are stored as decimals
-                        let displayValue = value;
-                        if (key === 'ctr' && typeof value === 'number') displayValue = value * 100;
-                        
-                        return formatNumber(displayValue, formatMap[key]);
-                    }
-                    if (key === 'insight') return `<span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color:${item.color}1A; color:${item.color}">${value}</span>`;
-                    if (key === 'media' || key === 'creative') return `<span class="font-medium text-gray-900">${value}</span>`;
-                    return value;
-                };
-
                 // Define the order of keys for the table row
-                const keys = currentCampaign === 'DA' 
-                    ? ['media', 'creative', 'imp', 'click', 'cost', 'cpm', 'ctr', 'cpc', 'scoreA', 'scoreB', 'total', 'insight', '교체 유무']
-                    : ['media', 'creative', 'imp', 'click', 'conv', 'revenue', 'cost', 'ctr', 'cpa', 'roas', 'scoreA', 'scoreB', 'total', 'insight', '교체 유무'];
+                const keys = data.headers.map(h => h.key);
                 
                 keys.forEach(key => {
                     const td = document.createElement('td');
-                    td.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-600';
-                    if(key === '교체 유무') {
-                        // Insight-based action
-                        td.innerHTML = item.total < 2.0 ? '<span class="text-red-600 font-bold bg-red-100 rounded-lg px-2 py-1">OFF/교체</span>' : '<span class="text-green-600 bg-green-100 rounded-lg px-2 py-1">유지/확대</span>';
-                    } else {
-                        td.innerHTML = getCellValue(key);
+                    td.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center';
+                    
+                    let cellValue = item[key];
+
+                    switch(key) {
+                        case 'cost':
+                        case 'revenue':
+                        case 'cpm':
+                        case 'cpc':
+                        case 'cpa':
+                            td.textContent = formatNumber(cellValue, 'currency');
+                            break;
+                        case 'imp':
+                        case 'click':
+                        case 'conv':
+                            td.textContent = formatNumber(cellValue, 'number');
+                            break;
+                        case 'ctr':
+                            // CTR is stored as decimal (e.g., 0.005) and displayed as percentage (0.50%)
+                            td.textContent = formatNumber(cellValue, 'percent');
+                            break;
+                        case 'roas':
+                            // ROAS is stored as a percentage value (e.g., 750)
+                            td.textContent = `${cellValue.toLocaleString('ko-KR')}%`;
+                            break;
+                        case 'scoreA':
+                        case 'scoreB':
+                        case 'total':
+                            td.textContent = formatNumber(cellValue, 'score');
+                            td.classList.add('font-bold', 'text-gray-800');
+                            break;
+                        case 'insight':
+                            td.innerHTML = `<span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color:${item.color}1A; color:${item.color}">${cellValue}</span>`;
+                            break;
+                        case 'action':
+                            const action = item.total < 2.5 ? 'OFF/교체' : '유지/확대';
+                            const colorClass = item.total < 2.5 ? 'text-red-600 bg-red-100' : 'text-green-600 bg-green-100';
+                            td.innerHTML = `<span class="font-bold rounded-lg px-2 py-1 ${colorClass}">${action}</span>`;
+                            break;
+                        default:
+                            td.textContent = cellValue;
+                            td.classList.remove('text-center');
+                            td.classList.add('text-left');
+                            break;
                     }
                     tr.appendChild(td);
                 });
 
-                body.appendChild(tr);
+                tableBody.appendChild(tr);
             });
         }
 
+        // --- Insight Rendering Logic ---
         function renderInsights() {
             const data = campaignData[currentCampaign];
             const insightList = document.getElementById('insight-list');
             insightList.innerHTML = '';
 
-            // Grouping insights by performance grade for better structure
-            const gradeInsights = {
-                'Top 소재': [],
-                'Potential 소재': [],
-                'Focus 소재': [],
-                'Low 소재': [],
-            };
-
+            // Grouping insights by performance grade
+            const gradeInsights = {};
             data.data.forEach(item => {
-                gradeInsights[item.insight]?.push({ 
+                if (!gradeInsights[item.insight]) {
+                    gradeInsights[item.insight] = [];
+                }
+                gradeInsights[item.insight].push({ 
                     media: item.media, 
                     insight: item.mediaInsight,
                     color: item.color
                 });
             });
 
-            // Display Insights in structured list
-            Object.entries(gradeInsights).forEach(([grade, items]) => {
-                if (items.length > 0) {
+            // Order of insights display
+            const insightOrder = ['Top 소재', 'Potential 소재', 'Focus 소재', 'Low 소재'];
+
+            insightOrder.forEach(grade => {
+                const items = gradeInsights[grade];
+                if (items && items.length > 0) {
                     const gradeColor = items[0].color;
                     const gradeHeader = document.createElement('li');
                     gradeHeader.className = 'pt-2 mb-2 font-extrabold text-base border-b-2 pb-1';
@@ -499,6 +610,10 @@
 
 
         function renderDashboard() {
+            // Reset sorting when switching campaigns
+            sortColumn = 'total';
+            sortDirection = 'desc';
+
             // Update Tab State
             document.querySelectorAll('.campaign-tab').forEach(tab => {
                 if (tab.dataset.camp === currentCampaign) {
