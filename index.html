@@ -105,16 +105,20 @@
         .sortable:hover {
             background-color: #e5e7eb;
         }
-
-        /* Sticky Header for Validation Table */
+        
+        /* Custom styles for validation table headers */
         #validation-input-table thead th {
-            z-index: 50; /* Ensure headers float above body */
+            text-align: center;
+            vertical-align: middle;
+            border-bottom: 1px solid #e5e7eb; /* Light gray border for separation */
         }
         #validation-input-table thead tr:first-child th {
-            top: 0;
+            border-bottom: none; /* No double line between first and second header row */
+            border-right: 1px solid #d1d5db; /* Darker line for group separation */
         }
         #validation-input-table thead tr:last-child th {
-            top: 2.25rem; /* Adjust this based on the height of the first row */
+             border-right: 1px solid #e5e7eb; /* Separator for bottom row cells */
+             padding-top: 4px; /* Adjust padding for better look */
         }
     </style>
 </head>
@@ -165,8 +169,8 @@
                     
                     <div class="overflow-x-auto">
                         <table id="validation-input-table" class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0">
-                            <thead id="validation-table-header-group" class="bg-gray-100 sticky top-0">
-                                <!-- Headers will be injected here (2 rows) -->
+                            <thead id="validation-table-header" class="bg-gray-100 sticky top-0">
+                                <!-- Table Headers will be injected here (2 rows) -->
                             </thead>
                             <tbody id="validation-table-body">
                                 <!-- Input Rows will be injected here -->
@@ -350,61 +354,70 @@
         let sortDirection = 'desc';
         let currentCampaign = 'DA';
 
-        // --- NEW/MODIFIED: Validation Table Logic & Data Setup ---
+        // --- NEW: Validation Table Logic & Data Setup (Updated for 2-level header) ---
         
         const validationTableConfigs = {
             'DA': {
                 label: 'DA 캠페인',
-                // Define column groups and headers
-                groups: [
-                    { name: '기본 정보', keys: ['media', 'placement'] },
-                    { name: '광고비', keys: ['cost'] },
-                    { name: '노출 성과 (CPM)', keys: ['imp', 'targetCpm', 'actualCpm'] },
-                    { name: '클릭 성과 (CPC/CTR)', keys: ['click', 'targetCpc', 'actualCpc', 'targetCtr', 'actualCtr'] },
-                    { name: '조회 성과 (CPV)', keys: ['view', 'targetCpv', 'actualCpv'] },
+                // Define the Level 1 Header Groups
+                headerGroups: [
+                    { name: '기본 정보', cols: ['media', 'placement', 'creativeName', 'cost', 'imp'] },
+                    { name: '노출 성과 (CPM)', cols: ['targetCpm', 'actualCpm'] },
+                    { name: '클릭 성과 (CPC/CTR)', cols: ['click', 'targetCpc', 'actualCpc', 'targetCtr', 'actualCtr'] },
+                    { name: '조회 성과 (CPV)', cols: ['view', 'targetCpv', 'actualCpv'] },
                 ],
+                // Define the Level 2 Columns
                 cols: [
-                    { name: '매체명', key: 'media', type: 'text', placeholder: '매체명', width: 'w-24' },
-                    { name: '지면', key: 'placement', type: 'text', placeholder: '지면', width: 'w-24' },
-                    { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true }, 
-                    { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
-                    { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24' },
-                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true },
-                    { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
-                    { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24' },
-                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true },
-                    { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24' },
-                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true },
-                    { name: '조회수', key: 'view', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
-                    { name: '목표 CPV(원)', key: 'targetCpv', type: 'currency', placeholder: '목표CPV', width: 'w-24' },
-                    { name: '성과 CPV(원)', key: 'actualCpv', type: 'currency', placeholder: '성과CPV', width: 'w-24', calculated: true },
+                    { name: '매체', key: 'media', type: 'text', placeholder: '매체', width: 'w-24', group: '기본 정보' },
+                    { name: '상품', key: 'placement', type: 'text', placeholder: '상품', width: 'w-24', group: '기본 정보' },
+                    { name: '소재명', key: 'creativeName', type: 'text', placeholder: '소재명', width: 'w-24', group: '기본 정보' },
+                    { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true, group: '기본 정보' }, 
+                    { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '기본 정보' }, 
+                    
+                    { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24', group: '노출 성과 (CPM)' },
+                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true, group: '노출 성과 (CPM)' },
+                    
+                    { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' }, 
+                    { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
+                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
+                    { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
+                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
+                    
+                    { name: '조회수', key: 'view', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '조회 성과 (CPV)' }, 
+                    { name: '목표 CPV(원)', key: 'targetCpv', type: 'currency', placeholder: '목표CPV', width: 'w-24', group: '조회 성과 (CPV)' },
+                    { name: '성과 CPV(원)', key: 'actualCpv', type: 'currency', placeholder: '성과CPV', width: 'w-24', calculated: true, group: '조회 성과 (CPV)' },
                 ],
             },
             'PERF': {
                 label: '퍼포먼스 캠페인',
-                groups: [
-                    { name: '기본 정보', keys: ['media', 'placement'] },
-                    { name: '광고비', keys: ['cost'] },
-                    { name: '노출 성과 (CPM)', keys: ['imp', 'targetCpm', 'actualCpm'] },
-                    { name: '클릭 성과 (CPC/CTR)', keys: ['click', 'targetCpc', 'actualCpc', 'targetCtr', 'actualCtr'] },
-                    { name: '전환 성과 (CPA)', keys: ['conv', 'targetCpa', 'actualCpa', 'revenue'] },
+                // Define the Level 1 Header Groups
+                headerGroups: [
+                    { name: '기본 정보', cols: ['media', 'placement', 'creativeName', 'cost', 'imp'] },
+                    { name: '노출 성과 (CPM)', cols: ['targetCpm', 'actualCpm'] },
+                    { name: '클릭 성과 (CPC/CTR)', cols: ['click', 'targetCpc', 'actualCpc', 'targetCtr', 'actualCtr'] },
+                    { name: '전환 성과 (CPA)', cols: ['conv', 'targetCpa', 'actualCpa', 'revenue'] }, // PERF-specific
                 ],
+                // Define the Level 2 Columns
                 cols: [
-                    { name: '매체명', key: 'media', type: 'text', placeholder: '매체명', width: 'w-24' },
-                    { name: '지면', key: 'placement', type: 'text', placeholder: '지면', width: 'w-24' },
-                    { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true }, 
-                    { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
-                    { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24' },
-                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true },
-                    { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
-                    { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24' },
-                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true },
-                    { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24' },
-                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true },
-                    { name: '전환수', key: 'conv', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true }, 
-                    { name: '목표 CPA(원)', key: 'targetCpa', type: 'currency', placeholder: '목표CPA', width: 'w-24' },
-                    { name: '성과 CPA(원)', key: 'actualCpa', type: 'currency', placeholder: '성과CPA', width: 'w-24', calculated: true },
-                    { name: '구매/가입액(원)', key: 'revenue', type: 'currency', placeholder: '금액', width: 'w-24', isLargeNumber: true }, 
+                    { name: '매체', key: 'media', type: 'text', placeholder: '매체', width: 'w-24', group: '기본 정보' },
+                    { name: '상품', key: 'placement', type: 'text', placeholder: '상품', width: 'w-24', group: '기본 정보' },
+                    { name: '소재명', key: 'creativeName', type: 'text', placeholder: '소재명', width: 'w-24', group: '기본 정보' },
+                    { name: '소진 광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true, group: '기본 정보' }, 
+                    { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '기본 정보' }, 
+                    
+                    { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24', group: '노출 성과 (CPM)' },
+                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true, group: '노출 성과 (CPM)' },
+                    
+                    { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' }, 
+                    { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
+                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
+                    { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
+                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
+                    
+                    { name: '전환수', key: 'conv', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '전환 성과 (CPA)' }, 
+                    { name: '목표 CPA(원)', key: 'targetCpa', type: 'currency', placeholder: '목표CPA', width: 'w-24', group: '전환 성과 (CPA)' },
+                    { name: '성과 CPA(원)', key: 'actualCpa', type: 'currency', placeholder: '성과CPA', width: 'w-24', calculated: true, group: '전환 성과 (CPA)' },
+                    { name: '구매/가입액(원)', key: 'revenue', type: 'currency', placeholder: '금액', width: 'w-24', isLargeNumber: true, group: '전환 성과 (CPA)' }, 
                 ],
             }
         };
@@ -415,6 +428,7 @@
         const getEmptyRow = (campaign) => {
             const row = { id: crypto.randomUUID() };
             validationTableConfigs[campaign].cols.forEach(col => {
+                // Ensure the new 'creativeName' field is initialized to ''
                 row[col.key] = col.type === 'number' || col.type === 'currency' || col.type === 'percent' ? null : '';
             });
             return row;
@@ -424,7 +438,7 @@
 
         const validationTableContent = document.getElementById('validation-table-content');
         const toggleValidationTableButton = document.getElementById('toggle-validation-table');
-        const validationTableHeaderGroup = document.getElementById('validation-table-header-group'); // Modified ID
+        const validationTableHeader = document.getElementById('validation-table-header');
         const validationTableBody = document.getElementById('validation-table-body');
         const validationCampaignLabel = document.getElementById('validation-campaign-label');
         const addValidationRowButton = document.getElementById('add-validation-row');
@@ -480,7 +494,8 @@
         }
 
         /**
-         * CRITICAL FIX: Updates only the calculated columns in the DOM without destroying input focus.
+         * Updates only the calculated columns in the DOM without destroying input focus.
+         * FIX: Removed +1 index offset since the '결과' column is deleted.
          * @param {string} rowId - The unique ID of the row.
          * @param {object} rowData - The data object for the row.
          */
@@ -491,23 +506,18 @@
 
             const config = validationTableConfigs[currentCampaign];
             
-            // Get all visible column keys (excluding the delete column)
-            const allKeys = config.cols.map(c => c.key);
-            
-            // Get all cells in the row
-            const cells = Array.from(rowElement.children);
-
+            // Iterate through columns to find calculated fields
             config.cols.forEach((col, colIndex) => {
                 if (col.calculated) {
-                    // Find the corresponding cell element
-                    const td = cells[colIndex];
-                    const inputElement = td?.querySelector('input');
+                    // FIX: Since the '결과' column is removed, the DOM child index now directly matches colIndex.
+                    const td = rowElement.children[colIndex]; 
+                    const inputElement = td.querySelector('input');
                     if (!inputElement) return;
 
                     const rawValue = rowData[col.key];
                     let displayValue = '-';
                     
-                    if (rawValue !== null && !isNaN(rawValue)) {
+                    if (rawValue !== null) {
                         if (col.type === 'currency') {
                             // Display as formatted currency number (without '원' in the input field)
                             displayValue = formatNumber(rawValue, 'currency').replace('원', ''); 
@@ -524,7 +534,6 @@
                 }
             });
         }
-
 
         function handleValidationInputChange(rowId, key, event) {
             const index = validationData[currentCampaign].findIndex(r => r.id === rowId);
@@ -609,66 +618,63 @@
             renderValidationTable();
         }
 
+        /**
+         * Renders the validation input table with 2-level headers based on the image provided.
+         * FIX: Removed the '결과' column header and body cell.
+         */
         function renderValidationTable() {
             const config = validationTableConfigs[currentCampaign];
             validationCampaignLabel.textContent = config.label;
             
-            validationTableHeaderGroup.innerHTML = '';
+            validationTableHeader.innerHTML = '';
             
-            // 1. Render Group Header (First Row)
-            const groupTr = document.createElement('tr');
-            groupTr.className = 'bg-gray-200';
+            // --- 1. Render Level 1 Header (Groups) ---
+            const trGroup = document.createElement('tr');
+            trGroup.className = 'bg-gray-200 border-b-2 border-gray-300';
             
-            // Placeholder for fixed columns (media, placement, cost)
-            const fixedCols = config.groups.filter(g => g.keys.length === 1 && (g.keys[0] === 'media' || g.keys[0] === 'placement' || g.keys[0] === 'cost'));
-            fixedCols.forEach(group => {
+            // First column ('결과') REMOVED. Group headers start immediately.
+            
+            // Generate Group Headers (Level 1)
+            config.headerGroups.forEach(group => {
                 const th = document.createElement('th');
-                th.className = 'px-2 py-1 text-xs font-bold text-gray-700 uppercase tracking-wider sticky top-0 bg-gray-300 border-r border-gray-400';
+                th.className = 'px-2 py-2 text-xs font-bold text-gray-700 uppercase tracking-wider sticky top-0 bg-gray-300';
                 th.textContent = group.name;
-                th.colSpan = group.keys.length; 
-                th.style.minWidth = config.cols.find(c => c.key === group.keys[0])?.width || 'w-24';
-                groupTr.appendChild(th);
-            });
-
-            // Grouping for performance metrics
-            const metricGroups = config.groups.filter(g => g.keys.length > 1);
-            metricGroups.forEach(group => {
-                const th = document.createElement('th');
-                th.className = 'px-2 py-1 text-xs font-bold text-gray-700 uppercase tracking-wider sticky top-0 bg-indigo-200 border-r border-gray-400';
-                th.textContent = group.name;
-                th.colSpan = group.keys.length;
-                groupTr.appendChild(th);
+                th.colSpan = group.cols.length; // Span across all columns in this group
+                trGroup.appendChild(th);
             });
             
-            // Action column (Delete)
-            const actionThGroup = document.createElement('th');
-            actionThGroup.className = 'px-1 py-1 text-xs font-bold text-gray-700 sticky top-0 bg-gray-300 w-10';
-            actionThGroup.textContent = '관리';
-            actionThGroup.rowSpan = 2; // Spans both header rows
-            groupTr.appendChild(actionThGroup);
+            // Last column (Action column - '삭제') spans two rows
+            const thDeleteTop = document.createElement('th');
+            thDeleteTop.className = 'px-1 py-2 text-xs font-bold text-gray-700 sticky top-0 bg-gray-300 w-10';
+            thDeleteTop.textContent = '삭제';
+            thDeleteTop.rowSpan = 2; // Spans both header rows
+            trGroup.appendChild(thDeleteTop);
 
-            validationTableHeaderGroup.appendChild(groupTr);
+            validationTableHeader.appendChild(trGroup);
+
+            // --- 2. Render Level 2 Header (Details) ---
+            const trDetail = document.createElement('tr');
+            trDetail.className = 'bg-gray-100 border-b border-gray-200';
             
-            // 2. Render Detail Header (Second Row)
-            const detailTr = document.createElement('tr');
-            detailTr.className = 'bg-gray-100';
-
+            // Generate Detail Headers (Level 2)
             config.cols.forEach(col => {
                 const th = document.createElement('th');
-                th.className = `px-2 py-1 text-xs font-semibold text-gray-700 uppercase tracking-wider sticky top-9 bg-gray-100 border-r border-gray-300 ${col.width || 'w-24'}`;
+                th.className = `px-2 py-2 text-xs font-semibold text-gray-700 uppercase tracking-wider sticky top-0 border-r border-gray-200 ${col.width || 'w-24'}`;
                 th.textContent = col.name;
-                detailTr.appendChild(th);
+                trDetail.appendChild(th);
             });
             
-            validationTableHeaderGroup.appendChild(detailTr);
+            validationTableHeader.appendChild(trDetail);
             
-            // 3. Render Body
+            
+            // --- 3. Render Body ---
             validationTableBody.innerHTML = '';
             validationData[currentCampaign].forEach(row => {
                 const tr = document.createElement('tr');
                 tr.className = 'border-t border-gray-200';
-                tr.dataset.rowId = row.id; // Added for targeted DOM updates
+                tr.dataset.rowId = row.id; 
                 
+                // First column ('결과') cell REMOVED.
 
                 config.cols.forEach(col => {
                     const td = document.createElement('td');
@@ -681,7 +687,7 @@
 
                     if (isCalculated) {
                         // Calculated fields: Read-only, centered, specific styling
-                        if (rawValue !== null && !isNaN(rawValue)) {
+                        if (rawValue !== null) {
                             if (col.type === 'currency') {
                                 // Remove '원' for a cleaner look in the input field
                                 displayValue = formatNumber(rawValue, 'currency').replace('원', '');
@@ -697,7 +703,8 @@
                         const inputElement = document.createElement('input');
                         inputElement.type = 'text';
                         inputElement.readOnly = true;
-                        inputElement.className = 'w-full p-1 border rounded-md text-xs bg-gray-200 font-semibold text-gray-700 pointer-events-none text-center';
+                        // Added custom styling for calculated fields to make them stand out
+                        inputElement.className = 'w-full p-1 border rounded-md text-xs bg-indigo-50 font-semibold text-indigo-700 pointer-events-none text-center'; 
                         inputElement.value = displayValue;
                         td.appendChild(inputElement);
 
