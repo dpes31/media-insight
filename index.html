@@ -124,6 +124,14 @@
             color: #4b5563; /* gray-600 */
             margin-top: 1px;
         }
+        
+        /* Style for prefill input text */
+        .input-prefill {
+            color: #9ca3af; /* gray-400 */
+        }
+        .input-prefill:focus {
+            color: #111827; /* gray-900 (default text color) */
+        }
     </style>
 </head>
 <body class="p-4 md:p-8"> <!-- 좌우 패딩을 줄였습니다 -->
@@ -324,11 +332,11 @@
                     { name: '교체 유무', key: 'action' }
                 ],
                 data: [
-                    // Mock data kept for prefill, values will be overwritten by calculated metrics
-                    { media: '네이버 GFA', creative: '소재A_블랙', cost: 1200000, imp: 2500000, click: 12500, cpm: 480, ctr: 0.0050, cpc: 96, scoreA: 4.8, scoreB: 4.5, total: 4.65, insight: 'Top 소재', color: '#10b981', mediaInsight: 'GFA Top 소재는 노출과 관심도 모두 높습니다. 예산 집중(확대).' },
-                    { media: '카카오 비즈보드', creative: '소재B_레드', cost: 1000000, imp: 2200000, click: 8800, cpm: 454.5, ctr: 0.0040, cpc: 113.6, scoreA: 4.0, scoreB: 4.0, total: 4.0, insight: 'Top 소재', color: '#10b981', mediaInsight: '비즈보드 Top 소재는 안정적입니다. A/B 테스트로 관심도(B) 개선 시도.' },
-                    { media: '구글 GDN', creative: '소재C_그린', cost: 1500000, imp: 3000000, click: 9000, cpm: 500, ctr: 0.0030, cpc: 166.7, scoreA: 3.5, scoreB: 2.0, total: 2.75, insight: 'Focus 소재', color: '#f59e0b', mediaInsight: 'GDN은 노출 효율(A)은 괜찮으나 소재 관심도(B)가 낮습니다. 소재 교체/타겟팅 정교화.' },
-                    { media: '네이버 GFA', creative: '소재D_옐로우', cost: 800000, imp: 1800000, click: 4500, cpm: 444.4, ctr: 0.0025, cpc: 177.8, scoreA: 2.0, scoreB: 1.5, total: 1.75, insight: 'Low 소재', color: '#ef4444', mediaInsight: 'Low 소재는 즉시 OFF 및 예산을 Top 소재로 이관해야 합니다.' },
+                    // *** 수정된 Mock Data ***
+                    { media: '네이버', creative: '소재A_스페셜DA', cost: 11480000, imp: 7200000, click: 16000, cpm: null, ctr: null, cpc: null, scoreA: null, scoreB: null, total: null, insight: null, color: null, mediaInsight: null },
+                    { media: '카카오', creative: '소재B_비즈보드', cost: 150000000, imp: 170000000, click: 250000, cpm: null, ctr: null, cpc: null, scoreA: null, scoreB: null, total: null, insight: null, color: null, mediaInsight: null },
+                    { media: '구글', creative: '소재C_GDN', cost: 80000000, imp: 9500000, click: 25000, cpm: null, ctr: null, cpc: null, scoreA: null, scoreB: null, total: null, insight: null, color: null, mediaInsight: null },
+                    { media: '버즈빌', creative: '소재D_네트워크', cost: null, imp: null, click: null, cpm: null, ctr: null, cpc: null, scoreA: null, scoreB: null, total: null, insight: null, color: null, mediaInsight: null },
                 ],
             },
             'PERF': {
@@ -458,13 +466,28 @@
                 // --- Campaign Specific Mapping & Defaults ---
                 if (campaignType === 'DA') {
                     // Mock a view count for CPV calculation (e.g., Imp/50)
-                    row.view = Math.round(sourceItem.imp / 50) || null; 
+                    row.view = (sourceItem.imp !== null) ? Math.round(sourceItem.imp / 50) : null; 
                     
-                    // Dummy Target Values for DA
-                    row.targetCpm = 450;
-                    row.targetCpc = 120;
-                    row.targetCtr = 0.004; // Use fraction for consistency
-                    row.targetCpv = 100;
+                    // *** 수정: 요청하신 매체별 목표값으로 변경 ***
+                    if (sourceItem.media === '네이버') {
+                        row.targetCpm = 2000;
+                        row.targetCpc = 740;
+                        row.targetCtr = 0.0020; // 0.20%
+                    } else if (sourceItem.media === '카카오') {
+                        row.targetCpm = 900;
+                        row.targetCpc = 400;
+                        row.targetCtr = 0.0025; // 0.25%
+                    } else if (sourceItem.media === '구글') {
+                        row.targetCpm = 5000;
+                        row.targetCpc = 2000;
+                        row.targetCtr = 0.0040; // 0.40%
+                    } else {
+                        // Default for Buzzvil or new rows
+                        row.targetCpm = 450; 
+                        row.targetCpc = 120;
+                        row.targetCtr = 0.004;
+                    }
+                    row.targetCpv = 100; // Keep CPV target default
                     
                 } else if (campaignType === 'PERF') {
                     row.conv = sourceItem.conv;
@@ -748,7 +771,13 @@
                         const inputElement = document.createElement('input');
                         inputElement.type = 'text'; 
                         inputElement.placeholder = col.placeholder;
-                        inputElement.className = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' || col.isLargeNumber ? 'text-right' : 'text-left'}`;
+                        
+                        // Base classes
+                        let inputClasses = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' || col.isLargeNumber ? 'text-right' : 'text-left'}`;
+                        
+                        // *** 수정: input-prefill 클래스 추가 ***
+                        inputClasses += ' input-prefill';
+                        inputElement.className = inputClasses;
                         
                         // Display the formatted number in the input field
                         if (col.isLargeNumber && typeof rawValue === 'number') {
@@ -761,8 +790,18 @@
                         } else {
                             inputElement.value = displayValue;
                         }
-                        // Attach the input handler
-                        inputElement.addEventListener('input', (e) => handleValidationInputChange(row.id, col.key, e));
+                        
+                        // *** 수정: focus 리스너 추가 ***
+                        inputElement.addEventListener('focus', (e) => {
+                            e.target.classList.remove('input-prefill');
+                        });
+                        
+                        // *** 수정: input 리스너 수정 ***
+                        inputElement.addEventListener('input', (e) => {
+                            e.target.classList.remove('input-prefill'); // 입력 시 prefill 클래스 제거
+                            handleValidationInputChange(row.id, col.key, e);
+                        });
+                        
                         td.appendChild(inputElement);
                     }
                     tr.appendChild(td);
