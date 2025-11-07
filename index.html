@@ -449,26 +449,31 @@
             return dataToMap.map((sourceItem) => {
                 const row = { id: crypto.randomUUID() };
                 
+                // *** 수정: (1) isPrefill 플래그 추가 ***
+                // sourceItem.media가 존재하면 (즉, {}가 아니면) prefill로 간주
+                row.isPrefill = !!sourceItem.media; 
+                
                 configCols.forEach(col => {
                     row[col.key] = null; // Initialize all fields to null
                 });
                 
                 // --- Core Metric Mapping (DA/PERF Common) ---
-                row.media = sourceItem.media || '';
-                const parts = sourceItem.creative ? sourceItem.creative.split('_') : ['', ''];
-                row.creativeName = parts[0] || '소재'; 
-                row.placement = parts[1] || '상품'; 
+                // *** 수정: (3) sourceItem이 없을 경우(새 행) media, creative, placement를 null로 설정 ***
+                row.media = sourceItem.media || null;
+                // *** 수정: 'undefined' 버그 방지 ***
+                const parts = sourceItem.creative ? String(sourceItem.creative).split('_') : [null, null];
+                row.creativeName = parts[0]; 
+                row.placement = parts[1]; 
+                
                 // Raw Performance Data
-                row.cost = sourceItem.cost;
-                row.imp = sourceItem.imp;
-                row.click = sourceItem.click;
+                // *** 수정: (2) 'undefined' 버그 수정 (|| null 추가) ***
+                row.cost = sourceItem.cost || null;
+                row.imp = sourceItem.imp || null;
+                row.click = sourceItem.click || null;
                 
                 // --- Campaign Specific Mapping & Defaults ---
                 if (campaignType === 'DA') {
-                    // Mock a view count for CPV calculation (e.g., Imp/50)
-                    row.view = (sourceItem.imp !== null) ? Math.round(sourceItem.imp / 50) : null; 
                     
-                    // *** 수정: 요청하신 매체별 목표값으로 변경 ***
                     if (sourceItem.media === '네이버') {
                         row.targetCpm = 2000;
                         row.targetCpc = 740;
@@ -481,23 +486,45 @@
                         row.targetCpm = 5000;
                         row.targetCpc = 2000;
                         row.targetCtr = 0.0040; // 0.40%
+                    } else if (sourceItem.media === '버즈빌') {
+                        // *** 수정: (5) 버즈빌의 목표값 null로 설정 ***
+                        row.targetCpm = null;
+                        row.targetCpc = null;
+                        row.targetCtr = null;
                     } else {
-                        // Default for Buzzvil or new rows
-                        row.targetCpm = 450; 
-                        row.targetCpc = 120;
-                        row.targetCtr = 0.004;
+                        // Default for new rows
+                        row.targetCpm = null; 
+                        row.targetCpc = null;
+                        row.targetCtr = null;
                     }
-                    row.targetCpv = 100; // Keep CPV target default
+                    
+                    // *** 수정: (5) 버즈빌 및 새 행의 targetCpv, view null로 설정 ***
+                    if (sourceItem.media === '버즈빌' || !sourceItem.media) { 
+                        row.targetCpv = null;
+                        row.view = null;
+                    } else {
+                        // 네이버, 카카오, 구글은 기존 로직 유지
+                        row.targetCpv = 100; 
+                        row.view = (sourceItem.imp !== null) ? Math.round(sourceItem.imp / 50) : null; 
+                    }
                     
                 } else if (campaignType === 'PERF') {
-                    row.conv = sourceItem.conv;
-                    row.revenue = sourceItem.revenue;
+                    // *** 수정: (2) 'undefined' 버그 수정 (|| null 추가) ***
+                    row.conv = sourceItem.conv || null;
+                    row.revenue = sourceItem.revenue || null;
                     
-                    // Dummy Target Values for PERF
-                    row.targetCpm = 5000; 
-                    row.targetCpa = 25000;
-                    row.targetCpc = 2000;
-                    row.targetCtr = 0.01; // Use fraction for consistency
+                    // (PERF 캠페인도 새 행일 경우 null로 설정)
+                    if (row.isPrefill) {
+                        row.targetCpm = 5000; 
+                        row.targetCpa = 25000;
+                        row.targetCpc = 2000;
+                        row.targetCtr = 0.01;
+                    } else {
+                        row.targetCpm = null; 
+                        row.targetCpa = null;
+                        row.targetCpc = null;
+                        row.targetCtr = null;
+                    }
                 }
                 
                 return row;
@@ -638,6 +665,7 @@
                     rawValueToStore = cleanValue === '' ? null : parseInt(cleanValue, 10);
                 } else if (config.type === 'number' || config.type === 'currency' || config.type === 'percent') {
                     // For other numeric fields, allow decimals
+                    // *** 수정: (4) % 기호 제거 ***
                     const cleanValue = inputValue.replace(/[^\d.]/g, ''); 
                     rawValueToStore = cleanValue === '' || cleanValue === '.' ? null : parseFloat(cleanValue);
                     
@@ -769,8 +797,11 @@
                     } else {
                         // Regular input (text/number/currency/percent)
                         const inputElement = document.createElement('input');
-                        inputElement.type = 'text'; 
+                        inputElement.type = 'text';
+                        // *** 수정: (3) placeholder를 col.placeholder에서 가져오도록 수정 ***
                         inputElement.placeholder = col.placeholder;
+                        // *** 수정: (1) data-key 추가 ***
+                        inputElement.dataset.key = col.key;
                         
                         // Base classes
                         let inputClasses = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' || col.isLargeNumber ? 'text-right' : 'text-left'}`;
@@ -779,16 +810,16 @@
                         if (col.isLargeNumber && typeof rawValue === 'number') {
                             displayValue = formatNumericInput(rawValue);
                         } else if (col.type === 'percent' && typeof rawValue === 'number') {
-                            // Display target CTR as percentage (e.g., 0.004 -> 0.4)
-                            displayValue = (rawValue * 100).toFixed(2).replace(/\.00$/, '');
+                            // *** 수정: (4) 목표 CTR(%)에도 % 기호 추가 ***
+                            displayValue = `${(rawValue * 100).toFixed(2).replace(/\.00$/, '')}%`;
                         } else if ((col.type === 'currency' || col.type === 'number') && typeof rawValue === 'number') {
                             displayValue = rawValue;
                         } else {
                             displayValue = displayValue; // text or null
                         }
                         
-                        // *** 수정: input-prefill 클래스 조건부 추가 ***
-                        if (displayValue) {
+                        // *** 수정: (1) isPrefill 값에 따라 prefill 클래스 적용 ***
+                        if (row.isPrefill && displayValue) {
                             inputClasses += ' input-prefill';
                         }
                         inputElement.className = inputClasses;
@@ -797,49 +828,81 @@
                         // Store the default display value for placeholder logic
                         inputElement.dataset.defaultValue = displayValue;
 
-                        // *** 수정: ON FOCUS: Clear placeholder if it's the default value ***
+                        // *** 수정: (1) ON FOCUS: Clear placeholder, clear calculated fields, and clear row if prefill ***
                         inputElement.addEventListener('focus', (e) => {
+                            const index = validationData[currentCampaign].findIndex(r => r.id === row.id);
+                            if (index === -1) return;
+                            const dataRow = validationData[currentCampaign][index];
+                            const clickedKey = e.target.dataset.key;
+
+                            // (1) If this is a prefill row, clear the entire row once
+                            if (dataRow.isPrefill) {
+                                dataRow.isPrefill = false; // Mark as "edited"
+                                
+                                const allInputs = tr.querySelectorAll('input:not([readonly])');
+
+                                config.cols.forEach(c => {
+                                    if (!c.calculated) {
+                                        // (5) Buzzvil exception: keep basic info
+                                        if (dataRow.media === '버즈빌' && (c.key === 'media' || c.key === 'placement' || c.key === 'creativeName')) {
+                                            // Don't clear these for Buzzvil
+                                        } else {
+                                            dataRow[c.key] = null; // Clear data model
+                                        }
+                                    }
+                                });
+
+                                // Now update the DOM
+                                allInputs.forEach(input => {
+                                    input.classList.remove('input-prefill');
+                                    input.dataset.defaultValue = ''; // Clear default value
+                                    
+                                    // (5) Buzzvil exception
+                                    if (dataRow.media === '버즈빌' && (input.dataset.key === 'media' || input.dataset.key === 'placement' || input.dataset.key === 'creativeName')) {
+                                         // Don't clear the value
+                                    } else {
+                                        input.value = ''; // Clear DOM value
+                                    }
+                                });
+                                
+                                // (1.b) Refocus on the clicked element
+                                const clickedInput = tr.querySelector(`input[data-key="${clickedKey}"]`);
+                                if(clickedInput) clickedInput.focus();
+                            }
+
+                            // (2) Always clear calculated fields on any input focus
+                            dataRow.actualCpm = null;
+                            dataRow.actualCpc = null;
+                            dataRow.actualCtr = null;
+                            dataRow.actualCpv = null;
+                            dataRow.actualCpa = null;
+                            updateCalculatedColumnsInDOM(row.id, dataRow);
+
+                            // Original logic: clear if it's default value (now '' for prefill rows)
                             if (e.target.value === e.target.dataset.defaultValue) {
                                 e.target.value = '';
                             }
                             e.target.classList.remove('input-prefill');
                         });
 
-                        // *** 수정: ON BLUR: Restore placeholder if field is empty, and save null ***
+                        // *** 수정: (1) ON BLUR: Save data, re-calculate, AND restore placeholder if empty ***
                         inputElement.addEventListener('blur', (e) => {
-                            const currentValue = e.target.value;
+                            // 1. Save the final value and trigger re-calculation
+                            handleValidationInputChange(row.id, col.key, e);
                             
-                            // Check if the input is empty
-                            if (currentValue === '') {
-                                // 1. Restore visual placeholder
-                                e.target.value = e.target.dataset.defaultValue;
-                                if (e.target.dataset.defaultValue) {
-                                    e.target.classList.add('input-prefill');
-                                }
-                                
-                                // 2. Save `null` to the data model
-                                const index = validationData[currentCampaign].findIndex(r => r.id === row.id);
-                                if (index > -1) {
-                                    // Only save null if the value was actually empty.
-                                    // The 'input' event (handleValidationInputChange) handles non-empty saves.
-                                    if (validationData[currentCampaign][index][col.key] !== null) {
-                                        validationData[currentCampaign][index][col.key] = null;
-                                    
-                                        // 3. Re-run dependent calculations
-                                        const baseMetrics = ['cost', 'imp', 'click', 'view', 'conv', 'revenue'];
-                                        if (baseMetrics.includes(col.key)) {
-                                            calculateValidationMetrics(validationData[currentCampaign][index], currentCampaign);
-                                            updateCalculatedColumnsInDOM(row.id, validationData[currentCampaign][index]);
-                                        }
-                                    }
-                                }
+                            // 2. Re-format % if needed
+                            const index = validationData[currentCampaign].findIndex(r => r.id === row.id);
+                            if (index === -1) return;
+                            const rawValue = validationData[currentCampaign][index][col.key];
+
+                            if (col.type === 'percent' && typeof rawValue === 'number' && !e.target.value.includes('%')) {
+                                e.target.value = `${(rawValue * 100).toFixed(2).replace(/\.00$/, '')}%`;
                             }
                         });
 
-                        // *** 수정: ON INPUT: Save data and ensure prefill is off ***
+                        // *** 수정: ON INPUT: Just remove prefill class ***
                         inputElement.addEventListener('input', (e) => {
-                            e.target.classList.remove('input-prefill'); // Just in case
-                            handleValidationInputChange(row.id, col.key, e);
+                            e.target.classList.remove('input-prefill');
                         });
                         
                         td.appendChild(inputElement);
@@ -973,7 +1036,7 @@
                 // [INSIGHT] 16개 조건 엑셀 수식 적용
                 const daInsight = getDaInsight(scoreA, scoreB);
                 insight = daInsight.grade;
-                mediaInsight = `${row.media}/${row.placement}/${row.creativeName}: ${daInsight.text}`;
+                mediaInsight = `${row.media || 'N/A'}/${row.placement || 'N/A'}/${row.creativeName || 'N/A'}: ${daInsight.text}`;
                 
                 // [Color] Insight 등급에 따른 색상 매핑
                 if (insight.includes("<Top")) color = '#10b981'; // Green
@@ -1025,7 +1088,7 @@
                 scoreB = 0;
                 insight = '데이터 부족';
                 color = '#94a3b8'; // Gray
-                mediaInsight = `${row.media}/${row.placement}/${row.creativeName}: 광고비, 노출수 등 필수 데이터가 누락되어 분석이 불가능합니다.`;
+                mediaInsight = `${row.media || 'N/A'}/${row.placement || 'N/A'}/${row.creativeName || 'N/A'}: 광고비, 노출수 등 필수 데이터가 누락되어 분석이 불가능합니다.`;
             }
             
             // Final Scored Row Structure
