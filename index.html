@@ -23,42 +23,61 @@
             grid-template-rows: 1fr 1fr;
             border: 2px solid #e5e7eb;
             border-radius: 12px;
-            /* *** (Request 2) 수정: overflow: hidden; 제거 *** */
-            /* overflow: hidden; */
+            overflow: hidden;
         }
         .quadrant {
-            padding: 1rem;
+            /* *** (Problem 1) 수정: 패딩 제거, 정렬 변경 *** */
+            padding: 0;
             display: flex;
             flex-direction: column;
-            justify-content: flex-start;
-            align-items: flex-start;
+            justify-content: center; /* 수직 중앙 정렬 */
+            align-items: center; /* 수평 중앙 정렬 */
             position: relative;
             z-index: 10;
         }
         /* Quadrant Colors & Labels for Intuitive Interpretation */
-        /* *** (Problem 1.3) 수정: 배경색만 남기고 라벨 제거 *** */
-        .quadrant-top-right { background-color: rgba(16, 185, 129, 0.05); } /* Top-Right */
-        .quadrant-top-left { background-color: rgba(59, 130, 246, 0.05); } /* Top-Left */
-        .quadrant-bottom-right { background-color: rgba(245, 158, 11, 0.05); } /* Bottom-Right */
-        .quadrant-bottom-left { background-color: rgba(239, 68, 68, 0.05); } /* Bottom-Left */
+        /* *** (Problem 1) 수정: 배경색만 남김 *** */
+        .quadrant-top-right { background-color: rgba(16, 185, 129, 0.05); } /* Top-Right (Q1) */
+        .quadrant-top-left { background-color: rgba(59, 130, 246, 0.05); } /* Top-Left (Q2) */
+        .quadrant-bottom-left { background-color: rgba(239, 68, 68, 0.05); } /* Bottom-Left (Q3) */
+        .quadrant-bottom-right { background-color: rgba(245, 158, 11, 0.05); } /* Bottom-Right (Q4) */
         
-        /* *** (Problem 1 & 2) 수정: Zone 라벨 CSS 수정 *** */
-        .quadrant-label {
-            /* display: none; */ /* REMOVED */
-            display: block; /* ADDED */
-            font-weight: 700;
-            font-size: 1.25rem; /* 20px, was 1.5rem */
-            position: absolute;
-            opacity: 0.2; /* Was 0.1, made slightly more visible */
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            pointer-events: none;
-            user-select: none;
-            text-align: center; /* ADDED */
-            line-height: 1.5; /* ADDED */
+        /* *** (Problem 1) NEW: 새로운 4분면 콘텐츠 스타일 *** */
+        .quadrant-content {
+            z-index: 15; /* 점(dot)보다 아래 */
+            position: relative;
+            padding: 1rem;
+            text-align: center;
         }
-        
+        .quadrant-content h3 {
+            font-weight: 700;
+            font-size: 1.25rem; /* 20px */
+            margin-bottom: 0.5rem;
+        }
+        .quadrant-content p {
+            font-size: 0.875rem; /* 14px */
+            color: #4b5563; /* gray-600 */
+            line-height: 1.4;
+        }
+        .action-box {
+            margin-top: 1rem;
+            padding: 0.25rem 0.75rem;
+            border-radius: 9999px; /* pill shape */
+            font-size: 0.75rem; /* 12px */
+            font-weight: 600;
+            display: inline-block;
+        }
+        /* Specific colors */
+        .q1-title { color: #10b981; } /* Green */
+        .q1-action { background-color: #d1fae5; color: #065f46; }
+        .q2-title { color: #3b82f6; } /* Blue */
+        .q2-action { background-color: #dbeafe; color: #1e40af; }
+        .q3-title { color: #ef4444; } /* Red */
+        .q3-action { background-color: #fee2e2; color: #991b1b; }
+        .q4-title { color: #f59e0b; } /* Amber */
+        .q4-action { background-color: #fef3c7; color: #92400e; }
+        /* *** End of New Styles *** */
+
         /* Quadrant Middle Lines (New Improvement) */
         .matrix-lines {
             position: absolute;
@@ -139,39 +158,6 @@
         }
         .input-prefill:focus {
             color: #111827; /* gray-900 (default text color) */
-        }
-        
-        /* *** (Problem 4) NEW: 가장자리 표식 CSS *** */
-        .matrix-marker {
-            position: absolute;
-            font-size: 0.75rem; /* 12px */
-            font-weight: 600;
-            /* *** (Request 2) 수정: color 변경 *** */
-            color: #6b7280; /* gray-500, Was gray-600 */
-            z-index: 30;
-        }
-        /* *** (Request 2) 수정: 위치 변경 *** */
-        .marker-top {
-            top: -20px; /* Was 8px */
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .marker-bottom {
-            bottom: -20px; /* Was 8px */
-            left: 50%;
-            transform: translateX(-50%);
-        }
-        .marker-left {
-            left: -32px; /* Was 8px */
-            top: 50%;
-            transform: translateY(-50%);
-            text-align: center;
-        }
-        .marker-right {
-            right: -32px; /* Was 8px */
-            top: 50%;
-            transform: translateY(-50%);
-            text-align: center;
         }
     </style>
 </head>
@@ -265,74 +251,62 @@
                 
                 <!-- Left 2/3: 4-Quadrant Matrix (Existing Logic) -->
                 <div class="xl:col-span-2 space-y-6">
-                    <!-- *** (Request 2) 수정: padding 변경 *** -->
-                    <div class="bg-white pt-10 pb-10 pl-12 pr-12 rounded-xl shadow-lg border border-gray-200">
+                    <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                             소재 성과 도식화 (4분면 매트릭스)
-                            <!-- *** (Request 2) 수정: 텍스트 삭제 *** -->
                             <span id="chart-axes-label" class="ml-3 text-sm text-gray-500"></span>
                         </h2>
                         
-                        <!-- *** (Request 2) 수정: relative wrapper 추가 *** -->
-                        <div class="relative"> 
-    
-                            <!-- *** (Request 2) 수정: 마커를 밖으로 이동 *** -->
-                            <div class="matrix-marker marker-top">소재 관심 우수</div>
-                            <div class="matrix-marker marker-bottom">소재 관심 미흡</div>
-                            <div class="matrix-marker marker-left"><div>노출</div><div class="font-medium">미흡</div></div>
-                            <div class="matrix-marker marker-right"><div>노출</div><div class="font-medium">우수</div></div>
-                        
-                            <div class="quadrant-matrix" id="quadrant-matrix">
-                                <!-- Quadrant Lines (NEW) -->
-                                <div class="matrix-lines">
-                                    <div class="v-line"></div>
-                                    <div class="h-line"></div>
-                                </div>
-                                
-                                <!-- *** (Request 2) 수정: 마커 여기에서 제거됨 *** -->
-                                
-                                <!-- Quadrant 1: Top Right (Top) -->
-                                <div class="quadrant quadrant-top-right">
-                                    <!-- *** (Problem 1 & 2) 수정: Zone 라벨 콘텐츠 *** -->
-                                    <div class="quadrant-label text-green-700">
-                                        Top Zone
-                                        <!-- *** (Request 4) 수정: whitespace-nowrap 추가 *** -->
-                                        <span class="block text-sm font-medium whitespace-nowrap">(유지/강화가 필요한 소재)</span>
-                                    </div>
-                                </div>
-                                <!-- Quadrant 2: Top Left (Potential) -->
-                                <div class="quadrant quadrant-top-left">
-                                    <!-- *** (Problem 1 & 2) 수정: Zone 라벨 콘텐츠 *** -->
-                                    <div class="quadrant-label text-blue-700">
-                                        Mid Zone
-                                        <!-- *** (Request 4) 수정: whitespace-nowrap 추가 *** -->
-                                        <span class="block text-sm font-medium whitespace-nowrap">(타겟팅 조정/범용적 메시지가 필요한 소재)</span>
-                                    </div>
-                                </div>
-                                <!-- Quadrant 3: Bottom Left (Low) -->
-                                <div class="quadrant quadrant-bottom-left">
-                                    <!-- *** (Problem 1 & 2) 수정: Zone 라벨 콘텐츠 *** -->
-                                    <div class="quadrant-label text-red-700">
-                                        Low Zone
-                                        <!-- *** (Request 4) 수정: whitespace-nowrap 추가 *** -->
-                                        <span class="block text-sm font-medium whitespace-nowrap" style="font-size: 0.8rem;">(메시지 훅킹 강화/타겟팅 수정/예산이관 필요한 소재)</span>
-                                    </div>
-                                </div>
-                                <!-- Quadrant 4: Bottom Right (Focus) -->
-                                <div class="quadrant quadrant-bottom-right">
-                                    <!-- *** (Problem 1 & 2) 수정: Zone 라벨 콘텐츠 *** -->
-                                    <div class="quadrant-label text-amber-700">
-                                        Mid Zone
-                                        <!-- *** (Request 4) 수정: whitespace-nowrap 추가 *** -->
-                                        <span class="block text-sm font-medium whitespace-nowrap">(타겟팅 조정/범용적 메시지가 필요한 소재)</span>
-                                    </div>
-                                </div>
-                                <!-- Dots are injected here -->
+                        <div class="quadrant-matrix" id="quadrant-matrix">
+                            <!-- Quadrant Lines (NEW) -->
+                            <div class="matrix-lines">
+                                <div class="v-line"></div>
+                                <div class="h-line"></div>
                             </div>
-                        </div> <!-- *** (Request 2) 수정: relative wrapper 닫기 *** -->
-
-                        <!-- *** (Request 3) 수정: 하단 라벨 3개 삭제 *** -->
+                            <!-- *** (Problem 1) NEW: 4분면 콘텐츠 *** -->
+                            <!-- Q1: Top Right (STAR) -->
+                            <div class="quadrant quadrant-top-right">
+                                <div class="quadrant-content">
+                                    <h3 class="q1-title">STAR</h3>
+                                    <p>노출 효율(High) 소재 매력도(High)<br>대중적으로 가장 반응이 우수한 소재</p>
+                                    <div class="action-box q1-action">Action : 유지 / 예산 증액</div>
+                                </div>
+                            </div>
+                            <!-- Q2: Top Left (High Potential) -->
+                            <div class="quadrant quadrant-top-left">
+                                <div class="quadrant-content">
+                                    <h3 class="q2-title">High Potential</h3>
+                                    <p>노출 효율(Low) 소재 매력도(High)<br>훅킹성은 높지만 잘 알려지지 않은 소재</p>
+                                    <div class="action-box q2-action">Action : 타겟팅 최적화</div>
+                                </div>
+                            </div>
+                            <!-- Q3: Bottom Left (Question Mark) -->
+                            <div class="quadrant quadrant-bottom-left">
+                                <div class="quadrant-content">
+                                    <h3 class="q3-title">Question Mark</h3>
+                                    <p>노출 효율(Low) 소재 매력도(Low)<br>예산 낭비 가능성이 높은 소재</p>
+                                    <div class="action-box q3-action">Action : 광고OFF / 예산이관</div>
+                                </div>
+                            </div>
+                            <!-- Q4: Bottom Right (Niche) -->
+                            <div class="quadrant quadrant-bottom-right">
+                                <div class="quadrant-content">
+                                    <h3 class="q4-title">Niche</h3>
+                                    <p>노출 효율(High) 소재 매력도(Low)<br>소수의 집단에서 반응이 높은 소재</p>
+                                    <div class="action-box q4-action">Action : 범용적 소재로 최적화</div>
+                                </div>
+                            </div>
+                            <!-- Dots are injected here -->
+                        </div>
                         
+                        <!-- *** (Problem 1.1) 수정: Y축 라벨 변경 *** -->
+                        <div id="matrix-info" class="mt-4 flex justify-between text-sm text-gray-600 font-medium">
+                            <span id="y-low-label"></span>
+                            <span id="y-high-label"></span>
+                        </div>
+                        <!-- *** (Problem 1.1) 수정: X축 라벨 변경 *** -->
+                        <p class="text-sm text-gray-500 mt-2 text-center">X축: <span id="x-axis-label" class="font-semibold text-gray-700"></span></p>
+                        <p class="text-xs text-gray-400 mt-1 text-center">중앙 기준선: 5점 척도 중 2.5점</p>
                     </div>
                 </div>
                 <!-- Right 1/3: Key Insights (Existing Logic) -->
@@ -1120,8 +1094,7 @@
             let totalScore = null; // *** 수정: 0 -> null ***
             let insight = '데이터 부족';
             let color = '#94a3b8'; // Gray
-            // *** (Request 1) 수정: mediaInsight -> insightText, mediaPrefix ***
-            let insightText = '데이터를 입력해주세요.';
+            let mediaInsight = '데이터를 입력해주세요.';
             
             // *** (Problem 2.2) 수정: mediaPrefix 로직 ***
             const mediaPrefix = (row.media || row.placement || row.creativeName) 
@@ -1173,8 +1146,7 @@
                     // [INSIGHT] 16개 조건 엑셀 수식 적용
                     const daInsight = getDaInsight(scoreA, scoreB);
                     insight = daInsight.grade;
-                    // *** (Request 1) 수정: mediaInsight -> insightText ***
-                    insightText = daInsight.text;
+                    mediaInsight = `${mediaPrefix}: ${daInsight.text}`;
                     
                     // [Color] Insight 등급에 따른 색상 매핑
                     if (insight.includes("Top")) color = '#10b981'; // Green
@@ -1214,15 +1186,14 @@
                     }
                     
                     // --- Dynamic Insight Message Generation (PERF용) ---
-                    // *** (Request 1) 수정: mediaInsight -> insightText ***
                     if (insight === 'Top 소재') {
-                        insightText = "효율이 매우 높습니다. 예산을 확대하고 A/B 테스트를 통해 추가 개선점을 찾으세요.";
+                        mediaInsight = `${mediaPrefix}: 효율이 매우 높습니다. 예산을 확대하고 A/B 테스트를 통해 추가 개선점을 찾으세요.`;
                     } else if (insight === 'Focus 소재') {
-                        insightText = "CPA(전환 기여도) 목표 달성이 미흡합니다. 해당 지표 개선에 집중하여 Top 소재로 육성해야 합니다.";
+                        mediaInsight = `${mediaPrefix}: CPA(전환 기여도) 목표 달성이 미흡합니다. 해당 지표 개선에 집중하여 Top 소재로 육성해야 합니다.`;
                     } else if (insight === 'Potential 소재') {
-                        insightText = "전환 효율은 좋으나 CTR(광고 관심도)이 낮습니다. 타겟팅 확대를 통해 노출 기여도(A)를 개선해야 잠재력을 발휘합니다.";
+                        mediaInsight = `${mediaPrefix}: 전환 효율은 좋으나 CTR(광고 관심도)이 낮습니다. 타겟팅 확대를 통해 노출 기여도(A)를 개선해야 잠재력을 발휘합니다.`;
                     } else if (insight === 'Low 소재') {
-                        insightText = "효율 기준치(총점 2.5점) 미달입니다. 즉시 OFF/교체를 고려하고, 예산을 Top 소재로 이관하세요.";
+                        mediaInsight = `${mediaPrefix}: 효율 기준치(총점 2.5점) 미달입니다. 즉시 OFF/교체를 고려하고, 예산을 Top 소재로 이관하세요.`;
                     }
                 }
             }
@@ -1234,8 +1205,7 @@
                 totalScore = null;
                 insight = '미디어 성과를 작성해주세요'; // *** (Problem 1.1 / 1.2) 수정 ***
                 color = '#94a3b8'; // Gray
-                // *** (Request 1) 수정: mediaInsight -> insightText ***
-                insightText = insight; // ("미디어 성과를 작성해주세요")
+                mediaInsight = `${mediaPrefix}: ${insight}`; // *** (Problem 2.2) 수정 ***
             }
             
             // Final Scored Row Structure
@@ -1246,9 +1216,7 @@
                 total: totalScore !== null ? parseFloat(totalScore.toFixed(2)) : null,
                 insight: insight,
                 color: color,
-                // *** (Request 1) 수정: mediaInsight 제거, prefix/text 추가 ***
-                mediaPrefix: mediaPrefix,
-                insightText: insightText,
+                mediaInsight: mediaInsight,
                 // Raw/Calculated Metrics for Detail Table
                 media: row.media,
                 placement: row.placement || '', // '상품' 키
@@ -1362,7 +1330,7 @@
         const tableBody = document.getElementById('table-body');
         const tooltip = document.createElement('div');
         tooltip.id = 'chart-tooltip';
-        // *** (Problem 1.4) 수정: whitespace-nowGrap -> whitespace-nowrap ***
+        // *** (Problem 2) 수정: whitespace-nowGrap -> whitespace-nowrap ***
         tooltip.className = 'absolute p-2 bg-gray-800 text-white text-xs rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 z-[100] whitespace-nowrap';
         document.body.appendChild(tooltip);
         function renderChart() {
@@ -1396,13 +1364,10 @@
                 summarySubtitleEl.textContent = '(전환 목표)'; // span 텍스트
             }
             
-            // *** (Request 2) 수정: 텍스트 삭제 ***
-            document.getElementById('chart-axes-label').textContent = '';
-            
-            // *** (Request 3) 수정: 하단 라벨 삭제 (JS에서도 관련 코드 삭제) ***
-            // document.getElementById('x-axis-label').textContent = data.metrics.xAxis;
-            // document.getElementById('y-high-label').textContent = data.metrics.yAxis + ' (높음)';
-            // document.getElementById('y-low-label').textContent = data.metrics.yAxis + ' (낮음)';
+            document.getElementById('chart-axes-label').textContent = `Y축: ${data.metrics.yAxis} | X축: ${data.metrics.xAxis}`;
+            document.getElementById('x-axis-label').textContent = data.metrics.xAxis; // *** (Problem 1.1) 수정 ***
+            document.getElementById('y-high-label').textContent = data.metrics.yAxis + ' (높음)'; // *** (Problem 1.1) 수정 ***
+            document.getElementById('y-low-label').textContent = data.metrics.yAxis + ' (낮음)'; // *** (Problem 1.1) 수정 ***
             
             data.data.forEach((item, index) => {
                 // *** (Problem 1.1) 수정: 점수가 null이 아닐 때만 dot 생성 ***
@@ -1429,7 +1394,8 @@
                     dot.dataset.total = item.total.toFixed(2);
                     
                     dot.addEventListener('mouseenter', showTooltip);
-                    dot.addEventListener('mousemove', moveTooltip);
+                    // *** (Problem 2) 수정: mousemove 리스너 제거 ***
+                    // dot.addEventListener('mousemove', moveTooltip); 
                     dot.addEventListener('mouseleave', hideTooltip);
                     matrixContainer.appendChild(dot);
                 }
@@ -1448,34 +1414,43 @@
             `;
             tooltip.innerHTML = tooltipContent;
             tooltip.classList.add('opacity-100');
-            moveTooltip(e);
-        }
-        // *** (Problem 3) 수정: 툴팁 위치 오류 수정 (pageX/Y -> clientX/Y) ***
-        function moveTooltip(e) {
-            let x = e.clientX + 15;
-            let y = e.clientY - 15;
             
+            // *** (Problem 2) 수정: moveTooltip 로직을 showTooltip으로 통합 ***
+            const dotRect = e.target.getBoundingClientRect();
+            // 1. 기본 위치: 점의 오른쪽 10px
+            let x = dotRect.right + window.scrollX + 10;
+            let y = dotRect.top + window.scrollY;
+            
+            // 2. 툴팁의 크기를 가져오기 위해 임시로 DOM에 렌더링 (opacity 0)
+            tooltip.style.left = `0px`;
+            tooltip.style.top = `0px`;
             const tooltipRect = tooltip.getBoundingClientRect();
-            // 뷰포트 오른쪽 경계 체크
-            if (x + tooltipRect.width > window.innerWidth) {
-                x = e.clientX - tooltipRect.width - 15;
+            
+            // 3. 뷰포트 오른쪽 가장자리 체크
+            if (x + tooltipRect.width > document.documentElement.clientWidth) {
+                // 오른쪽 오버플로우 -> 점의 왼쪽 10px로 변경
+                x = dotRect.left + window.scrollX - tooltipRect.width - 10;
             }
-            // 뷰포트 아래쪽 경계 체크
-            if (y + tooltipRect.height > window.innerHeight) {
-                y = window.innerHeight - tooltipRect.height - 10;
+            
+            // 4. 뷰포트 하단 가장자리 체크
+            if (y + tooltipRect.height > document.documentElement.clientHeight) {
+                // 하단 오버플로우 -> 뷰포트 하단에 고정
+                y = document.documentElement.clientHeight - tooltipRect.height - 10;
             }
-            // 뷰포트 위쪽 경계 체크
+            
+            // 5. 뷰포트 상단 가장자리 체크
             if (y < 0) {
                 y = 10;
             }
-            // 뷰포트 왼쪽 경계 체크
-            if (x < 0) {
-                x = 10;
-            }
             
+            // 6. 최종 위치 적용
             tooltip.style.left = `${x}px`;
             tooltip.style.top = `${y}px`;
         }
+        
+        // *** (Problem 2) 수정: moveTooltip 함수 삭제 ***
+        // function moveTooltip(e) { ... }
+        
         function hideTooltip() { 
             tooltip.classList.remove('opacity-100');
         }
@@ -1569,7 +1544,7 @@
                 const th = document.createElement('th');
                 th.className = 'px-4 py-3 text-left border-b border-gray-200 text-center sortable whitespace-nowrap';
                 
-                // *** (Problem 2.1) 수정: A/B 점수 헤더에 부제 추가 ***
+                // *** (Problem 3) 수정: A/B 점수 헤더에 부제 추가 ***
                 if (header.key === 'cost') {
                      th.innerHTML = `${header.name} <span class="header-subtext">(소진 금액)</span>`;
                 } else if (header.key === 'scoreA') {
@@ -1692,10 +1667,9 @@
                     if (!gradeInsights[grade]) {
                         gradeInsights[grade] = [];
                     }
-                    // *** (Request 1) 수정: insight -> prefix/text ***
                     gradeInsights[grade].push({ 
-                        prefix: item.mediaPrefix,
-                        text: item.insightText,
+                        media: item.media, 
+                        insight: item.mediaInsight, // 상세 텍스트
                         color: item.color
                     });
                 }
@@ -1728,12 +1702,22 @@
                         const li = document.createElement('li');
                         li.className = 'text-gray-700 text-sm flex items-start';
                         
-                        // *** (Request 1) 수정: 가독성 포맷팅 (볼드, 줄바꿈) ***
+                        // *** (Problem 2) 수정: 가독성 포맷팅 (볼드, 줄바꿈) ***
+                        const insightParts = item.insight.split(/:(.+)/); // [Prefix, Text]
+                        let prefix = insightParts[0] ? insightParts[0].trim() : '매체 상품과 소재명 없음';
+                        let text = insightParts[1] ? insightParts[1].trim() : '인사이트 내용이 없습니다.';
+                    
+                        // "매체 상품과 소재명 없음" 케이스 처리
+                        if (prefix === '매체 상품과 소재명 없음') {
+                            text = item.insight; // 원본 텍스트(예: "미디어 성과를 작성해주세요")
+                            prefix = ''; // 접두사 없음
+                        }
+                        
                         li.innerHTML = `
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 mr-2 flex-shrink-0" style="color:${gradeColor}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             <span>
-                                <strong class="font-bold text-gray-900 block">${item.prefix}</strong>
-                                <span class="block mt-1">${item.text}</span>
+                                ${prefix ? `<strong class="font-bold text-gray-900 block">${prefix}</strong>` : ''}
+                                <span class="block ${prefix ? 'mt-1' : ''}">${text}</span>
                             </span>
                         `;
                         insightList.appendChild(li);
