@@ -775,30 +775,70 @@
                         // Base classes
                         let inputClasses = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' || col.isLargeNumber ? 'text-right' : 'text-left'}`;
                         
-                        // *** 수정: input-prefill 클래스 추가 ***
-                        inputClasses += ' input-prefill';
-                        inputElement.className = inputClasses;
-                        
                         // Display the formatted number in the input field
                         if (col.isLargeNumber && typeof rawValue === 'number') {
-                            inputElement.value = formatNumericInput(rawValue);
+                            displayValue = formatNumericInput(rawValue);
                         } else if (col.type === 'percent' && typeof rawValue === 'number') {
                             // Display target CTR as percentage (e.g., 0.004 -> 0.4)
-                            inputElement.value = (rawValue * 100).toFixed(2).replace(/\.00$/, '');
+                            displayValue = (rawValue * 100).toFixed(2).replace(/\.00$/, '');
                         } else if ((col.type === 'currency' || col.type === 'number') && typeof rawValue === 'number') {
-                            inputElement.value = rawValue;
+                            displayValue = rawValue;
                         } else {
-                            inputElement.value = displayValue;
+                            displayValue = displayValue; // text or null
                         }
                         
-                        // *** 수정: focus 리스너 추가 ***
+                        // *** 수정: input-prefill 클래스 조건부 추가 ***
+                        if (displayValue) {
+                            inputClasses += ' input-prefill';
+                        }
+                        inputElement.className = inputClasses;
+                        inputElement.value = displayValue;
+                        
+                        // Store the default display value for placeholder logic
+                        inputElement.dataset.defaultValue = displayValue;
+
+                        // *** 수정: ON FOCUS: Clear placeholder if it's the default value ***
                         inputElement.addEventListener('focus', (e) => {
+                            if (e.target.value === e.target.dataset.defaultValue) {
+                                e.target.value = '';
+                            }
                             e.target.classList.remove('input-prefill');
                         });
-                        
-                        // *** 수정: input 리스너 수정 ***
+
+                        // *** 수정: ON BLUR: Restore placeholder if field is empty, and save null ***
+                        inputElement.addEventListener('blur', (e) => {
+                            const currentValue = e.target.value;
+                            
+                            // Check if the input is empty
+                            if (currentValue === '') {
+                                // 1. Restore visual placeholder
+                                e.target.value = e.target.dataset.defaultValue;
+                                if (e.target.dataset.defaultValue) {
+                                    e.target.classList.add('input-prefill');
+                                }
+                                
+                                // 2. Save `null` to the data model
+                                const index = validationData[currentCampaign].findIndex(r => r.id === row.id);
+                                if (index > -1) {
+                                    // Only save null if the value was actually empty.
+                                    // The 'input' event (handleValidationInputChange) handles non-empty saves.
+                                    if (validationData[currentCampaign][index][col.key] !== null) {
+                                        validationData[currentCampaign][index][col.key] = null;
+                                    
+                                        // 3. Re-run dependent calculations
+                                        const baseMetrics = ['cost', 'imp', 'click', 'view', 'conv', 'revenue'];
+                                        if (baseMetrics.includes(col.key)) {
+                                            calculateValidationMetrics(validationData[currentCampaign][index], currentCampaign);
+                                            updateCalculatedColumnsInDOM(row.id, validationData[currentCampaign][index]);
+                                        }
+                                    }
+                                }
+                            }
+                        });
+
+                        // *** 수정: ON INPUT: Save data and ensure prefill is off ***
                         inputElement.addEventListener('input', (e) => {
-                            e.target.classList.remove('input-prefill'); // 입력 시 prefill 클래스 제거
+                            e.target.classList.remove('input-prefill'); // Just in case
                             handleValidationInputChange(row.id, col.key, e);
                         });
                         
