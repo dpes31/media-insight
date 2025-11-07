@@ -616,6 +616,7 @@
                 if (col.calculated) {
                     // Find the TD based on the column index (colIndex). This relies on the order being consistent.
                     const td = rowElement.children[colIndex]; 
+                    if (!td) return; // (오류 방지)
                     const inputElement = td.querySelector('input');
                     if (!inputElement) return;
                     const rawValue = rowData[col.key];
@@ -639,6 +640,7 @@
             const index = validationData[currentCampaign].findIndex(r => r.id === rowId);
             if (index > -1) {
                 const config = validationTableConfigs[currentCampaign].cols.find(c => c.key === key);
+                if (!config) return; // (오류 방지)
                 let inputValue = event.target.value;
                 let rawValueToStore = inputValue; 
                 
@@ -837,18 +839,18 @@
                         // Store the default display value for placeholder logic
                         inputElement.dataset.defaultValue = displayValue;
 
-                        // *** 수정: (1) ON FOCUS: Clear placeholder, clear calculated fields, and clear row if prefill ***
+                        // *** (오류 수정) ON FOCUS: 로직 전면 수정 ***
                         inputElement.addEventListener('focus', (e) => {
-                            // *** (1.1) 전역 초기화 (최초 1회) ***
+                            const clickedRowId = row.id;
+                            const clickedKey = col.key;
+
+                            // (1) 전역 초기화 (최초 1회)
                             if (isPrefillActive) {
-                                isPrefillActive = false; // (1.2) 전역 플래그 비활성화
+                                isPrefillActive = false; // 플래그 비활성화
                                 
-                                const clickedRowId = row.id;
-                                const clickedKey = e.target.dataset.key;
-                                
-                                // (1.1) 모든 prefill 행을 찾아서 데이터 초기화
+                                // (1.1) 데이터 모델(validationData)을 먼저 전체 초기화
                                 validationData[currentCampaign].forEach(dataRow => {
-                                    // (2.1) 모든 행의 성과 지표 초기화
+                                    // (1.2) 모든 행의 성과 지표 초기화
                                     dataRow.actualCpm = null;
                                     dataRow.actualCpc = null;
                                     dataRow.actualCtr = null;
@@ -856,87 +858,73 @@
                                     dataRow.actualCpa = null;
                                     
                                     if (dataRow.isPrefill) { // prefill 행만
+                                        dataRow.isPrefill = false; // 상태 변경
+                                        
+                                        // (1.3) 모든 '기재' 데이터 null로 변경
                                         config.cols.forEach(c => {
                                             if (!c.calculated) {
-                                                // (1.1) 버즈빌 기본 정보 예외
-                                                if (dataRow.media === '버즈빌' && (c.key === 'media' || c.key === 'placement' || c.key === 'creativeName')) {
-                                                    // 이 값들은 유지
-                                                } else {
-                                                    dataRow[c.key] = null; // 나머지 데이터 모델 초기화
-                                                }
+                                                dataRow[c.key] = null; 
                                             }
                                         });
                                     }
                                 });
-                                
-                                // (1.1) 클릭된 행의 isPrefill만 false로 변경
-                                const clickedRowIndex = validationData[currentCampaign].findIndex(r => r.id === clickedRowId);
-                                if(clickedRowIndex > -1) {
-                                    validationData[currentCampaign][clickedRowIndex].isPrefill = false;
-                                }
 
-                                renderValidationTable(); // 테이블 전체 재-렌더링
+                                // (1.4) DOM을 수동으로 업데이트 (renderValidationTable() 호출 안함)
                                 
-                                // (1.1) 원래 클릭했던 입력창을 찾아 다시 포커스
-                                const newClickedInput = document.querySelector(`tr[data-row-id="${clickedRowId}"] input[data-key="${clickedKey}"]`);
-                                if (newClickedInput) {
-                                    newClickedInput.focus();
-                                    newClickedInput.value = ''; // 포커스된 입력창은 확실하게 비움
-                                }
+                                // (1.4.1) 모든 '기재 항목' input을 찾아서
+                                const allInputs = validationTableBody.querySelectorAll('input:not([readonly])');
+                                allInputs.forEach(input => {
+                                    input.value = ''; // 값을 비움
+                                    input.classList.remove('input-prefill'); // 회색 글씨 제거
+                                });
+
+                                // (1.4.2) 모든 '성과' input (readonly)을 찾아서
+                                const allCalculatedInputs = validationTableBody.querySelectorAll('input[readonly]');
+                                allCalculatedInputs.forEach(input => {
+                                    input.value = '-'; // '-'로 초기화
+                                });
+                                
+                                // (1.4.3) e.target (지금 클릭한 input)은 이미 allInputs에서
+                                // .value = ''가 되었으므로, 브라우저가 자동으로 focus를 유지함.
+                                
                                 return; // 전역 초기화 실행 후 함수 종료
                             }
                             
-                            // --- (1.1) 전역 초기화가 끝난 후의 일반 포커스 로직 ---
-                            const index = validationData[currentCampaign].findIndex(r => r.id === row.id);
-                            if (index === -1) return;
-                            const dataRow = validationData[currentCampaign][index];
-
-                            // (1.1) 만약 이 행이 아직 prefill 상태라면 (예: 버즈빌)
-                            if (dataRow.isPrefill) {
-                                dataRow.isPrefill = false; // 이 행의 prefill 상태 해제
-                                
-                                // 이 행의 DOM 입력값만 초기화 (버즈빌 예외)
-                                const allInputs = tr.querySelectorAll('input:not([readonly])');
-                                allInputs.forEach(input => {
-                                    const key = input.dataset.key;
-                                    if (dataRow.media === '버즈빌' && (key === 'media' || key === 'placement' || key === 'creativeName')) {
-                                        input.classList.remove('input-prefill'); // 회색 글씨만 제거
-                                    } else {
-                                        input.value = ''; // 값 비우기
-                                    }
-                                });
-                                e.target.focus(); // 클릭한 곳에 다시 포커스
+                            // (2) 전역 초기화가 끝난 후의 일반 포커스 로직
+                            const index = validationData[currentCampaign].findIndex(r => r.id === clickedRowId);
+                            if (index > -1) {
+                                // (2.1) ★ 클릭된 행의 성과 지표만 초기화 ★
+                                const dataRow = validationData[currentCampaign][index];
+                                dataRow.actualCpm = null;
+                                dataRow.actualCpc = null;
+                                dataRow.actualCtr = null;
+                                dataRow.actualCpv = null;
+                                dataRow.actualCpa = null;
+                                updateCalculatedColumnsInDOM(clickedRowId, dataRow);
                             }
-                            
-                            // (2.2) 클릭된 행의 성과 지표는 항상 초기화
-                            dataRow.actualCpm = null;
-                            dataRow.actualCpc = null;
-                            dataRow.actualCtr = null;
-                            dataRow.actualCpv = null;
-                            dataRow.actualCpa = null;
-                            updateCalculatedColumnsInDOM(row.id, dataRow);
 
                             e.target.classList.remove('input-prefill');
                         });
 
-                        // *** 수정: (1) ON BLUR: Save data, re-calculate, AND restore placeholder if empty ***
+                        // *** (오류 수정) ON BLUR: 로직 수정 ***
                         inputElement.addEventListener('blur', (e) => {
-                            // 1. Save the final value and trigger re-calculation
+                            // 1. Save the final value
                             handleValidationInputChange(row.id, col.key, e);
                             
-                            // 2. Re-format % if needed
                             const index = validationData[currentCampaign].findIndex(r => r.id === row.id);
                             if (index === -1) return;
                             const rawValue = validationData[currentCampaign][index][col.key];
 
+                            // 2. Re-format % if needed
                             if (col.type === 'percent' && typeof rawValue === 'number' && !e.target.value.includes('%')) {
                                 e.target.value = `${(rawValue * 100).toFixed(2).replace(/\.00$/, '')}%`;
                             }
                         });
 
-                        // *** 수정: ON INPUT: Just remove prefill class ***
+                        // *** (오류 수정) ON INPUT: handleValidationInputChange만 호출 ***
                         inputElement.addEventListener('input', (e) => {
                             e.target.classList.remove('input-prefill');
+                            handleValidationInputChange(row.id, col.key, e);
                         });
                         
                         td.appendChild(inputElement);
@@ -1273,7 +1261,7 @@
             const summarySubtitleEl = document.getElementById('summary-title');
             if (currentCampaign === 'DA') {
                 summaryTitleEl.childNodes[0].nodeValue = '집행 성과 요약 '; // h2 텍스트
-                summarySubtitleEl.textContent = '(반응 목표)'; // span 텍스트
+                summarySubtitleEl.textContent = ''; // *** (반응 목표) 삭제 ***
             } else {
                 summaryTitleEl.childNodes[0].nodeValue = '집행 성과 요약 '; // h2 텍스트
                 summarySubtitleEl.textContent = '(전환 목표)'; // span 텍스트
