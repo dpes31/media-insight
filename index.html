@@ -269,8 +269,8 @@
                     <div class="bg-white pt-10 pb-10 pl-12 pr-12 rounded-xl shadow-lg border border-gray-200">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                             소재 성과 도식화 (4분면 매트릭스)
-                            <!-- *** (Request 1) 수정: 텍스트 변경 *** -->
-                            <span id="chart-axes-label" class="ml-3 text-sm text-gray-500">X축 노출 영향력, Y축 소재 관심도</span>
+                            <!-- *** (Request 2) 수정: 텍스트 삭제 *** -->
+                            <span id="chart-axes-label" class="ml-3 text-sm text-gray-500"></span>
                         </h2>
                         
                         <!-- *** (Request 2) 수정: relative wrapper 추가 *** -->
@@ -1120,7 +1120,8 @@
             let totalScore = null; // *** 수정: 0 -> null ***
             let insight = '데이터 부족';
             let color = '#94a3b8'; // Gray
-            let mediaInsight = '데이터를 입력해주세요.';
+            // *** (Request 1) 수정: mediaInsight -> insightText, mediaPrefix ***
+            let insightText = '데이터를 입력해주세요.';
             
             // *** (Problem 2.2) 수정: mediaPrefix 로직 ***
             const mediaPrefix = (row.media || row.placement || row.creativeName) 
@@ -1172,7 +1173,8 @@
                     // [INSIGHT] 16개 조건 엑셀 수식 적용
                     const daInsight = getDaInsight(scoreA, scoreB);
                     insight = daInsight.grade;
-                    mediaInsight = `${mediaPrefix}: ${daInsight.text}`;
+                    // *** (Request 1) 수정: mediaInsight -> insightText ***
+                    insightText = daInsight.text;
                     
                     // [Color] Insight 등급에 따른 색상 매핑
                     if (insight.includes("Top")) color = '#10b981'; // Green
@@ -1212,14 +1214,15 @@
                     }
                     
                     // --- Dynamic Insight Message Generation (PERF용) ---
+                    // *** (Request 1) 수정: mediaInsight -> insightText ***
                     if (insight === 'Top 소재') {
-                        mediaInsight = `${mediaPrefix}: 효율이 매우 높습니다. 예산을 확대하고 A/B 테스트를 통해 추가 개선점을 찾으세요.`;
+                        insightText = "효율이 매우 높습니다. 예산을 확대하고 A/B 테스트를 통해 추가 개선점을 찾으세요.";
                     } else if (insight === 'Focus 소재') {
-                        mediaInsight = `${mediaPrefix}: CPA(전환 기여도) 목표 달성이 미흡합니다. 해당 지표 개선에 집중하여 Top 소재로 육성해야 합니다.`;
+                        insightText = "CPA(전환 기여도) 목표 달성이 미흡합니다. 해당 지표 개선에 집중하여 Top 소재로 육성해야 합니다.";
                     } else if (insight === 'Potential 소재') {
-                        mediaInsight = `${mediaPrefix}: 전환 효율은 좋으나 CTR(광고 관심도)이 낮습니다. 타겟팅 확대를 통해 노출 기여도(A)를 개선해야 잠재력을 발휘합니다.`;
+                        insightText = "전환 효율은 좋으나 CTR(광고 관심도)이 낮습니다. 타겟팅 확대를 통해 노출 기여도(A)를 개선해야 잠재력을 발휘합니다.";
                     } else if (insight === 'Low 소재') {
-                        mediaInsight = `${mediaPrefix}: 효율 기준치(총점 2.5점) 미달입니다. 즉시 OFF/교체를 고려하고, 예산을 Top 소재로 이관하세요.`;
+                        insightText = "효율 기준치(총점 2.5점) 미달입니다. 즉시 OFF/교체를 고려하고, 예산을 Top 소재로 이관하세요.";
                     }
                 }
             }
@@ -1231,7 +1234,8 @@
                 totalScore = null;
                 insight = '미디어 성과를 작성해주세요'; // *** (Problem 1.1 / 1.2) 수정 ***
                 color = '#94a3b8'; // Gray
-                mediaInsight = `${mediaPrefix}: ${insight}`; // *** (Problem 2.2) 수정 ***
+                // *** (Request 1) 수정: mediaInsight -> insightText ***
+                insightText = insight; // ("미디어 성과를 작성해주세요")
             }
             
             // Final Scored Row Structure
@@ -1242,7 +1246,9 @@
                 total: totalScore !== null ? parseFloat(totalScore.toFixed(2)) : null,
                 insight: insight,
                 color: color,
-                mediaInsight: mediaInsight,
+                // *** (Request 1) 수정: mediaInsight 제거, prefix/text 추가 ***
+                mediaPrefix: mediaPrefix,
+                insightText: insightText,
                 // Raw/Calculated Metrics for Detail Table
                 media: row.media,
                 placement: row.placement || '', // '상품' 키
@@ -1390,8 +1396,8 @@
                 summarySubtitleEl.textContent = '(전환 목표)'; // span 텍스트
             }
             
-            // *** (Request 1) 수정: 텍스트 변경 ***
-            document.getElementById('chart-axes-label').textContent = 'X축 노출 영향력, Y축 소재 관심도';
+            // *** (Request 2) 수정: 텍스트 삭제 ***
+            document.getElementById('chart-axes-label').textContent = '';
             
             // *** (Request 3) 수정: 하단 라벨 삭제 (JS에서도 관련 코드 삭제) ***
             // document.getElementById('x-axis-label').textContent = data.metrics.xAxis;
@@ -1686,9 +1692,10 @@
                     if (!gradeInsights[grade]) {
                         gradeInsights[grade] = [];
                     }
+                    // *** (Request 1) 수정: insight -> prefix/text ***
                     gradeInsights[grade].push({ 
-                        media: item.media, 
-                        insight: item.mediaInsight, // 상세 텍스트
+                        prefix: item.mediaPrefix,
+                        text: item.insightText,
                         color: item.color
                     });
                 }
@@ -1721,22 +1728,12 @@
                         const li = document.createElement('li');
                         li.className = 'text-gray-700 text-sm flex items-start';
                         
-                        // *** (Problem 2) 수정: 가독성 포맷팅 (볼드, 줄바꿈) ***
-                        const insightParts = item.insight.split(/:(.+)/); // [Prefix, Text]
-                        let prefix = insightParts[0] ? insightParts[0].trim() : '매체 상품과 소재명 없음';
-                        let text = insightParts[1] ? insightParts[1].trim() : '인사이트 내용이 없습니다.';
-                    
-                        // "매체 상품과 소재명 없음" 케이스 처리
-                        if (prefix === '매체 상품과 소재명 없음') {
-                            text = item.insight; // 원본 텍스트(예: "미디어 성과를 작성해주세요")
-                            prefix = ''; // 접두사 없음
-                        }
-                        
+                        // *** (Request 1) 수정: 가독성 포맷팅 (볼드, 줄바꿈) ***
                         li.innerHTML = `
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 mr-2 flex-shrink-0" style="color:${gradeColor}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                             <span>
-                                ${prefix ? `<strong class="font-bold text-gray-900 block">${prefix}</strong>` : ''}
-                                <span class="block ${prefix ? 'mt-1' : ''}">${text}</span>
+                                <strong class="font-bold text-gray-900 block">${item.prefix}</strong>
+                                <span class="block mt-1">${item.text}</span>
                             </span>
                         `;
                         insightList.appendChild(li);
