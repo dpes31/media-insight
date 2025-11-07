@@ -238,9 +238,8 @@
                             
                             <!-- Quadrant 1 -> 2: Top Left (Potential) -->
                             <div class="quadrant quadrant-top-left">
-                                <!-- *** (Request 1) 수정: 워터마크 삭제 *** -->
-                                <!-- *** (Request 2, 3) 수정: h-full, text-center, 텍스트/클래스 변경 *** -->
-                                <div class="relative z-10 flex flex-col h-full text-center">
+                                <!-- *** (Request 1) 수정: h-full 제거, justify-center 추가 *** -->
+                                <div class="relative z-10 flex flex-col justify-center text-center">
                                     <h3 class="text-xl font-extrabold text-blue-700">High Potential</h3>
                                     <p class="text-sm text-gray-500 mt-2">노출 효율(Low) 소재 매력도(High)</p>
                                     <p class="text-sm text-gray-700 mt-2">훅킹성은 높지만 잘 알려지지 않은 소재</p>
@@ -253,9 +252,8 @@
                             </div>
                             <!-- Quadrant 2 -> 1: Top Right (Top) -->
                             <div class="quadrant quadrant-top-right">
-                                <!-- *** (Request 1) 수정: 워터마크 삭제 *** -->
-                                <!-- *** (Request 2, 3) 수정: h-full, text-center, 텍스트/클래스 변경 *** -->
-                                <div class="relative z-10 flex flex-col h-full text-center">
+                                <!-- *** (Request 1) 수정: h-full 제거, justify-center 추가 *** -->
+                                <div class="relative z-10 flex flex-col justify-center text-center">
                                     <h3 class="text-xl font-extrabold text-green-700">STAR</h3>
                                     <p class="text-sm text-gray-500 mt-2">노출 효율(High) 소재 매력도(High)</p>
                                     <p class="text-sm text-gray-700 mt-2">대중적으로 가장 반응이 우수한 소재</p>
@@ -268,9 +266,8 @@
                             </div>
                             <!-- Quadrant 3: Bottom Left (Low) -->
                             <div class="quadrant quadrant-bottom-left">
-                                <!-- *** (Request 1) 수정: 워터마크 삭제 *** -->
-                                <!-- *** (Request 2, 3) 수정: h-full, text-center, 텍스트/클래스 변경 *** -->
-                                <div class="relative z-10 flex flex-col h-full text-center">
+                                <!-- *** (Request 1) 수정: h-full 제거, justify-center 추가 *** -->
+                                <div class="relative z-10 flex flex-col justify-center text-center">
                                     <h3 class="text-xl font-extrabold text-red-700">Question Mark</h3>
                                     <p class="text-sm text-gray-500 mt-2">노출 효율(Low) 소재 매력도(Low)</p>
                                     <p class="text-sm text-gray-700 mt-2">예산 낭비 가능성이 높은 소재</p>
@@ -283,9 +280,8 @@
                             </div>
                             <!-- Quadrant 4: Bottom Right (Focus) -->
                             <div class="quadrant quadrant-bottom-right">
-                                <!-- *** (Request 1) 수정: 워터마크 삭제 *** -->
-                                <!-- *** (Request 2, 3) 수정: h-full, text-center, 텍스트/클래스 변경 *** -->
-                                <div class="relative z-10 flex flex-col h-full text-center">
+                                <!-- *** (Request 1) 수정: h-full 제거, justify-center 추가 *** -->
+                                <div class="relative z-10 flex flex-col justify-center text-center">
                                     <h3 class="text-xl font-extrabold text-amber-700">Niche</h3>
                                     <p class="text-sm text-gray-500 mt-2">노출 효율(High) 소재 매력도(Low)</p>
                                     <p class="text-sm text-gray-700 mt-2">소수의 집단에서 반응이 높은 소재</p>
@@ -1323,8 +1319,8 @@
         const tableBody = document.getElementById('table-body');
         const tooltip = document.createElement('div');
         tooltip.id = 'chart-tooltip';
-        // *** (Problem 1.4) 수정: whitespace-nowGrap -> whitespace-nowrap ***
-        tooltip.className = 'absolute p-2 bg-gray-800 text-white text-xs rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 z-[100] whitespace-nowrap';
+        // *** (Request 2) 수정: absolute -> fixed ***
+        tooltip.className = 'fixed p-2 bg-gray-800 text-white text-xs rounded-lg shadow-xl pointer-events-none opacity-0 transition-opacity duration-200 z-[100] whitespace-nowrap';
         document.body.appendChild(tooltip);
         function renderChart() {
             // Use liveAnalysisData
@@ -1405,9 +1401,10 @@
             tooltip.classList.add('opacity-100');
             moveTooltip(e);
         }
+        // *** (Request 2) 수정: pageX/Y -> clientX/Y ***
         function moveTooltip(e) {
-            let x = e.pageX + 15;
-            let y = e.pageY - 15;
+            let x = e.clientX + 15;
+            let y = e.clientY - 15;
             
             const tooltipRect = tooltip.getBoundingClientRect();
             // *** (Problem 1.4) 툴팁 위치 조정 로직 강화 ***
@@ -1416,11 +1413,11 @@
             
             // X축: 오른쪽 가장자리를 넘어가면 왼쪽으로 붙임
             if (x + tooltipRect.width + 15 > viewportWidth) {
-                x = e.pageX - tooltipRect.width - 15;
+                x = e.clientX - tooltipRect.width - 15;
             }
             // Y축: 위쪽 가장자리를 넘어가면 아래로 붙임
             if (y - 15 < 0) {
-                 y = e.pageY + 15;
+                 y = e.clientY + 15;
             }
             // Y축: 아래쪽 가장자리를 넘어가면 위로 붙임 (기존 로직 유지)
             else if (y + tooltipRect.height > viewportHeight) {
