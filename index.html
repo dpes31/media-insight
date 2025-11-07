@@ -266,9 +266,10 @@
                 <!-- Right 1/3: Key Insights (Existing Logic) -->
                 <div class="xl:col-span-1 space-y-6">
                     <div class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200 h-full">
+                        <!-- *** 수정: (2.1) 타이틀 변경 *** -->
                         <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                            매체/등급별 핵심 인사이트
+                            MEDIA INSIGHT
                         </h2>
                         <ul id="insight-list" class="space-y-4 text-gray-700 text-sm">
                             <!-- Insights will be injected here -->
@@ -338,7 +339,7 @@
                     { name: 'CTR(%)', key: 'ctr' }, { name: 'CPC(원)', key: 'cpc' }, 
                     { name: 'A 점수', key: 'scoreA' }, { name: 'B 점수', key: 'scoreB' }, 
                     { name: '총점', key: 'total' }, { name: 'INSIGHT', key: 'insight' }, 
-                    { name: '교체 유무', key: 'action' }
+                    { name: '피드백', key: 'action' } // *** (Problem 3) 수정: '교체 유무' -> '피드백' ***
                 ],
                 data: [
                     // *** 수정된 Mock Data ***
@@ -363,7 +364,7 @@
                     { name: 'CPA(원)', key: 'cpa' }, { name: 'ROAS(%)', key: 'roas' },
                     { name: 'A 점수', key: 'scoreA' }, { name: 'B 점수', key: 'scoreB' }, 
                     { name: '총점', key: 'total' }, { name: 'INSIGHT', key: 'insight' }, 
-                    { name: '교체 유무', key: 'action' }
+                    { name: '피드백', key: 'action' } // *** (Problem 3) 수정: '교체 유무' -> '피드백' ***
                 ],
                 data: [
                     { media: '구글 SA', creative: '소재_키워드1', cost: 2000000, imp: 150000, click: 7500, conv: 100, revenue: 15000000, ctr: 0.050, cpa: 20000, roas: 750, scoreA: 5.0, scoreB: 4.8, total: 4.9, insight: 'Top 소재', color: '#10b981', mediaInsight: 'SA Top 키워드는 독보적인 효율입니다. 예산 최대 확대를 고려.' },
@@ -830,7 +831,7 @@
                         }
                         
                         // *** 수정: (1) isPrefill 값에 따라 prefill 클래스 적용 ***
-                        if (row.isPrefill && displayValue) {
+                        if (row.isPrefill && (displayValue || displayValue === 0)) { // 0도 표시
                             inputClasses += ' input-prefill';
                         }
                         inputElement.className = inputClasses;
@@ -839,7 +840,7 @@
                         // Store the default display value for placeholder logic
                         inputElement.dataset.defaultValue = displayValue;
 
-                        // *** (오류 수정) ON FOCUS: 로직 전면 수정 ***
+                        // *** (Problem 1) ON FOCUS: 로직 수정 ***
                         inputElement.addEventListener('focus', (e) => {
                             const clickedRowId = row.id;
                             const clickedKey = col.key;
@@ -890,19 +891,9 @@
                                 return; // 전역 초기화 실행 후 함수 종료
                             }
                             
+                            // *** (Problem 1) 수정: '성과' 초기화 로직 삭제 ***
                             // (2) 전역 초기화가 끝난 후의 일반 포커스 로직
-                            const index = validationData[currentCampaign].findIndex(r => r.id === clickedRowId);
-                            if (index > -1) {
-                                // (2.1) ★ 클릭된 행의 성과 지표만 초기화 ★
-                                const dataRow = validationData[currentCampaign][index];
-                                dataRow.actualCpm = null;
-                                dataRow.actualCpc = null;
-                                dataRow.actualCtr = null;
-                                dataRow.actualCpv = null;
-                                dataRow.actualCpa = null;
-                                updateCalculatedColumnsInDOM(clickedRowId, dataRow);
-                            }
-
+                            // (focus 이벤트는 이제 prefill 제거만 담당)
                             e.target.classList.remove('input-prefill');
                         });
 
@@ -992,27 +983,28 @@
          * [INSIGHT] 16개 조건 엑셀 수식
          * @returns {object} { grade: string, text: string }
          */
+        // *** (Problem 1) 수정: 괄호('<', '>') 제거 ***
         const getDaInsight = (scoreA, scoreB) => {
             // V8 = scoreA, W8 = scoreB
-            if (scoreA >= 4 && scoreB >= 4) return { grade: "<Top 소재>", text: "관심 타겟에게 매우 원활하게 노출되며 소재 관심이 매우 높아 타겟팅과 메시지가 효과적인 소재" };
-            if (scoreA >= 4 && scoreB >= 3) return { grade: "<Top 소재>", text: "관심 타겟에게 매우 원활하게 노출 중이나 소재 관심은 우수한 편으로 좀 더 소재와 밀접한 타겟팅 적용 고려" };
-            if (scoreA >= 4 && scoreB >= 1.5) return { grade: "<Mid 소재>", text: "타겟 내 노출은 원활하나 클릭이 낮은 편으로 특정 모수에만 워킹하는 소재로 보여지고, 타겟팅 조정 필요" };
-            if (scoreA >= 4 && scoreB >= 0) return { grade: "<Low소재>", text: "타겟 내 노출은 원활하나 소재 관심이 매우 저조함으로 훅킹성을 높인 소재로 교체 필요" };
+            if (scoreA >= 4 && scoreB >= 4) return { grade: "Top 소재", text: "관심 타겟에게 매우 원활하게 노출되며 소재 관심이 매우 높아 타겟팅과 메시지가 효과적인 소재" };
+            if (scoreA >= 4 && scoreB >= 3) return { grade: "Top 소재", text: "관심 타겟에게 매우 원활하게 노출 중이나 소재 관심은 우수한 편으로 좀 더 소재와 밀접한 타겟팅 적용 고려" };
+            if (scoreA >= 4 && scoreB >= 1.5) return { grade: "Mid 소재", text: "타겟 내 노출은 원활하나 클릭이 낮은 편으로 특정 모수에만 워킹하는 소재로 보여지고, 타겟팅 조정 필요" };
+            if (scoreA >= 4 && scoreB >= 0) return { grade: "Low소재", text: "타겟 내 노출은 원활하나 소재 관심이 매우 저조함으로 훅킹성을 높인 소재로 교체 필요" };
             
-            if (scoreA >= 3 && scoreB >= 4) return { grade: "<Top 소재>", text: "타겟 내 노출이 적절하며, 소재 관심이 매우 높아 메시지 효과성이 높은 소재" };
-            if (scoreA >= 3 && scoreB >= 3) return { grade: "<Top소재>", text: "타겟 내 노출이 적절하며 소재 관심도 동반되며 우수한 소재" }; // 엑셀 원본에 <Top소재>로 되어있어 그대로 반영
-            if (scoreA >= 3 && scoreB >= 1.5) return { grade: "<Mid 소재>", text: "타겟 내 노출이 적절하나, 소재 관심이 낮은 편으로 특정 모수에만 워킹하는 소재로 보여지고, 타겟팅 조정 필요" };
-            if (scoreA >= 3 && scoreB >= 0) return { grade: "<Low소재>", text: "타겟 내 노출이 적절하나, 소재 관심이 매우 저조함으로 훅킹성을 높인 소재로 교체 필요" };
+            if (scoreA >= 3 && scoreB >= 4) return { grade: "Top 소재", text: "타겟 내 노출이 적절하며, 소재 관심이 매우 높아 메시지 효과성이 높은 소재" };
+            if (scoreA >= 3 && scoreB >= 3) return { grade: "Top소재", text: "타겟 내 노출이 적절하며 소재 관심도 동반되며 우수한 소재" }; // 엑셀 원본
+            if (scoreA >= 3 && scoreB >= 1.5) return { grade: "Mid 소재", text: "타겟 내 노출이 적절하나, 소재 관심이 낮은 편으로 특정 모수에만 워킹하는 소재로 보여지고, 타겟팅 조정 필요" };
+            if (scoreA >= 3 && scoreB >= 0) return { grade: "Low소재", text: "타겟 내 노출이 적절하나, 소재 관심이 매우 저조함으로 훅킹성을 높인 소재로 교체 필요" };
             
-            if (scoreA >= 1.5 && scoreB >= 4) return { grade: "<Mid소재>", text: "노출이 원활하지 않은 편이나 소재 관심이 매우 높은 것으로 보아 타겟팅 조정 및 예산 증액으로 노출 증대방안 고려" }; // 엑셀 원본 <Mid소재>
-            if (scoreA >= 1.5 && scoreB >= 3) return { grade: "<Low소재>", text: "노출이 원활하지 않고 소재 관심도 평이한 수준으로 타겟팅 조정 및 훅킹성을 강조한 소재로 교체 필요" };
-            if (scoreA >= 1.5 && scoreB >= 1.5) return { grade: "<Low소재>", text: "노출이 원활하지 않은 편이며 소재 또한 관심이 낮은 편으로 메시지 수정 및 타겟팅 조정 필요" };
-            if (scoreA >= 1.5 && scoreB >= 0) return { grade: "<Low소재>", text: "노출이 원활하지 않은 편이며 소재 또한 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
+            if (scoreA >= 1.5 && scoreB >= 4) return { grade: "Mid소재", text: "노출이 원활하지 않은 편이나 소재 관심이 매우 높은 것으로 보아 타겟팅 조정 및 예산 증액으로 노출 증대방안 고려" }; // 엑셀 원본
+            if (scoreA >= 1.5 && scoreB >= 3) return { grade: "Low소재", text: "노출이 원활하지 않고 소재 관심도 평이한 수준으로 타겟팅 조정 및 훅킹성을 강조한 소재로 교체 필요" };
+            if (scoreA >= 1.5 && scoreB >= 1.5) return { grade: "Low소재", text: "노출이 원활하지 않은 편이며 소재 또한 관심이 낮은 편으로 메시지 수정 및 타겟팅 조정 필요" };
+            if (scoreA >= 1.5 && scoreB >= 0) return { grade: "Low소재", text: "노출이 원활하지 않은 편이며 소재 또한 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
             
-            if (scoreA >= 0 && scoreB >= 4) return { grade: "<Low소재>", text: "소수의 소비자에게 노출되지만 소재 관심이 매우 높은 것으로 보아 타겟팅 조정과 예산 증액으로 노출 증대방안 고려" };
-            if (scoreA >= 0 && scoreB >= 3) return { grade: "<Low소재>", text: "소수의 소비자에게 노출되고 소재 관심도 평이한 수준으로 타겟팅 조정 및 훅킹성을 강조한 소재로 교체 필요" };
-            if (scoreA >= 0 && scoreB >= 1.5) return { grade: "<Low소재>", text: "소수의 소비자에게 노출되고 소재 관심도 낮은 편으로 소재 OFF 및 예산 이관 고려" };
-            if (scoreA >= 0 && scoreB >= 0) return { grade: "<Low소재>", text: "소수의 소비자에게 노출되고 소재 관심도 낮은 편으로 소재 OFF 및 예산 이관 고려" };
+            if (scoreA >= 0 && scoreB >= 4) return { grade: "Low소재", text: "소수의 소비자에게 노출되지만 소재 관심이 매우 높은 것으로 보아 타겟팅 조정과 예산 증액으로 노출 증대방안 고려" };
+            if (scoreA >= 0 && scoreB >= 3) return { grade: "Low소재", text: "소수의 소비자에게 노출되고 소재 관심도 평이한 수준으로 타겟팅 조정 및 훅킹성을 강조한 소재로 교체 필요" };
+            if (scoreA >= 0 && scoreB >= 1.5) return { grade: "Low소재", text: "소수의 소비자에게 노출되고 소재 관심도 낮은 편으로 소재 OFF 및 예산 이관 고려" };
+            if (scoreA >= 0 && scoreB >= 0) return { grade: "Low소재", text: "소수의 소비자에게 노출되고 소재 관심도 낮은 편으로 소재 OFF 및 예산 이관 고려" };
             
             return { grade: "오류", text: "점수 계산 오류" };
         };
@@ -1022,11 +1014,17 @@
          * Calculates all scores (A, B, Total) and insight labels based on input data and targets.
          */
         function calculateScoresAndInsight(row, campaignType) {
-            let scoreA = 0;
-            let scoreB = 0;
+            let scoreA = null; // *** 수정: 0 -> null ***
+            let scoreB = null; // *** 수정: 0 -> null ***
+            let totalScore = null; // *** 수정: 0 -> null ***
             let insight = '데이터 부족';
             let color = '#94a3b8'; // Gray
             let mediaInsight = '데이터를 입력해주세요.';
+            
+            // *** (Problem 2.2) 수정: mediaPrefix 로직 ***
+            const mediaPrefix = (row.media || row.placement || row.creativeName) 
+                ? `${row.media || 'N/A'}/${row.placement || 'N/A'}/${row.creativeName || 'N/A'}` 
+                : '매체 상품과 소재명 없음';
             
             // Helper to calculate score for metrics where 'Higher is Better' (e.g., CTR) - PERF용
             const scoreHigherIsBetter = (actual, target) => {
@@ -1042,83 +1040,105 @@
             };
             
             // Check for critical missing data (no cost/imp or primary target)
-            const criticalMissing = row.cost === null || row.imp === null || row.cost === 0 || row.imp === 0;
+            // *** (Problem 1.1) 수정: criticalMissing 로직 강화 ***
+            let criticalMissing = row.cost === null || row.imp === null || row.cost === 0 || row.imp === 0;
             
             if (campaignType === 'DA') {
-                // --- DA: 5점 척도화 (신규 로직) ---
+                // [A점수] [B점수] 계산에 필요한 모든 '기본' 및 '목표' 데이터가 있는지 확인
+                const daCriticalMissing = row.cost === null || row.cost === 0 || 
+                                          row.imp === null || row.imp === 0 || 
+                                          row.click === null || // B점수(CPC, CTR)에 필요
+                                          row.targetCpm === null || // A점수에 필요
+                                          row.targetCpc === null || // B점수(CPC)에 필요
+                                          row.targetCtr === null;   // B점수(CTR)에 필요
                 
-                // [A점수] 노출 기여도 : 목표 CPM 기준 5점 척도화
-                scoreA = getScoreCpm(row.actualCpm, row.targetCpm);
-                
-                // [B점수] (1) CTR 기준과 (2) CPC 기준으로 산출된 점수의 평균값
-                const bScoreCtr = getScoreCtr(row.actualCtr, row.targetCtr);
-                const bScoreCpc = getScoreCpc(row.actualCpc, row.targetCpc);
-                scoreB = (bScoreCtr + bScoreCpc) / 2;
-                
-                // [INSIGHT] 16개 조건 엑셀 수식 적용
-                const daInsight = getDaInsight(scoreA, scoreB);
-                insight = daInsight.grade;
-                mediaInsight = `${row.media || 'N/A'}/${row.placement || 'N/A'}/${row.creativeName || 'N/A'}: ${daInsight.text}`;
-                
-                // [Color] Insight 등급에 따른 색상 매핑
-                if (insight.includes("<Top")) color = '#10b981'; // Green
-                else if (insight.includes("<Mid")) color = '#f59e0b'; // Amber
-                else if (insight.includes("<Low")) color = '#ef4444'; // Red
-                else color = '#94a3b8'; // Gray
-                
+                criticalMissing = daCriticalMissing; // DA 캠페인의 criticalMissing 덮어쓰기
+
+                if (!daCriticalMissing) {
+                    // --- DA: 5점 척도화 (신규 로직) ---
+                    
+                    // [A점수] 노출 기여도 : 목표 CPM 기준 5점 척도화
+                    scoreA = getScoreCpm(row.actualCpm, row.targetCpm);
+                    
+                    // [B점수] (1) CTR 기준과 (2) CPC 기준으로 산출된 점수의 평균값
+                    const bScoreCtr = getScoreCtr(row.actualCtr, row.targetCtr);
+                    const bScoreCpc = getScoreCpc(row.actualCpc, row.targetCpc);
+                    scoreB = (bScoreCtr + bScoreCpc) / 2;
+                    
+                    // [총점]
+                    totalScore = (scoreA + scoreB) / 2;
+                    
+                    // [INSIGHT] 16개 조건 엑셀 수식 적용
+                    const daInsight = getDaInsight(scoreA, scoreB);
+                    insight = daInsight.grade;
+                    mediaInsight = `${mediaPrefix}: ${daInsight.text}`;
+                    
+                    // [Color] Insight 등급에 따른 색상 매핑
+                    if (insight.includes("Top")) color = '#10b981'; // Green
+                    else if (insight.includes("Mid")) color = '#f59e0b'; // Amber
+                    else if (insight.includes("Low")) color = '#ef4444'; // Red
+                    else color = '#94a3b8'; // Gray
+                }
                 
             } else if (campaignType === 'PERF') {
                 // --- PERF: 기존 선형 로직 (유지) ---
                 // PERF: A(광고 관심도) = CTR (Higher is better), B(전환 기여도) = CPA (Lower is better)
-                scoreA = criticalMissing ? 0 : scoreHigherIsBetter(row.actualCtr, row.targetCtr);
-                scoreB = criticalMissing ? 0 : scoreLowerIsBetter(row.actualCpa, row.targetCpa);
                 
-                // --- Insight Grouping & Color Assignment (PERF용) ---
-                const totalScorePerf = (scoreA + scoreB) / 2;
-                if (totalScorePerf >= 4.0 && scoreA >= 2.5 && scoreB >= 2.5) {
-                    insight = 'Top 소재'; color = '#10b981';
-                } else if (totalScorePerf >= 2.5 && scoreA >= 2.5 && scoreB < 2.5) {
-                    insight = 'Focus 소재'; color = '#f59e0b';
-                } else if (totalScorePerf >= 2.5 && scoreA < 2.5 && scoreB >= 2.5) {
-                    insight = 'Potential 소재'; color = '#3b82f6';
-                } else {
-                    insight = 'Low 소재'; color = '#ef4444';
-                }
+                // (PERF용 criticalMissing을 여기서 정의)
+                const perfCriticalMissing = row.cost === null || row.cost === 0 || 
+                                            row.imp === null || row.imp === 0 || 
+                                            row.click === null || // A점수(CTR)에 필요
+                                            row.conv === null || // B점수(CPA)에 필요
+                                            row.targetCpa === null || // B점수(CPA)에 필요
+                                            row.targetCtr === null; // A점수(CTR)에 필요
                 
-                // --- Dynamic Insight Message Generation (PERF용) ---
-                mediaInsight = `${row.media}: ${insight}에 해당됩니다. 세부 지표 확인 후 개선 전략을 도출하세요.`;
-                const mediaCreative = row.creativeName;
-                const mediaPlacement = row.placement;
-                
-                if (insight === 'Top 소재') {
-                    mediaInsight = `${row.media}/${mediaPlacement}/${mediaCreative}: 효율이 매우 높습니다. 예산을 확대하고 A/B 테스트를 통해 추가 개선점을 찾으세요.`;
-                } else if (insight === 'Focus 소재') {
-                    mediaInsight = `${row.media}/${mediaPlacement}/${mediaCreative}: CPA(전환 기여도) 목표 달성이 미흡합니다. 해당 지표 개선에 집중하여 Top 소재로 육성해야 합니다.`;
-                } else if (insight === 'Potential 소재') {
-                    mediaInsight = `${row.media}/${mediaPlacement}/${mediaCreative}: 전환 효율은 좋으나 CTR(광고 관심도)이 낮습니다. 타겟팅 확대를 통해 노출 기여도(A)를 개선해야 잠재력을 발휘합니다.`;
-                } else if (insight === 'Low 소재') {
-                    mediaInsight = `${row.media}/${mediaPlacement}/${mediaCreative}: 효율 기준치(총점 2.5점) 미달입니다. 즉시 OFF/교체를 고려하고, 예산을 Top 소재로 이관하세요.`;
+                criticalMissing = perfCriticalMissing;
+
+                if (!perfCriticalMissing) {
+                    scoreA = scoreHigherIsBetter(row.actualCtr, row.targetCtr);
+                    scoreB = scoreLowerIsBetter(row.actualCpa, row.targetCpa);
+                    totalScore = (scoreA + scoreB) / 2;
+                    
+                    // --- Insight Grouping & Color Assignment (PERF용) ---
+                    if (totalScore >= 4.0 && scoreA >= 2.5 && scoreB >= 2.5) {
+                        insight = 'Top 소재'; color = '#10b981';
+                    } else if (totalScore >= 2.5 && scoreA >= 2.5 && scoreB < 2.5) {
+                        insight = 'Focus 소재'; color = '#f59e0b';
+                    } else if (totalScore >= 2.5 && scoreA < 2.5 && scoreB >= 2.5) {
+                        insight = 'Potential 소재'; color = '#3b82f6';
+                    } else {
+                        insight = 'Low 소재'; color = '#ef4444';
+                    }
+                    
+                    // --- Dynamic Insight Message Generation (PERF용) ---
+                    if (insight === 'Top 소재') {
+                        mediaInsight = `${mediaPrefix}: 효율이 매우 높습니다. 예산을 확대하고 A/B 테스트를 통해 추가 개선점을 찾으세요.`;
+                    } else if (insight === 'Focus 소재') {
+                        mediaInsight = `${mediaPrefix}: CPA(전환 기여도) 목표 달성이 미흡합니다. 해당 지표 개선에 집중하여 Top 소재로 육성해야 합니다.`;
+                    } else if (insight === 'Potential 소재') {
+                        mediaInsight = `${mediaPrefix}: 전환 효율은 좋으나 CTR(광고 관심도)이 낮습니다. 타겟팅 확대를 통해 노출 기여도(A)를 개선해야 잠재력을 발휘합니다.`;
+                    } else if (insight === 'Low 소재') {
+                        mediaInsight = `${mediaPrefix}: 효율 기준치(총점 2.5점) 미달입니다. 즉시 OFF/교체를 고려하고, 예산을 Top 소재로 이관하세요.`;
+                    }
                 }
             }
             
-            // [총점] A점수와 B점수의 평균 값
-            const totalScore = (scoreA + scoreB) / 2;
-            
-            // 필수 데이터가 없으면 0점 처리
+            // 필수 데이터가 없으면 0점이 아닌 null로 처리
             if (criticalMissing) {
-                scoreA = 0;
-                scoreB = 0;
-                insight = '데이터 부족';
+                scoreA = null;
+                scoreB = null;
+                totalScore = null;
+                insight = '미디어 성과를 작성해주세요'; // *** (Problem 1.1 / 1.2) 수정 ***
                 color = '#94a3b8'; // Gray
-                mediaInsight = `${row.media || 'N/A'}/${row.placement || 'N/A'}/${row.creativeName || 'N/A'}: 광고비, 노출수 등 필수 데이터가 누락되어 분석이 불가능합니다.`;
+                mediaInsight = `${mediaPrefix}: ${insight}`; // *** (Problem 2.2) 수정 ***
             }
             
             // Final Scored Row Structure
             return {
                 // Scores
-                scoreA: parseFloat(scoreA.toFixed(2)),
-                scoreB: parseFloat(scoreB.toFixed(2)),
-                total: parseFloat(totalScore.toFixed(2)),
+                scoreA: scoreA !== null ? parseFloat(scoreA.toFixed(2)) : null,
+                scoreB: scoreB !== null ? parseFloat(scoreB.toFixed(2)) : null,
+                total: totalScore !== null ? parseFloat(totalScore.toFixed(2)) : null,
                 insight: insight,
                 color: color,
                 mediaInsight: mediaInsight,
@@ -1149,7 +1169,8 @@
             const campaignType = currentCampaign;
             
             const scoredData = rawInputData
-                .filter(row => row.media || row.creativeName || row.cost > 0 || row.imp > 0)
+                // *** (Problem 1.1) 수정: cost가 0이 아닌 null일 때도 포함하도록 filter 조건 변경 ***
+                .filter(row => row.media || row.creativeName || row.cost !== null || row.imp !== null)
                 .map(row => {
                      // 1. Recalculate actual metrics (ensure all numbers are fresh)
                      calculateValidationMetrics(row, campaignType); 
@@ -1165,12 +1186,12 @@
             let totalView = 0; // *** (2.2) totalView 추가 ***
             
             scoredData.forEach(item => {
-                totalCost += item.cost;
-                totalImp += item.imp;
-                totalClick += item.click;
-                totalConv += item.conv;
-                totalRevenue += item.revenue;
-                totalView += item.view; // *** (2.2) totalView 집계 ***
+                totalCost += item.cost || 0; // || 0 추가
+                totalImp += item.imp || 0;
+                totalClick += item.click || 0;
+                totalConv += item.conv || 0;
+                totalRevenue += item.revenue || 0;
+                totalView += item.view || 0; // *** (2.2) totalView 집계 ***
             });
             
             const avgCpm = totalImp > 0 ? (totalCost / totalImp) * 1000 : 0;
@@ -1271,38 +1292,42 @@
             document.getElementById('x-axis-label').textContent = data.metrics.xAxis;
             document.getElementById('y-high-label').textContent = data.metrics.yAxis + ' (높음)';
             document.getElementById('y-low-label').textContent = data.metrics.yAxis + ' (낮음)';
+            
             data.data.forEach((item, index) => {
-                let x = PADDING + (item.scoreB - MIN_SCORE) * scaleX; 
-                let y = H - PADDING - (item.scoreA - MIN_SCORE) * scaleY;
-                const dot = document.createElement('div');
-                dot.className = 'chart-dot';
-                dot.style.backgroundColor = item.color;
-                
-                const DOT_SIZE = 14;
-                x = Math.max(PADDING + DOT_SIZE / 2, Math.min(W - PADDING - DOT_SIZE / 2, x));
-                y = Math.max(PADDING + DOT_SIZE / 2, Math.min(H - PADDING - DOT_SIZE / 2, y));
-                dot.style.left = `${x - DOT_SIZE / 2}px`;
-                dot.style.top = `${y - DOT_SIZE / 2}px`;
-                
-                dot.dataset.index = index;
-                dot.dataset.campaign = currentCampaign;
-                dot.dataset.creative = `${item.placement}_${item.creativeName}`; // 수정됨
-                dot.dataset.insight = item.insight;
-                dot.dataset.scoreA = item.scoreA.toFixed(1);
-                dot.dataset.scoreB = item.scoreB.toFixed(1);
-                dot.dataset.total = item.total.toFixed(2);
-                
-                dot.addEventListener('mouseenter', showTooltip);
-                dot.addEventListener('mousemove', moveTooltip);
-                dot.addEventListener('mouseleave', hideTooltip);
-                matrixContainer.appendChild(dot);
+                // *** (Problem 1.1) 수정: 점수가 null이 아닐 때만 dot 생성 ***
+                if (item.scoreA !== null && item.scoreB !== null) { 
+                    let x = PADDING + (item.scoreB - MIN_SCORE) * scaleX; 
+                    let y = H - PADDING - (item.scoreA - MIN_SCORE) * scaleY;
+                    const dot = document.createElement('div');
+                    dot.className = 'chart-dot';
+                    dot.style.backgroundColor = item.color;
+                    
+                    const DOT_SIZE = 14;
+                    x = Math.max(PADDING + DOT_SIZE / 2, Math.min(W - PADDING - DOT_SIZE / 2, x));
+                    y = Math.max(PADDING + DOT_SIZE / 2, Math.min(H - PADDING - DOT_SIZE / 2, y));
+                    dot.style.left = `${x - DOT_SIZE / 2}px`;
+                    dot.style.top = `${y - DOT_SIZE / 2}px`;
+                    
+                    dot.dataset.index = index;
+                    dot.dataset.campaign = currentCampaign;
+                    dot.dataset.creative = `${item.placement}_${item.creativeName}`; // 수정됨
+                    dot.dataset.insight = item.insight;
+                    dot.dataset.scoreA = item.scoreA.toFixed(1);
+                    dot.dataset.scoreB = item.scoreB.toFixed(1);
+                    dot.dataset.total = item.total.toFixed(2);
+                    
+                    dot.addEventListener('mouseenter', showTooltip);
+                    dot.addEventListener('mousemove', moveTooltip);
+                    dot.addEventListener('mouseleave', hideTooltip);
+                    matrixContainer.appendChild(dot);
+                }
             });
         }
         
         function showTooltip(e) { 
             const item = e.target.dataset;
-            // 툴팁 텍스트에서 <, > 기호가 HTML로 해석되는 것을 방지
-            const insightText = item.insight.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+            // *** (Problem 1) 수정: 괄호 제거 ***
+            const insightText = item.insight;
             
             const tooltipContent = `
                 <div class="font-bold text-base">${item.creative}</div>
@@ -1406,7 +1431,8 @@
         }
         function renderTable() {
             if (!liveAnalysisData || liveAnalysisData.data.length === 0) {
-                 tableBody.innerHTML = '<tr><td colspan="15" class="text-center py-4 text-gray-500">입력 데이터가 없습니다. 검증 항목을 채워주세요.</td></tr>';
+                 // *** (Problem 1.2) 수정: 문구 변경 ***
+                 tableBody.innerHTML = `<tr><td colspan="15" class="text-center py-4 text-gray-500">미디어 성과를 작성해주세요</td></tr>`;
                  document.getElementById('table-header').innerHTML = '';
                  return;
             }
@@ -1473,8 +1499,8 @@
                             td.classList.add('font-bold', 'text-gray-800');
                             break;
                         case 'insight':
-                            // 텍스트에서 <, > 기호가 HTML로 해석되는 것을 방지
-                            const insightText = cellValue.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                            // *** (Problem 1) 수정: 괄호 제거 ***
+                            const insightText = cellValue;
                             td.innerHTML = `<span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color:${item.color}1A; color:${item.color}">${insightText}</span>`;
                             break;
                         case 'action':
@@ -1483,9 +1509,10 @@
                             let colorClass = 'text-gray-800';
                             
                             if (currentCampaign === 'DA') {
-                                // 엑셀 로직: INSIGHT 텍스트에 "<Low소재>"가 포함되면 "소재교체"
-                                if (item.insight.includes("<Low소재>")) {
-                                    actionText = '소재교체';
+                                // *** (Problem 3) 수정: '피드백' -> '소재교체'로 복구 ***
+                                // 엑셀 로직: INSIGHT 텍스트에 "Low소재"가 포함되면 "소재교체"
+                                if (item.insight.includes("Low소재")) { 
+                                    actionText = '소재교체'; 
                                     colorClass = 'text-red-600 bg-red-100';
                                 } else {
                                     actionText = ''; // Top, Mid, 오류는 빈칸
@@ -1513,35 +1540,47 @@
         }
         function renderInsights() {
             if (!liveAnalysisData || liveAnalysisData.data.length === 0) {
-                 document.getElementById('insight-list').innerHTML = '<li class="text-gray-500">분석을 위해 입력 데이터가 필요합니다.</li>';
+                 document.getElementById('insight-list').innerHTML = `<li class="text-gray-500">${currentCampaign === 'DA' ? '미디어 성과를 작성해주세요' : '분석을 위해 입력 데이터가 필요합니다.'}</li>`; // *** (Problem 1.2) 수정 ***
                  return;
             }
-            const data = liveAnalysisData;
+            const data = liveAnalysisData.data; // (liveAnalysisData.data를 data로 참조)
             const insightList = document.getElementById('insight-list');
             insightList.innerHTML = '';
             const gradeInsights = {};
-            data.data.forEach(item => {
-                // INSIGHT 등급('<Top 소재>')을 기준으로 그룹화
-                const grade = item.insight; 
-                if (!gradeInsights[grade]) {
-                    gradeInsights[grade] = [];
+            let hasValidData = false; // *** (Problem 1.1) 수정 ***
+            
+            data.forEach(item => { // (data.data.forEach -> data.forEach)
+                // *** (Problem 1.1) 수정: 점수가 null이 아닌 (유효한) 데이터만 집계 ***
+                if (item.total !== null) { 
+                    hasValidData = true;
+                    // INSIGHT 등급('Top 소재')을 기준으로 그룹화
+                    const grade = item.insight; 
+                    if (!gradeInsights[grade]) {
+                        gradeInsights[grade] = [];
+                    }
+                    gradeInsights[grade].push({ 
+                        media: item.media, 
+                        insight: item.mediaInsight, // 상세 텍스트
+                        color: item.color
+                    });
                 }
-                gradeInsights[grade].push({ 
-                    media: item.media, 
-                    insight: item.mediaInsight, // 상세 텍스트
-                    color: item.color
-                });
             });
             
-            // 엑셀 수식의 등급 순서 (Top -> Mid -> Low)
-            const insightOrder = ["<Top 소재>", "<Top소재>", "<Mid 소재>", "<Mid소재>", "<Low소재>", "데이터 부족", "오류"]; 
+            // *** (Problem 1.1) 수정: 유효한 데이터가 하나도 없으면 메시지 표시 ***
+            if (!hasValidData) {
+                 insightList.innerHTML = `<li class="text-gray-500">${currentCampaign === 'DA' ? '미디어 성과를 작성해주세요' : '분석을 위해 입력 데이터가 필요합니다.'}</li>`;
+                 return;
+            }
+            
+            // *** (Problem 1) 수정: 괄호 제거 ***
+            const insightOrder = ["Top 소재", "Top소재", "Mid 소재", "Mid소재", "Low소재", "데이터 부족", "오류"]; 
             
             insightOrder.forEach(grade => {
                 const items = gradeInsights[grade];
                 if (items && items.length > 0) {
                     const gradeColor = items[0].color;
-                    // 텍스트에서 <, > 기호가 HTML로 해석되는 것을 방지
-                    const gradeText = grade.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                    // *** (Problem 1) 수정: 괄호 제거 ***
+                    const gradeText = grade;
                     
                     const gradeHeader = document.createElement('li');
                     gradeHeader.className = 'pt-2 mb-2 font-extrabold text-base border-b-2 pb-1';
@@ -1553,9 +1592,24 @@
                     items.forEach(item => {
                         const li = document.createElement('li');
                         li.className = 'text-gray-700 text-sm flex items-start';
+                        
+                        // *** (Problem 2) 수정: 가독성 포맷팅 (볼드, 줄바꿈) ***
+                        const insightParts = item.insight.split(/:(.+)/); // [Prefix, Text]
+                        let prefix = insightParts[0] ? insightParts[0].trim() : '매체 상품과 소재명 없음';
+                        let text = insightParts[1] ? insightParts[1].trim() : '인사이트 내용이 없습니다.';
+                    
+                        // "매체 상품과 소재명 없음" 케이스 처리
+                        if (prefix === '매체 상품과 소재명 없음') {
+                            text = item.insight; // 원본 텍스트(예: "미디어 성과를 작성해주세요")
+                            prefix = ''; // 접두사 없음
+                        }
+                        
                         li.innerHTML = `
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 mr-2 flex-shrink-0" style="color:${gradeColor}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
-                            <span>${item.insight}</span>
+                            <span>
+                                ${prefix ? `<strong class="font-bold text-gray-900 block">${prefix}</strong>` : ''}
+                                <span class="block ${prefix ? 'mt-1' : ''}">${text}</span>
+                            </span>
                         `;
                         insightList.appendChild(li);
                     });
