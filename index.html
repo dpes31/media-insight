@@ -200,8 +200,13 @@
         <div id="analysis-results"> 
             <!-- 1. Overall Performance Summary Table -->
             <div class="mb-10">
-                <h2 class="text-2xl font-bold text-gray-800 mb-4">종합 성과 요약 <span id="summary-title" class="text-indigo-600 text-lg ml-2"></span></h2>
-                <div class="overflow-hidden rounded-xl shadow-lg border">
+                <!-- *** 수정: (2.1) <h2>에 ID 추가 *** -->
+                <h2 id="summary-main-title" class="text-2xl font-bold text-gray-800 mb-4">
+                    종합 성과 요약 
+                    <span id="summary-title" class="text-indigo-600 text-lg ml-2"></span>
+                </h2>
+                <!-- *** 수정: (2.4) 가로 스크롤 컨테이너 추가 *** -->
+                <div class="scroll-container overflow-x-auto rounded-xl shadow-lg border">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-indigo-50">
                             <tr id="summary-header" class="text-sm font-semibold text-indigo-700 uppercase tracking-wider">
@@ -295,6 +300,10 @@
         // Firebase Config (Mandatory, though not used for persistence here)
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
+        
+        // *** 수정: (1.2) 전역 플래그 추가 ***
+        let isPrefillActive = true; 
+        
         // Helper function for formatting numbers with commas
         const formatNumericInput = (value) => {
             // Remove all non-digit characters
@@ -830,47 +839,76 @@
 
                         // *** 수정: (1) ON FOCUS: Clear placeholder, clear calculated fields, and clear row if prefill ***
                         inputElement.addEventListener('focus', (e) => {
+                            // *** (1.1) 전역 초기화 (최초 1회) ***
+                            if (isPrefillActive) {
+                                isPrefillActive = false; // (1.2) 전역 플래그 비활성화
+                                
+                                const clickedRowId = row.id;
+                                const clickedKey = e.target.dataset.key;
+                                
+                                // (1.1) 모든 prefill 행을 찾아서 데이터 초기화
+                                validationData[currentCampaign].forEach(dataRow => {
+                                    // (2.1) 모든 행의 성과 지표 초기화
+                                    dataRow.actualCpm = null;
+                                    dataRow.actualCpc = null;
+                                    dataRow.actualCtr = null;
+                                    dataRow.actualCpv = null;
+                                    dataRow.actualCpa = null;
+                                    
+                                    if (dataRow.isPrefill) { // prefill 행만
+                                        config.cols.forEach(c => {
+                                            if (!c.calculated) {
+                                                // (1.1) 버즈빌 기본 정보 예외
+                                                if (dataRow.media === '버즈빌' && (c.key === 'media' || c.key === 'placement' || c.key === 'creativeName')) {
+                                                    // 이 값들은 유지
+                                                } else {
+                                                    dataRow[c.key] = null; // 나머지 데이터 모델 초기화
+                                                }
+                                            }
+                                        });
+                                    }
+                                });
+                                
+                                // (1.1) 클릭된 행의 isPrefill만 false로 변경
+                                const clickedRowIndex = validationData[currentCampaign].findIndex(r => r.id === clickedRowId);
+                                if(clickedRowIndex > -1) {
+                                    validationData[currentCampaign][clickedRowIndex].isPrefill = false;
+                                }
+
+                                renderValidationTable(); // 테이블 전체 재-렌더링
+                                
+                                // (1.1) 원래 클릭했던 입력창을 찾아 다시 포커스
+                                const newClickedInput = document.querySelector(`tr[data-row-id="${clickedRowId}"] input[data-key="${clickedKey}"]`);
+                                if (newClickedInput) {
+                                    newClickedInput.focus();
+                                    newClickedInput.value = ''; // 포커스된 입력창은 확실하게 비움
+                                }
+                                return; // 전역 초기화 실행 후 함수 종료
+                            }
+                            
+                            // --- (1.1) 전역 초기화가 끝난 후의 일반 포커스 로직 ---
                             const index = validationData[currentCampaign].findIndex(r => r.id === row.id);
                             if (index === -1) return;
                             const dataRow = validationData[currentCampaign][index];
-                            const clickedKey = e.target.dataset.key;
 
-                            // (1) If this is a prefill row, clear the entire row once
+                            // (1.1) 만약 이 행이 아직 prefill 상태라면 (예: 버즈빌)
                             if (dataRow.isPrefill) {
-                                dataRow.isPrefill = false; // Mark as "edited"
+                                dataRow.isPrefill = false; // 이 행의 prefill 상태 해제
                                 
+                                // 이 행의 DOM 입력값만 초기화 (버즈빌 예외)
                                 const allInputs = tr.querySelectorAll('input:not([readonly])');
-
-                                config.cols.forEach(c => {
-                                    if (!c.calculated) {
-                                        // (5) Buzzvil exception: keep basic info
-                                        if (dataRow.media === '버즈빌' && (c.key === 'media' || c.key === 'placement' || c.key === 'creativeName')) {
-                                            // Don't clear these for Buzzvil
-                                        } else {
-                                            dataRow[c.key] = null; // Clear data model
-                                        }
-                                    }
-                                });
-
-                                // Now update the DOM
                                 allInputs.forEach(input => {
-                                    input.classList.remove('input-prefill');
-                                    input.dataset.defaultValue = ''; // Clear default value
-                                    
-                                    // (5) Buzzvil exception
-                                    if (dataRow.media === '버즈빌' && (input.dataset.key === 'media' || input.dataset.key === 'placement' || input.dataset.key === 'creativeName')) {
-                                         // Don't clear the value
+                                    const key = input.dataset.key;
+                                    if (dataRow.media === '버즈빌' && (key === 'media' || key === 'placement' || key === 'creativeName')) {
+                                        input.classList.remove('input-prefill'); // 회색 글씨만 제거
                                     } else {
-                                        input.value = ''; // Clear DOM value
+                                        input.value = ''; // 값 비우기
                                     }
                                 });
-                                
-                                // (1.b) Refocus on the clicked element
-                                const clickedInput = tr.querySelector(`input[data-key="${clickedKey}"]`);
-                                if(clickedInput) clickedInput.focus();
+                                e.target.focus(); // 클릭한 곳에 다시 포커스
                             }
-
-                            // (2) Always clear calculated fields on any input focus
+                            
+                            // (2.2) 클릭된 행의 성과 지표는 항상 초기화
                             dataRow.actualCpm = null;
                             dataRow.actualCpc = null;
                             dataRow.actualCtr = null;
@@ -878,10 +916,6 @@
                             dataRow.actualCpa = null;
                             updateCalculatedColumnsInDOM(row.id, dataRow);
 
-                            // Original logic: clear if it's default value (now '' for prefill rows)
-                            if (e.target.value === e.target.dataset.defaultValue) {
-                                e.target.value = '';
-                            }
                             e.target.classList.remove('input-prefill');
                         });
 
@@ -1107,11 +1141,13 @@
                 cost: row.cost || 0,
                 imp: row.imp || 0,
                 click: row.click || 0,
+                view: row.view || 0, // *** (2.2) view 추가 ***
                 conv: row.conv || 0,
                 revenue: row.revenue || 0,
                 ctr: row.actualCtr || 0, // fraction
                 cpm: row.actualCpm || 0, // won
                 cpc: row.actualCpc || 0, // won
+                cpv: row.actualCpv || 0, // *** (2.2) cpv 추가 ***
                 cpa: row.actualCpa || 0, // won
                 roas: (campaignType === 'PERF' && row.cost > 0) ? (row.revenue / row.cost) * 100 : 0 // percentage
             };
@@ -1138,6 +1174,7 @@
             let totalClick = 0;
             let totalConv = 0;
             let totalRevenue = 0;
+            let totalView = 0; // *** (2.2) totalView 추가 ***
             
             scoredData.forEach(item => {
                 totalCost += item.cost;
@@ -1145,29 +1182,45 @@
                 totalClick += item.click;
                 totalConv += item.conv;
                 totalRevenue += item.revenue;
+                totalView += item.view; // *** (2.2) totalView 집계 ***
             });
             
             const avgCpm = totalImp > 0 ? (totalCost / totalImp) * 1000 : 0;
             const avgCtr = totalImp > 0 ? (totalClick / totalImp) : 0; // fraction
             const avgCpc = totalClick > 0 ? (totalCost / totalClick) : 0;
+            const avgCpv = totalView > 0 ? (totalCost / totalView) : 0; // *** (2.2) avgCpv 계산 ***
             const avgCpa = totalConv > 0 ? (totalCost / totalConv) : 0;
             const avgRoas = totalCost > 0 ? (totalRevenue / totalCost) * 100 : 0; // percentage
+            
             let summaryMetrics = [];
             let metricsAxes = {};
             let campaignName = validationTableConfigs[campaignType].label;
             
             if (campaignType === 'DA') {
-                campaignName += ' (반응 목표)';
+                // *** 수정: (2.1) (2.2) (2.3) ***
+                campaignName = '집행 성과 요약';
                 metricsAxes = { xAxis: '소재 관심도 (B) - CTR/CPC 기반', yAxis: '유효 노출 기여도 (A) - CPM 기반' };
                 summaryMetrics = [
                     { label: '총 광고비', key: 'cost', value: totalCost, type: 'currency' },
-                    { label: '총 노출수', key: 'imp', value: totalImp, type: 'number' },
-                    { label: '평균 CPM', key: 'cpm_avg', value: avgCpm, type: 'currency' },
-                    { label: '평균 CTR', key: 'ctr_avg', value: avgCtr, type: 'percent' },
-                    { label: '평균 CPC', key: 'cpc_avg', value: avgCpc, type: 'currency' },
+                    { label: '총 노출수', key: 'imp', value: totalImp, type: 'number',
+                        subMetrics: [
+                            { label: '성과 CPM', value: avgCpm, type: 'currency' }
+                        ]
+                    },
+                    { label: '총 클릭수', key: 'click', value: totalClick, type: 'number',
+                        subMetrics: [
+                            { label: '성과 CPC', value: avgCpc, type: 'currency' },
+                            { label: '성과 CTR', value: avgCtr, type: 'percent' }
+                        ]
+                    },
+                    { label: '총 조회수', key: 'view', value: totalView, type: 'number',
+                        subMetrics: [
+                            { label: '성과 CPV', value: avgCpv, type: 'currency' }
+                        ]
+                    },
                 ];
             } else if (campaignType === 'PERF') {
-                campaignName += ' (전환 목표)';
+                campaignName = '집행 성과 요약'; // PERF도 동일하게 '집행 성과 요약'으로 변경
                 metricsAxes = { xAxis: '전환 기여도 (B) - CPA 기반', yAxis: '광고 관심도 (A) - CTR 기반' };
                 summaryMetrics = [
                     { label: '총 광고비', key: 'cost', value: totalCost, type: 'currency' },
@@ -1214,7 +1267,18 @@
             const plotH = H - 2 * PADDING;
             const scaleX = plotW / (MAX_SCORE - MIN_SCORE);
             const scaleY = plotH / (MAX_SCORE - MIN_SCORE);
-            document.getElementById('summary-title').textContent = `(${data.name.split('(')[1].replace(')', '')})`;
+            
+            // *** 수정: (2.1) 타이틀 설정 ***
+            const summaryTitleEl = document.getElementById('summary-main-title');
+            const summarySubtitleEl = document.getElementById('summary-title');
+            if (currentCampaign === 'DA') {
+                summaryTitleEl.childNodes[0].nodeValue = '집행 성과 요약 '; // h2 텍스트
+                summarySubtitleEl.textContent = '(반응 목표)'; // span 텍스트
+            } else {
+                summaryTitleEl.childNodes[0].nodeValue = '집행 성과 요약 '; // h2 텍스트
+                summarySubtitleEl.textContent = '(전환 목표)'; // span 텍스트
+            }
+            
             document.getElementById('chart-axes-label').textContent = `Y축: ${data.metrics.yAxis} | X축: ${data.metrics.xAxis}`;
             document.getElementById('x-axis-label').textContent = data.metrics.xAxis;
             document.getElementById('y-high-label').textContent = data.metrics.yAxis + ' (높음)';
@@ -1278,44 +1342,59 @@
         function hideTooltip() { 
             tooltip.classList.remove('opacity-100');
         }
+        
+        // *** 수정: (2.2) (2.3) renderSummaryTable 전면 재작성 ***
         function renderSummaryTable() {
-             if (!liveAnalysisData || liveAnalysisData.summary.length === 0) return;
+            if (!liveAnalysisData || liveAnalysisData.summary.length === 0) return;
             const data = liveAnalysisData;
             const headerRow = document.getElementById('summary-header');
             const body = document.getElementById('summary-body');
             headerRow.innerHTML = '';
             body.innerHTML = '';
+            
+            // --- 1. Header Row ---
             data.summary.forEach(metric => {
                 const th = document.createElement('th');
-                th.className = 'px-6 py-3 text-center';
+                th.className = 'px-6 py-3 text-center min-w-[150px]'; // min-width 추가
                 th.textContent = metric.label;
                 headerRow.appendChild(th);
             });
+            
+            // --- 2. Body Row (Data) ---
             const tr = document.createElement('tr');
             tr.className = 'text-gray-900';
+            
             data.summary.forEach(metric => {
                 const td = document.createElement('td');
-                td.className = 'px-6 py-4 whitespace-nowrap text-center text-lg font-bold';
+                td.className = 'px-6 py-4 whitespace-nowrap text-center align-top';
                 
-                let displayValue = metric.value;
-                if (metric.type === 'percent') {
-                    // Display value is a fraction (e.g., 0.005) or a percentage (e.g., 500)
-                    // If the value is for ROAS (already scaled in aggregateAndScoreData)
-                    if (metric.key === 'roas_avg') {
-                         td.textContent = `${Math.round(displayValue).toLocaleString('ko-KR')}%`;
-                    } else {
-                        // For CTR (fraction)
-                        td.textContent = formatNumber(displayValue, 'percent');
-                    }
-                } else if (metric.type === 'currency' || metric.type === 'number') {
-                    td.textContent = formatNumber(displayValue, metric.type);
-                } else {
-                    td.textContent = displayValue;
+                // Main Value
+                let mainValueText = formatNumber(metric.value, metric.type);
+                // PERF 캠페인의 ROAS와 CPA는 %나 원 표시가 이미 되어있음 (예외처리)
+                if (currentCampaign === 'PERF' && (metric.key === 'roas_avg')) {
+                    mainValueText = `${Math.round(metric.value).toLocaleString('ko-KR')}%`;
+                } else if (currentCampaign === 'PERF' && metric.key === 'cpa_avg') {
+                     mainValueText = formatNumber(metric.value, 'currency');
                 }
+                
+                let tdHtml = `<div class="text-lg font-bold">${mainValueText}</div>`;
+                
+                // Sub-Metrics
+                if (metric.subMetrics) {
+                    metric.subMetrics.forEach(sub => {
+                        const subValueText = formatNumber(sub.value, sub.type);
+                        tdHtml += `<div class="text-sm text-gray-600 mt-2">
+                                     <span class="font-semibold">${sub.label}:</span> ${subValueText}
+                                   </div>`;
+                    });
+                }
+                
+                td.innerHTML = tdHtml;
                 tr.appendChild(td);
             });
             body.appendChild(tr);
         }
+        
         function sortData(key) {
             if (sortColumn === key) {
                 sortDirection = sortDirection === 'asc' ? 'desc' : 'asc';
@@ -1384,11 +1463,13 @@
                         case 'cpm':
                         case 'cpc':
                         case 'cpa':
+                        case 'cpv': // *** (2.2) CPV 포맷팅 추가 ***
                             td.textContent = formatNumber(cellValue, 'currency');
                             break;
                         case 'imp':
                         case 'click':
                         case 'conv':
+                        case 'view': // *** (2.2) VIEW 포맷팅 추가 ***
                             td.textContent = formatNumber(cellValue, 'number');
                             break;
                         case 'ctr':
@@ -1513,6 +1594,9 @@
             }
         }
         function renderDashboard() {
+            // *** 수정: (1.2) 캠페인 변경 시 전역 플래그 리셋 ***
+            isPrefillActive = true; 
+            
             // Reset sorting when switching campaigns
             sortColumn = 'total';
             sortDirection = 'desc';
