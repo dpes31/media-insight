@@ -40,9 +40,22 @@
         .quadrant-top-left { background-color: rgba(59, 130, 246, 0.05); } /* Top-Left */
         .quadrant-bottom-right { background-color: rgba(245, 158, 11, 0.05); } /* Bottom-Right */
         .quadrant-bottom-left { background-color: rgba(239, 68, 68, 0.05); } /* Bottom-Left */
+        
+        /* *** (Problem 1 & 2) 수정: Zone 라벨 CSS 수정 *** */
         .quadrant-label {
-            /* *** (Problem 1.3) 수정: 라벨 숨김 *** */
-            display: none; 
+            /* display: none; */ /* REMOVED */
+            display: block; /* ADDED */
+            font-weight: 700;
+            font-size: 1.25rem; /* 20px, was 1.5rem */
+            position: absolute;
+            opacity: 0.2; /* Was 0.1, made slightly more visible */
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            pointer-events: none;
+            user-select: none;
+            text-align: center; /* ADDED */
+            line-height: 1.5; /* ADDED */
         }
         
         /* Quadrant Middle Lines (New Improvement) */
@@ -125,6 +138,37 @@
         }
         .input-prefill:focus {
             color: #111827; /* gray-900 (default text color) */
+        }
+        
+        /* *** (Problem 4) NEW: 가장자리 표식 CSS *** */
+        .matrix-marker {
+            position: absolute;
+            font-size: 0.75rem; /* 12px */
+            font-weight: 600;
+            color: #4b5563; /* gray-600 */
+            z-index: 30;
+        }
+        .marker-top {
+            top: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .marker-bottom {
+            bottom: 8px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .marker-left {
+            left: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
+        }
+        .marker-right {
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            text-align: center;
         }
     </style>
 </head>
@@ -230,21 +274,44 @@
                                 <div class="v-line"></div>
                                 <div class="h-line"></div>
                             </div>
+                            
+                            <!-- *** (Problem 4) NEW: 가장자리 표식 *** -->
+                            <div class="matrix-marker marker-top">소재 관심 우수</div>
+                            <div class="matrix-marker marker-bottom">소재 관심 미흡</div>
+                            <div class="matrix-marker marker-left"><div>노출</div><div class="font-medium">미흡</div></div>
+                            <div class="matrix-marker marker-right"><div>노출</div><div class="font-medium">우수</div></div>
+                            
                             <!-- Quadrant 1: Top Right (Top) -->
                             <div class="quadrant quadrant-top-right">
-                                <div class="quadrant-label text-green-700"></div> <!-- *** (Problem 1.3) 라벨 텍스트 제거 *** -->
+                                <!-- *** (Problem 1 & 2) 수정: Zone 라벨 콘텐츠 *** -->
+                                <div class="quadrant-label text-green-700">
+                                    Top Zone
+                                    <span class="block text-sm font-medium">(유지/강화가 필요한 소재)</span>
+                                </div>
                             </div>
                             <!-- Quadrant 2: Top Left (Potential) -->
                             <div class="quadrant quadrant-top-left">
-                                <div class="quadrant-label text-blue-700"></div> <!-- *** (Problem 1.3) 라벨 텍스트 제거 *** -->
+                                <!-- *** (Problem 1 & 2) 수정: Zone 라벨 콘텐츠 *** -->
+                                <div class="quadrant-label text-blue-700">
+                                    Mid Zone
+                                    <span class="block text-sm font-medium">(타겟팅 조정/범용적 메시지가 필요한 소재)</span>
+                                </div>
                             </div>
                             <!-- Quadrant 3: Bottom Left (Low) -->
                             <div class="quadrant quadrant-bottom-left">
-                                <div class="quadrant-label text-red-700"></div> <!-- *** (Problem 1.3) 라벨 텍스트 제거 *** -->
+                                <!-- *** (Problem 1 & 2) 수정: Zone 라벨 콘텐츠 *** -->
+                                <div class="quadrant-label text-red-700">
+                                    Low Zone
+                                    <span class="block text-sm font-medium" style="font-size: 0.8rem;">(메시지 훅킹 강화/타겟팅 수정/예산이관 필요한 소재)</span>
+                                </div>
                             </div>
                             <!-- Quadrant 4: Bottom Right (Focus) -->
                             <div class="quadrant quadrant-bottom-right">
-                                <div class="quadrant-label text-amber-700"></div> <!-- *** (Problem 1.3) 라벨 텍스트 제거 *** -->
+                                <!-- *** (Problem 1 & 2) 수정: Zone 라벨 콘텐츠 *** -->
+                                <div class="quadrant-label text-amber-700">
+                                    Mid Zone
+                                    <span class="block text-sm font-medium">(타겟팅 조정/범용적 메시지가 필요한 소재)</span>
+                                </div>
                             </div>
                             <!-- Dots are injected here -->
                         </div>
@@ -1365,17 +1432,29 @@
             tooltip.classList.add('opacity-100');
             moveTooltip(e);
         }
+        // *** (Problem 3) 수정: 툴팁 위치 오류 수정 (pageX/Y -> clientX/Y) ***
         function moveTooltip(e) {
-            let x = e.pageX + 15;
-            let y = e.pageY - 15;
+            let x = e.clientX + 15;
+            let y = e.clientY - 15;
             
             const tooltipRect = tooltip.getBoundingClientRect();
+            // 뷰포트 오른쪽 경계 체크
             if (x + tooltipRect.width > window.innerWidth) {
-                x = e.pageX - tooltipRect.width - 15;
+                x = e.clientX - tooltipRect.width - 15;
             }
+            // 뷰포트 아래쪽 경계 체크
             if (y + tooltipRect.height > window.innerHeight) {
                 y = window.innerHeight - tooltipRect.height - 10;
             }
+            // 뷰포트 위쪽 경계 체크
+            if (y < 0) {
+                y = 10;
+            }
+            // 뷰포트 왼쪽 경계 체크
+            if (x < 0) {
+                x = 10;
+            }
+            
             tooltip.style.left = `${x}px`;
             tooltip.style.top = `${y}px`;
         }
