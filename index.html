@@ -170,10 +170,19 @@
                         <p class="text-sm text-gray-600">
                             <span id="validation-campaign-label" class="font-bold text-indigo-600">DA 캠페인</span> 효율 검증 항목을 직접 기재해주세요.
                         </p>
-                        <!-- *** AI UPLOAD: 버튼 그룹 (REMOVED) *** -->
-                        <button id="add-validation-row" class="bg-green-500 text-white hover:bg-green-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">
-                            + 항목 추가
-                        </button>
+                        <!-- *** (LocalStorage) NEW: 버튼 그룹 *** -->
+                        <div class="flex items-center space-x-2">
+                            <span id="save-status" class="text-sm text-green-600 font-medium hidden">저장됨!</span>
+                            <button id="save-data-button" class="bg-blue-500 text-white hover:bg-blue-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">
+                                💾 현재 내용 저장
+                            </button>
+                            <button id="reset-data-button" class="bg-red-500 text-white hover:bg-red-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">
+                                🔄 기본값으로 초기화
+                            </button>
+                            <button id="add-validation-row" class="bg-green-500 text-white hover:bg-green-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">
+                                + 항목 추가
+                            </button>
+                        </div>
                     </div>
                     
                     <div class="overflow-x-auto">
@@ -344,8 +353,30 @@
         const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
         const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         
+        // *** (LocalStorage) NEW: 키 정의 ***
+        const LOCAL_STORAGE_KEY = 'campaignDashboardData';
+        
         // *** 수정: (1.2) 전역 플래그 추가 ***
         let isPrefillActive = true; 
+        
+        // *** (LocalStorage) NEW: Function to save data ***
+        function saveDataToLocalStorage() {
+            try {
+                // validationData에는 rowId같은 임시 ID가 있으므로 저장
+                localStorage.setItem(LOCAL_STORAGE_KEY, JSON.stringify(validationData));
+                
+                // (LocalStorage) NEW: Show save status
+                const saveStatus = document.getElementById('save-status');
+                saveStatus.classList.remove('hidden');
+                setTimeout(() => {
+                    saveStatus.classList.add('hidden');
+                }, 2000); // 2초 후 메시지 숨김
+                
+            } catch (e) {
+                console.error("Error saving to localStorage", e);
+                // (Optional) UI alert if storage is full
+            }
+        }
         
         // Helper function for formatting numbers with commas
         const formatNumericInput = (value) => {
@@ -493,11 +524,11 @@
          * Converts core campaign data into the structure required for the validation input table.
          * Takes the first 4 items and initializes them with core performance metrics and mock targets.
          */
-        // *** AI UPLOAD: `data` 파라미터 추가 ***
+        // *** AI UPLOAD: (REVERT) `data` 파라미터 제거 ***
         const mapCampaignDataToValidation = (sourceData, campaignType) => {
             
             // *** AI UPLOAD: (REVERT) dataToMap이 sourceData.slice(0, 4)가 되도록 수정 ***
-            const dataToMap = sourceData.slice(0, 4); 
+            const dataToMap = sourceData; 
             const configCols = validationTableConfigs[campaignType].cols;
             
             return dataToMap.map((sourceItem) => {
@@ -603,7 +634,13 @@
         const prefillPerfData = mapCampaignDataToValidation(campaignData.PERF.data, 'PERF');
         // 2. Initialize validationData with the prefilled rows (4 rows for each)
         let isValidationTableOpen = true; 
-        const validationData = { 'DA': prefillDaData, 'PERF': prefillPerfData };
+        // *** (LocalStorage) NEW: 기본값을 mock 데이터로 설정 ***
+        const defaultValidationData = { 
+            'DA': mapCampaignDataToValidation(campaignData.DA.data, 'DA'), 
+            'PERF': mapCampaignDataToValidation(campaignData.PERF.data, 'PERF')
+        };
+        let validationData = { ...defaultValidationData };
+        
         // --- NEW Element references ---
         const runAnalysisButton = document.getElementById('run-analysis-button');
         const analysisResults = document.getElementById('analysis-results'); 
@@ -613,7 +650,9 @@
         const validationTableBody = document.getElementById('validation-table-body');
         const validationCampaignLabel = document.getElementById('validation-campaign-label');
         const addValidationRowButton = document.getElementById('add-validation-row');
-        // *** AI UPLOAD: 새 DOM 요소 (REMOVED) ***
+        // *** (LocalStorage) NEW: 버튼 DOM 요소 ***
+        const saveDataButton = document.getElementById('save-data-button');
+        const resetDataButton = document.getElementById('reset-data-button');
         
         function toggleValidationTable() {
             isValidationTableOpen = !isValidationTableOpen;
@@ -762,6 +801,8 @@
                     calculateValidationMetrics(validationData[currentCampaign][index], currentCampaign);
                     updateCalculatedColumnsInDOM(rowId, validationData[currentCampaign][index]);
                 }
+                
+                // *** (LocalStorage) REMOVED: Auto-save on input ***
             }
         }
         
@@ -769,6 +810,8 @@
             // Get an empty row template, using the current campaign type
             const row = mapCampaignDataToValidation([{}], currentCampaign)[0];
             validationData[currentCampaign].push(row);
+            
+            // *** (LocalStorage) REMOVED: Auto-save on add ***
             renderValidationTable();
         }
         function removeValidationRow(rowId) {
@@ -777,6 +820,9 @@
                  // Ensure at least one row exists
                  validationData[currentCampaign].push(mapCampaignDataToValidation([{}], currentCampaign)[0]);
             }
+            
+            // *** (LocalStorage) REMOVED: Auto-save on remove ***
+            
             // Re-render the table and re-run analysis
             renderValidationTable();
             runAnalysis();
@@ -894,6 +940,7 @@
                         
                         // *** 수정: (1) isPrefill 값에 따라 prefill 클래스 적용 ***
                         // *** AI UPLOAD: (REVERT) isPrefillActive가 false여도, row.isPrefill이 true면 회색으로 표시 ***
+                        // *** (LocalStorage) NEW: isPrefillActive는 로드 시 설정됨 ***
                         if (isPrefillActive && row.isPrefill && (displayValue || displayValue === 0)) { // 0도 표시
                             inputClasses += ' input-prefill';
                         }
@@ -950,6 +997,9 @@
                                 
                                 // (1.4.3) e.target (지금 클릭한 input)은 이미 allInputs에서
                                 // .value = ''가 되었으므로, 브라우저가 자동으로 focus를 유지함.
+                                
+                                // *** (LocalStorage) NEW: Save the cleared prefill state ***
+                                // saveDataToLocalStorage(); // (save on click is disabled)
                                 
                                 return; // 전역 초기화 실행 후 함수 종료
                             }
@@ -1110,7 +1160,7 @@
             let scoreB = null; // *** 수정: 0 -> null ***
             let totalScore = null; // *** 수정: 0 -> null ***
             let insight = '데이터 부족';
-            let color = '#94a3b8'; // Gray
+            let color = '#9ca3b8'; // Gray
             let mediaInsight = '데이터를 입력해주세요.';
             
             // *** (Problem 2.2) 수정: mediaPrefix 로직 ***
@@ -1749,8 +1799,29 @@
             }
         }
         function renderDashboard() {
-            // *** 수정: (1.2) 캠페인 변경 시 전역 플래그 리셋 ***
-            isPrefillActive = true; 
+            // *** (LocalStorage) NEW: 캠페인 변경 시 localStorage에서 로드 시도 ***
+            const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+            let parsedData = null;
+            if (savedData) {
+                try {
+                    parsedData = JSON.parse(savedData);
+                } catch (e) {
+                    console.error("localStorage 파싱 오류:", e);
+                    parsedData = null; // 파싱 실패 시 null로
+                }
+            }
+            
+            // 저장된 데이터가 있고, 현재 캠페인 데이터가 있는지 확인
+            if (parsedData && parsedData[currentCampaign] && parsedData[currentCampaign].length > 0) {
+                validationData[currentCampaign] = parsedData[currentCampaign];
+                // 저장된 데이터의 isPrefill 상태를 전역 플래그에 반영
+                isPrefillActive = validationData[currentCampaign].some(row => row.isPrefill);
+            } else {
+                // 저장된 데이터가 없거나, 현재 캠페인 데이터가 없으면 mock으로 리셋
+                validationData[currentCampaign] = mapCampaignDataToValidation(campaignData[currentCampaign].data, currentCampaign);
+                isPrefillActive = true; // 이 경우엔 다시 prefill 상태
+            }
+
             
             // Reset sorting when switching campaigns
             sortColumn = 'total';
@@ -1767,6 +1838,11 @@
                     tab.classList.add('hover:bg-white', 'hover:text-indigo-600');
                 }
             });
+            
+            // *** (문제 1 수정) ***
+            // renderValidationTable() 전에 성과 계산 로직을 먼저 실행합니다.
+            validationData[currentCampaign].forEach(row => calculateValidationMetrics(row, currentCampaign));
+
             // 1. Render Validation Table for the current campaign
             renderValidationTable();
             
@@ -1782,6 +1858,28 @@
         document.addEventListener('DOMContentLoaded', () => {
             // 안정성을 위해 try...catch로 감쌉니다.
             try {
+                // *** (LocalStorage) NEW: Load saved data on init ***
+                const savedData = localStorage.getItem(LOCAL_STORAGE_KEY);
+                if (savedData) {
+                    try {
+                        const parsedData = JSON.parse(savedData);
+                        // isPrefill 상태를 복원하기 위해, DA/PERF 둘 다 덮어써야 함
+                        if (parsedData.DA) {
+                            validationData.DA = parsedData.DA;
+                        }
+                        if (parsedData.PERF) {
+                             validationData.PERF = parsedData.PERF;
+                        }
+                        
+                        // 현재 캠페인(DA)의 isPrefill 상태를 보고 전역 플래그 설정
+                        isPrefillActive = validationData.DA.some(row => row.isPrefill);
+
+                    } catch(e) {
+                         console.error("Failed to parse localStorage data", e);
+                         isPrefillActive = true; // 파싱 실패 시 기본값(mock) 사용
+                    }
+                }
+                
                 document.querySelectorAll('.campaign-tab').forEach(tab => {
                     tab.addEventListener('click', (e) => {
                         currentCampaign = e.target.dataset.camp;
@@ -1795,11 +1893,36 @@
                 // Event listener for the analysis button (manual re-run after input)
                 runAnalysisButton.addEventListener('click', runAnalysis);
                 
+                // *** (LocalStorage) NEW: 버튼 이벤트 리스너 ***
+                saveDataButton.addEventListener('click', () => {
+                    // 저장 시, 현재 isPrefillActive 상태도 함께 저장 (의도치 않은 초기화 방지)
+                    // 현재 캠페인의 isPrefill 상태를 모든 행에 동기화
+                    validationData[currentCampaign].forEach(row => row.isPrefill = isPrefillActive);
+                    saveDataToLocalStorage();
+                });
+                
+                resetDataButton.addEventListener('click', () => {
+                    // (Optional: Show confirmation modal here)
+                    if (confirm("정말로 모든 데이터를 기본값으로 초기화하시겠습니까? 저장된 내용이 사라집니다.")) {
+                        localStorage.removeItem(LOCAL_STORAGE_KEY);
+                        
+                        // *** (문제 2 수정) ***
+                        // '기본값(예시)'이 아닌 '공란'으로 초기화
+                        validationData.DA = [mapCampaignDataToValidation([{}], 'DA')[0]];
+                        validationData.PERF = [mapCampaignDataToValidation([{}], 'PERF')[0]];
+                        isPrefillActive = false; // 공란 상태이므로 prefill이 아님
+                        
+                        renderDashboard(); // 대시보드 새로고침
+                    }
+                });
+                
+                
                 // *** AI UPLOAD: 이벤트 리스너 추가 (REMOVED) ***
                 
-                // Initial calculation for prefilled data rows
-                validationData.DA.forEach(row => calculateValidationMetrics(row, 'DA'));
-                validationData.PERF.forEach(row => calculateValidationMetrics(row, 'PERF'));
+                // *** (문제 1 수정) ***
+                // 이 계산 로직을 DOMContentLoaded에서 renderDashboard 내부로 이동시켰습니다.
+                // validationData.DA.forEach(row => calculateValidationMetrics(row, 'DA'));
+                // validationData.PERF.forEach(row => calculateValidationMetrics(row, 'PERF'));
                 
                 renderDashboard(); // Initial render
                 
