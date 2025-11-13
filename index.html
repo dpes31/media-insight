@@ -258,7 +258,7 @@
                                     <p class="text-sm text-gray-700 mt-2">훅킹성은 높지만 잘 알려지지 않은 소재</p>
                                     <div class="mt-4">
                                         <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-blue-800 bg-blue-100">
-                                            Action : 타겟팅 최적화
+                                            Action : 타겟팅 확장
                                         </span>
                                     </div>
                                 </div>
@@ -300,7 +300,7 @@
                                     <p class="text-sm text-gray-700 mt-2">소수의 집단에서 반응이 높은 소재</p>
                                     <div class="mt-4">
                                         <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-amber-800 bg-amber-100">
-                                            Action : 타겟팅 확장 / 범용적 소재
+                                            Action : 범용적 소재 / 훅킹성 강화
                                         </span>
                                     </div>
                                 </div>
@@ -1055,6 +1055,7 @@
         /**
          * A점수: 목표 CPM 기준 5점 척도화 (Lower is Better)
          */
+        // *** [STEP 1] 수정: 엑셀 파일 기준 (변경 없음) ***
         const getScoreCpm = (actualCpm, targetCpm) => {
             if (actualCpm === null || targetCpm === null || targetCpm <= 0) return 1; // 데이터 없으면 1점
             const ratio = actualCpm / targetCpm;
@@ -1068,82 +1069,86 @@
         /**
          * B점수(1): 목표 CTR 기준 5점 척도화 (Higher is Better)
          */
+        // *** [STEP 1] 수정: 엑셀 파일 기준 (로직 변경) ***
         const getScoreCtr = (actualCtr, targetCtr) => {
             if (actualCtr === null || targetCtr === null || targetCtr <= 0) return 1;
             const ratio = actualCtr / targetCtr;
             
-            if (ratio > 1.0) return 5;  // 목표 초과
-            if (ratio > 0.9) return 4;  // 90% 초과
-            if (ratio > 0.7) return 3;  // 70% 초과
+            // 엑셀 파일의 "수정완료" 시트 기준
+            if (ratio > 1.3) return 5;  // 130% 초과
+            if (ratio > 1.1) return 4;  // 110% 초과
+            if (ratio > 1.0) return 3;  // 100% 초과
             if (ratio > 0.5) return 2;  // 50% 초과
-            return 1; // 50% 미만 (이하)
+            return 1; // 50% 이하
         };
         /**
          * B점수(2): 목표 CPC 기준 5점 척도화 (Lower is Better)
          */
+        // *** [STEP 1] 수정: 엑셀 파일 기준 (로직 변경) ***
         const getScoreCpc = (actualCpc, targetCpc) => {
             if (actualCpc === null || targetCpc === null || targetCpc <= 0) return 1;
             const ratio = actualCpc / targetCpc;
             
-            if (ratio < 0.6) return 5;  // 60% 미만
-            if (ratio < 0.8) return 4;  // 80% 미만
-            if (ratio < 1.0) return 3;  // 100% 미만
-            if (ratio < 1.5) return 2;  // 150% 미만
-            return 1; // 150% 초과 (이상)
+            // 엑셀 파일의 "수정완료" 시트 기준
+            if (ratio < 0.85) return 5;  // 85% 미만
+            if (ratio < 0.95) return 4;  // 95% 미만
+            if (ratio < 1.04) return 3;  // 104% 미만
+            if (ratio < 1.4) return 2;  // 140% 미만
+            return 1; // 140% 이상
         };
         
         /**
          * [INSIGHT] 16개 조건 엑셀 수식
          * @returns {object} { grade: string, text: string }
          */
-        // *** (Problem 1) 수정: 괄호('<', '>') 제거 ***
+        // *** [STEP 1] 수정: 엑셀 파일 기준 (로직 변경) ***
         const getDaInsight = (scoreA, scoreB) => {
             // V8 = scoreA, W8 = scoreB
-            if (scoreA >= 4 && scoreB >= 4) return { grade: "Top 소재", text: "관심 타겟에게 매우 원활하게 노출되며 소재 관심이 매우 높아 타겟팅과 메시지가 효과적인 소재" };
-            if (scoreA >= 4 && scoreB >= 3) return { grade: "Top 소재", text: "관심 타겟에게 매우 원활하게 노출 중이나 소재 관심은 우수한 편으로 좀 더 소재와 밀접한 타겟팅 적용 고려" };
-            if (scoreA >= 4 && scoreB >= 1.5) return { grade: "Mid 소재", text: "타겟 내 노출은 원활하나 클릭이 낮은 편으로 특정 모수에만 워킹하는 소재로 보여지고, 타겟팅 조정 필요" };
-            if (scoreA >= 4 && scoreB >= 0) return { grade: "Low소재", text: "타겟 내 노출은 원활하나 소재 관심이 매우 저조함으로 훅킹성을 높인 소재로 교체 필요" };
+            if (scoreA >= 4 && scoreB >= 4) return { grade: "Top 소재", text: "노출이 매우 원활하고, 소재 관심도도 매우 높아 타겟팅과 메시지 효과적인 소재" };
+            if (scoreA >= 4 && scoreB >= 3) return { grade: "Top 소재", text: "노출이 매우 원활하고, 소재 관심은 우수한 편이므로 좀 더 범용적인 소재로 개선 필요" };
+            if (scoreA >= 4 && scoreB >= 1.5) return { grade: "Mid 소재", text: "노출은 매우 원할하지만, 소재 관심이 낮은 편으로 훅킹성을 높인 소재로 수정 필요" };
+            if (scoreA >= 4 && scoreB >= 0) return { grade: "Low소재", text: "노출은 매우 원활하지만 극소수의 집단에서 반응이 발생함으로 소재 훅킹성 증대 필요" };
             
-            if (scoreA >= 3 && scoreB >= 4) return { grade: "Top 소재", text: "타겟 내 노출이 적절하며, 소재 관심이 매우 높아 메시지 효과성이 높은 소재" };
-            if (scoreA >= 3 && scoreB >= 3) return { grade: "Top소재", text: "타겟 내 노출이 적절하며 소재 관심도 동반되며 우수한 소재" }; // 엑셀 원본
-            if (scoreA >= 3 && scoreB >= 1.5) return { grade: "Mid 소재", text: "타겟 내 노출이 적절하나, 소재 관심이 낮은 편으로 특정 모수에만 워킹하는 소재로 보여지고, 타겟팅 조정 필요" };
-            if (scoreA >= 3 && scoreB >= 0) return { grade: "Low소재", text: "타겟 내 노출이 적절하나, 소재 관심이 매우 저조함으로 훅킹성을 높인 소재로 교체 필요" };
+            if (scoreA >= 3 && scoreB >= 4) return { grade: "Top 소재", text: "노출이 적절하며, 소재 관심이 매우 높아 메시지 효과성이 높은 소재" };
+            if (scoreA >= 3 && scoreB >= 3) return { grade: "Top소재", text: "노출이 적절하고, 소재 관심도 동반되어 우수한 소재" };
+            if (scoreA >= 3 && scoreB >= 1.5) return { grade: "Mid 소재", text: "노출은 적절하지만 소재 관심이 낮은 편으로 타겟팅 확장 및 범용적인 소재로 개선 필요" };
+            if (scoreA >= 3 && scoreB >= 0) return { grade: "Low소재", text: "노출은 적절하지만 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
             
-            if (scoreA >= 1.5 && scoreB >= 4) return { grade: "Mid소재", text: "노출이 원활하지 않은 편이나 소재 관심이 매우 높은 것으로 보아 타겟팅 조정 및 예산 증액으로 노출 증대방안 고려" }; // 엑셀 원본
-            if (scoreA >= 1.5 && scoreB >= 3) return { grade: "Low소재", text: "노출이 원활하지 않고 소재 관심도 평이한 수준으로 타겟팅 조정 및 훅킹성을 강조한 소재로 교체 필요" };
-            if (scoreA >= 1.5 && scoreB >= 1.5) return { grade: "Low소재", text: "노출이 원활하지 않은 편이며 소재 또한 관심이 낮은 편으로 메시지 수정 및 타겟팅 조정 필요" };
-            if (scoreA >= 1.5 && scoreB >= 0) return { grade: "Low소재", text: "노출이 원활하지 않은 편이며 소재 또한 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
+            if (scoreA >= 1.5 && scoreB >= 4) return { grade: "Mid소재", text: "소재 관심이 매우 높지만 노출이 원활하지 않는 소재로 타겟팅 조정 및 예산 증액으로 노출 증대방안 고려" };
+            if (scoreA >= 1.5 && scoreB >= 3) return { grade: "Low소재", text: "소재 훅킹성은 있지만 노출이 원활하지 않는 소재로 타겟팅 확장 필요" };
+            if (scoreA >= 1.5 && scoreB >= 1.5) return { grade: "Low소재", text: "노출과 소재 관심이 낮은 편으로 소재 OFF 및 예산 이관 고려" };
+            if (scoreA >= 1.5 && scoreB >= 0) return { grade: "Low소재", text: "노출과 소재 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
             
-            if (scoreA >= 0 && scoreB >= 4) return { grade: "Low소재", text: "소수의 소비자에게 노출되지만 소재 관심이 매우 높은 것으로 보아 타겟팅 조정과 예산 증액으로 노출 증대방안 고려" };
-            if (scoreA >= 0 && scoreB >= 3) return { grade: "Low소재", text: "소수의 소비자에게 노출되고 소재 관심도 평이한 수준으로 타겟팅 조정 및 훅킹성을 강조한 소재로 교체 필요" };
-            if (scoreA >= 0 && scoreB >= 1.5) return { grade: "Low소재", text: "소수의 소비자에게 노출되고 소재 관심도 낮은 편으로 소재 OFF 및 예산 이관 고려" };
-            if (scoreA >= 0 && scoreB >= 0) return { grade: "Low소재", text: "소수의 소비자에게 노출되고 소재 관심도 낮은 편으로 소재 OFF 및 예산 이관 고려" };
+            if (scoreA >= 0 && scoreB >= 4) return { grade: "Low소재", text: "소재 관심은 매우 높지만 극소수의 집단에만 노출되어 타겟팅 확장 및 예산 증액으로 노출 증대방안 고려" };
+            if (scoreA >= 0 && scoreB >= 3) return { grade: "Low소재", text: "소재 훅킹성은 있지만 극소수의 집단에만 노출되어 타겟팅 확장 필요" };
+            if (scoreA >= 0 && scoreB >= 1.5) return { grade: "Low소재", text: "노출이 저조하고 소재 관심이 낮은 편으로 소재 OFF 및 예산 이관 고려" };
+            if (scoreA >= 0 && scoreB >= 0) return { grade: "Low소재", text: "노출과 소재 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
             
             return { grade: "오류", text: "점수 계산 오류" };
         };
         
-        // *** (Problem 4) NEW: '피드백' 열을 위한 16개 조건 엑셀 수식 ***
+        // *** [STEP 1] 수정: 엑셀 파일 기준 (로직 변경) ***
         const getDaFeedback = (scoreA, scoreB) => {
             if (scoreA === null || scoreB === null) return ''; // 데이터 없으면 빈칸
             
             // V8 = scoreA, W8 = scoreB
             if (scoreA >= 4 && scoreB >= 4) return "유지/강화";
-            if (scoreA >= 4 && scoreB >= 3) return "타겟팅 조정";
-            if (scoreA >= 4 && scoreB >= 1.5) return "타겟팅 조정/범용적 소재 세팅";
-            if (scoreA >= 4 && scoreB >= 0) return "소재 훅킹 강화";
+            if (scoreA >= 4 && scoreB >= 3) return "범용적 메시지 강화";
+            if (scoreA >= 4 && scoreB >= 1.5) return "훅킹성 증대";
+            if (scoreA >= 4 && scoreB >= 0) return "훅킹성 증대";
             
             if (scoreA >= 3 && scoreB >= 4) return "유지/강화";
             if (scoreA >= 3 && scoreB >= 3) return "유지/강화";
-            if (scoreA >= 3 && scoreB >= 1.5) return "타겟팅 조정/범용적 소재 세팅";
-            if (scoreA >= 3 && scoreB >= 0) return "소재 훅킹 강화";
+            if (scoreA >= 3 && scoreB >= 1.5) return "타겟팅 확장/범용적 메시지";
+            if (scoreA >= 3 && scoreB >= 0) return "타겟팅 확장+훅킹성 증대";
             
-            if (scoreA >= 1.5 && scoreB >= 4) return "타겟팅 조정+예산 증대";
-            if (scoreA >= 1.5 && scoreB >= 3) return "타겟팅 조정+소재 훅킹 강화";
-            if (scoreA >= 1.5 && scoreB >= 1.5) return "타겟팅 조정";
+            if (scoreA >= 1.5 && scoreB >= 4) return "타겟팅 확장+예산 증대";
+            if (scoreA >= 1.5 && scoreB >= 3) return "타겟팅 조정";
+            if (scoreA >= 1.5 && scoreB >= 1.5) return "예산이관";
             if (scoreA >= 1.5 && scoreB >= 0) return "예산이관";
             
-            if (scoreA >= 0 && scoreB >= 4) return "타겟팅 조정+예산 증대";
-            if (scoreA >= 0 && scoreB >= 3) return "타겟팅 조정+소재 훅킹 강화";
+            if (scoreA >= 0 && scoreB >= 4) return "타겟팅 확장+예산 증대";
+            if (scoreA >= 0 && scoreB >= 3) return "타겟팅 조정+훅킹성 증대";
             if (scoreA >= 0 && scoreB >= 1.5) return "예산이관";
             if (scoreA >= 0 && scoreB >= 0) return "예산이관";
             
@@ -1160,7 +1165,7 @@
             let scoreB = null; // *** 수정: 0 -> null ***
             let totalScore = null; // *** 수정: 0 -> null ***
             let insight = '데이터 부족';
-            let color = '#9ca3b8'; // Gray
+            let color = '#94a3b8'; // Gray
             let mediaInsight = '데이터를 입력해주세요.';
             
             // *** (Problem 2.2) 수정: mediaPrefix 로직 ***
@@ -1902,11 +1907,11 @@
                 });
                 
                 resetDataButton.addEventListener('click', () => {
+                    // *** (문제 2 수정) ***
                     // (Optional: Show confirmation modal here)
-                    if (confirm("정말로 모든 데이터를 기본값으로 초기화하시겠습니까? 저장된 내용이 사라집니다.")) {
+                    if (confirm("성과를 초기화 하시겠습니까? 저장된 내용이 모두 지워집니다.")) {
                         localStorage.removeItem(LOCAL_STORAGE_KEY);
                         
-                        // *** (문제 2 수정) ***
                         // '기본값(예시)'이 아닌 '공란'으로 초기화
                         validationData.DA = [mapCampaignDataToValidation([{}], 'DA')[0]];
                         validationData.PERF = [mapCampaignDataToValidation([{}], 'PERF')[0]];
