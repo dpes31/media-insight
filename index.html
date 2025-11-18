@@ -1140,7 +1140,7 @@
         // --- [NEW] (항목 3) 4단계: Insight Functions (Perf) ---
         /**
          * 퍼포먼스 인사이트 (B/C 점수 기준)
-         * CSV 파일 기준
+         * CSV 파일 기준 (워딩 수정됨)
          */
         const getPerfInsight = (scoreB, scoreC) => {
             if (scoreB === null || scoreC === null) return { grade: "데이터 부족", text: "퍼포먼스 성과(C) 분석을 위한 데이터가 부족합니다." };
@@ -1170,7 +1170,7 @@
 
         /**
          * 퍼포먼스 피드백 (B/C 점수 기준)
-         * CSV 파일 기준
+         * CSV 파일 기준 (워딩 수정됨)
          */
         const getPerfFeedback = (scoreB, scoreC) => {
             if (scoreB === null || scoreC === null) return '';
@@ -1508,7 +1508,6 @@
                     
                     // [NEW] (항목 7) 4단계: PM 점 컬러 적용
                     dotPerf.style.backgroundColor = item.color;
-                    dotPerf.style.borderColor = '#fff';
 
                     // X, Y 좌표 보정
                     xPerf = Math.max(PADDING + DOT_SIZE / 2, Math.min(W - PADDING - DOT_SIZE / 2, xPerf));
@@ -2103,7 +2102,7 @@
                     validationData = storageData.projects[currentProject]; // 포인터 업데이트
                     
                     // 로드된 프로젝트의 prefill 상태 재확인
-                    if (!validationData.MAIN || validationData.MAIN.length === 0) {
+                    if (!validationData || !validationData.MAIN || validationData.MAIN.length === 0) {
                         validationData = { 'MAIN': mapCampaignDataToValidation(campaignData.MAIN.data) };
                         storageData.projects[currentProject] = validationData;
                         isPrefillActive = true;
