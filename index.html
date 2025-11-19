@@ -13,37 +13,36 @@
         .scroll-container::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
         .scroll-container::-webkit-scrollbar-track { background: #f1f5f9; }
         
-        /* [NEW] (요청 9) 커스텀 설정 모달 스타일 */
+        /* 커스텀 설정 모달 스타일 */
         #custom-score-modal-backdrop {
             background-color: rgba(0, 0, 0, 0.5);
         }
         #custom-score-modal-content {
             max-width: 90vw;
-            width: 900px; /* 커스텀 모달 너비 */
+            width: 900px;
             max-height: 80vh;
         }
-        
-        /* [NEW] (요청 9) 커스텀 설정 모달 내부 탭 */
         .tab-button.active {
             border-color: #4f46e5;
             color: #4f46e5;
             background-color: #eef2ff;
         }
         
-        /* [NEW] 5단계: 샘플 보기 모달 스타일 */
+        /* 샘플 보기 모달 스타일 */
         #sample-modal-backdrop {
             background-color: rgba(0, 0, 0, 0.5);
         }
         #sample-modal-content {
             max-width: 90vw;
-            width: 1200px; /* 모달 너비 고정 */
-            max-height: 90vh; /* 높이 늘림 */
+            width: 1200px;
+            max-height: 90vh;
         }
-        /* [FIX] 샘플 모달 내부 차트 높이 복구 (300px -> 480px) */
+        
+        /* [수정] 샘플 차트 컨테이너 - 메인과 동일한 스타일 적용 */
         .sample-quadrant-matrix {
             position: relative;
             width: 100%;
-            height: 480px; /* 메인 차트와 동일한 높이 */
+            height: 480px;
             display: grid;
             grid-template-columns: 1fr 1fr;
             grid-template-rows: 1fr 1fr;
@@ -51,19 +50,18 @@
             border-radius: 12px;
             overflow: hidden;
         }
-        /* [FIX] 샘플 모달 내부 쿼드런트 스타일 (메인과 동일하게) */
-        .sample-quadrant {
-             padding: 1rem;
-             display: flex;
-             flex-direction: column;
-             justify-content: center; 
-             align-items: center; 
-             position: relative;
-             z-index: 10;
-             text-align: center;
+        
+        /* [수정] 쿼드런트 스타일 통합 (샘플/메인 동일하게) */
+        .quadrant, .sample-quadrant {
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            justify-content: center; 
+            align-items: center; 
+            position: relative;
+            z-index: 10;
+            text-align: center; /* 텍스트 중앙 정렬 강제 */
         }
-        .sample-quadrant h3 { font-size: 1.25rem; font-weight: 800; } /* text-xl font-extrabold */
-        .sample-quadrant p { font-size: 0.875rem; margin-top: 0.5rem; } /* text-sm mt-2 */
         
         /* 4-Quadrant Matrix Styling */
         .quadrant-matrix {
@@ -77,26 +75,14 @@
             border-radius: 12px;
             overflow: hidden;
         }
-        .quadrant {
-            padding: 1rem;
-            display: flex;
-            flex-direction: column;
-            justify-content: center; 
-            align-items: center; 
-            position: relative;
-            z-index: 10;
-        }
-        /* Quadrant Colors & Labels for Intuitive Interpretation */
-        .quadrant-top-right { background-color: rgba(16, 185, 129, 0.05); } /* Top-Right */
-        .quadrant-top-left { background-color: rgba(59, 130, 246, 0.05); } /* Top-Left */
-        .quadrant-bottom-right { background-color: rgba(245, 158, 11, 0.05); } /* Bottom-Right */
-        .quadrant-bottom-left { background-color: rgba(239, 68, 68, 0.05); } /* Bottom-Left */
         
-        .quadrant-label {
-            display: none;
-        }
+        /* Quadrant Colors */
+        .quadrant-top-right { background-color: rgba(16, 185, 129, 0.05); }
+        .quadrant-top-left { background-color: rgba(59, 130, 246, 0.05); }
+        .quadrant-bottom-right { background-color: rgba(245, 158, 11, 0.05); }
+        .quadrant-bottom-left { background-color: rgba(239, 68, 68, 0.05); }
         
-        /* Quadrant Middle Lines (New Improvement) */
+        /* Quadrant Middle Lines */
         .matrix-lines {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -105,26 +91,19 @@
         }
         .v-line {
             position: absolute;
-            left: 50%;
-            top: 0;
-            bottom: 0;
-            width: 2px;
-            border-left: 2px dashed #9ca3af; /* Gray dashed line for mid-point */
+            left: 50%; top: 0; bottom: 0; width: 2px;
+            border-left: 2px dashed #9ca3af;
             transform: translateX(-1px);
         }
         .h-line {
             position: absolute;
-            top: 50%;
-            left: 0;
-            right: 0;
-            height: 2px;
-            border-top: 2px dashed #9ca3af; /* Gray dashed line for mid-point */
+            top: 50%; left: 0; right: 0; height: 2px;
+            border-top: 2px dashed #9ca3af;
             transform: translateY(-1px);
         }
         .chart-dot {
             position: absolute;
-            width: 14px;
-            height: 14px;
+            width: 14px; height: 14px;
             border-radius: 50%;
             cursor: pointer;
             z-index: 50;
@@ -133,100 +112,63 @@
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
         }
         .chart-dot:hover {
-            transform: scale(1.5);
-            z-index: 60;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transform: scale(1.5); z-index: 60; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
-        
-        /* [MODIFY] (항목 7) 5단계: PM 점 스타일 (DA 점과 동일, radius만 다름) */
         .chart-dot-perf {
             position: absolute;
-            width: 14px;
-            height: 14px;
-            border-radius: 3px; /* Square with slightly rounded corners */
+            width: 14px; height: 14px;
+            border-radius: 3px;
             cursor: pointer;
-            z-index: 49; /* Slightly behind the main dot if overlapping */
+            z-index: 49;
             transition: transform 0.2s, box-shadow 0.2s;
-            border: 2px solid #fff; /* [MODIFY] (항목 7) 흰색 테두리 */
+            border: 2px solid #fff;
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-            /* background-color는 JS에서 item.color로 적용 */
         }
         .chart-dot-perf:hover {
-            transform: scale(1.5);
-            z-index: 59;
-            box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
+            transform: scale(1.5); z-index: 59; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5);
         }
         
-        .sortable {
-            cursor: pointer;
-            transition: background-color 0.2s;
-        }
-        .sortable:hover {
-            background-color: #e5e7eb;
-        }
+        .sortable { cursor: pointer; transition: background-color 0.2s; }
+        .sortable:hover { background-color: #e5e7eb; }
         
-        /* Custom styles for validation table headers */
         #validation-input-table thead th {
-            text-align: center;
-            vertical-align: middle;
-            border-bottom: 1px solid #e5e7eb; /* Light gray border for separation */
+            text-align: center; vertical-align: middle; border-bottom: 1px solid #e5e7eb;
         }
         #validation-input-table thead tr:first-child th {
-            border-bottom: none; /* No double line between first and second header row */
-            border-right: 1px solid #d1d5db; /* Darker line for group separation */
+            border-bottom: none; border-right: 1px solid #d1d5db;
         }
         #validation-input-table thead tr:last-child th {
-             border-right: 1px solid #e5e7eb; /* Separator for bottom row cells */
-             padding-top: 4px; /* Adjust padding for better look */
+             border-right: 1px solid #e5e7eb; padding-top: 4px;
         }
-        
-        /* Style for header sub-text */
         .header-subtext {
-            display: block;
-            font-size: 0.65rem; /* 10.4px */
-            font-weight: 500;
-            color: #4b5563; /* gray-600 */
-            margin-top: 1px;
+            display: block; font-size: 0.65rem; font-weight: 500; color: #4b5563; margin-top: 1px;
         }
+        .input-prefill { color: #9ca3af; }
+        .input-prefill:focus { color: #111827; }
         
-        /* Style for prefill input text */
-        .input-prefill {
-            color: #9ca3af; /* gray-400 */
-        }
-        .input-prefill:focus {
-            color: #111827; /* gray-900 (default text color) */
-        }
-        
-        /* [NEW] 안정화 1: 커스텀 확인 모달 스타일 */
+        /* 커스텀 확인 모달 스타일 */
         #custom-modal-backdrop {
             background-color: rgba(0, 0, 0, 0.6);
             transition: opacity 0.2s ease-in-out;
         }
         #custom-modal-content {
-            transform: scale(0.95);
-            transition: transform 0.2s ease-in-out;
+            transform: scale(0.95); transition: transform 0.2s ease-in-out;
         }
         #custom-modal-backdrop:not(.hidden) #custom-modal-content {
             transform: scale(1);
         }
-        
     </style>
 </head>
-<body class="p-4 md:p-8"> <!-- 좌우 패딩을 줄였습니다 -->
+<body class="p-4 md:p-8">
     <div id="app" class="w-full mx-auto bg-white rounded-xl shadow-2xl p-8 md:p-12">
-        <!-- Header and Campaign Selector -->
         <header class="mb-8 border-b pb-4">
             <h1 class="text-4xl font-extrabold text-gray-900 mb-2">통합 캠페인 성과 심층 분석 대시보드 (PC)</h1>
             <p class="text-gray-500">DA/퍼포먼스 목표별 효율 분석 및 소재 등급별 직관적 인사이트 도출</p>
         </header>
-        <!-- [NEW] Project Selector (항목 2) -->
         <div class="mb-8 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <label for="project-selector" class="text-lg font-bold text-gray-800">프로젝트:</label>
-                <select id="project-selector" class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500">
-                    <!-- Projects will be loaded here by JS -->
-                </select>
-                <!-- [NEW] (항목 10) 5단계: 프로젝트 삭제 버튼 -->
+                <select id="project-selector" class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></select>
                 <button id="delete-project-button" class="bg-red-500 text-white hover:bg-red-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors" title="현재 프로젝트 삭제">삭제</button>
             </div>
             <button id="new-project-button" class="bg-green-500 text-white hover:bg-green-600 text-sm font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
@@ -235,21 +177,14 @@
             </button>
         </div>
         
-        <!-- Campaign Validation Input Section -->
         <div id="validation-section" class="mb-10">
-            <!-- Title and Toggle Button -->
             <div class="flex items-center justify-between mb-4 border-b pb-2">
-                <h2 class="text-2xl font-bold text-gray-800">
-                    캠페인 목표 & 성과 검증 항목 입력
-                </h2>
-                <!-- [MODIFY] (항목 1) 5단계: 버튼 그룹으로 묶음 -->
+                <h2 class="text-2xl font-bold text-gray-800">캠페인 목표 & 성과 검증 항목 입력</h2>
                 <div class="flex items-center space-x-2">
-                    <!-- [NEW] (요청 9) '나만의 성과' (커스텀 기능) 버튼 -->
                     <button id="show-custom-score-modal-button" class="bg-indigo-600 text-white hover:bg-indigo-700 text-sm font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1"><path fill-rule="evenodd" d="M11.013 2.51_a7.5_7.5_0_0_1_6.43_2.446_1_1_0_0_0_1.264-1.54_9.5_9.5_0_0_0-15.414_0_1_1_0_0_0_1.264_1.54_7.5_7.5_0_0_1_6.456-2.446zM2.083_8.384_1_1_0_0_0_3.62_6.843l-1.01_1.01a1_1_0_0_0_1.414_1.414l1.01-1.01A1_1_0_0_0_2.083_8.384zm14.293-1.54_1.01_1.01a1_1_0_0_0_1.414-1.414l-1.01-1.01a1_1_0_1_0-1.414_1.414zM10_13a3_3_0_1_0_0-6_3_3_0_0_0_0_6zm-5_2.121_1_1_0_0_0_1.414-1.414L5_12.293V10.5a5_5_0_1_1_10_0v1.793l-1.414_1.414a1_1_0_0_0_1.414_1.414L15_14.121V16.5a1_1_0_0_0_2_0v-3.879a1_1_0_0_0-.293-.707l-2.02-2.02A7.5_7.5_0_0_0_3.02_9.914l-2.02_2.02a1_1_0_0_0-.293.707V16.5a1_1_0_0_0_2_0v-2.379z" clip-rule="evenodd" /></svg>
                         커스텀 설정
                     </button>
-                    <!-- [NEW] (항목 1) 5단계: 샘플 보기 버튼 -->
                     <button id="show-sample-modal-button" class="bg-gray-500 text-white hover:bg-gray-600 text-sm font-semibold py-2 px-4 rounded-lg transition-colors">
                         [샘플 보기]
                     </button>
@@ -259,207 +194,94 @@
                     </button>
                 </div>
             </div>
-            <!-- Collapsible Input Table Container (Removed 'hidden' class) -->
             <div id="validation-table-content" class="transition-all duration-300 overflow-hidden">
                 <div class="bg-gray-50 p-4 rounded-xl shadow-inner border">
                     <div class="flex justify-between items-center mb-4">
                         <p class="text-sm text-gray-600">
-                            <span id="validation-campaign-label" class="font-bold text-indigo-600">통합 캠페인</span> 효율 검증 항목을 직접 기재해주세요. <!-- (항목 1) 문구 수정 -->
+                            <span id="validation-campaign-label" class="font-bold text-indigo-600">통합 캠페인</span> 효율 검증 항목을 직접 기재해주세요.
                         </p>
-                        <!-- *** (LocalStorage) NEW: 버튼 그룹 *** -->
                         <div class="flex items-center space-x-2">
                             <span id="save-status" class="text-sm text-green-600 font-medium hidden">저장됨!</span>
-                            <button id="save-data-button" class="bg-blue-500 text-white hover:bg-blue-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">
-                                  💾   현재 내용 저장
-                            </button>
-                            <button id="reset-data-button" class="bg-red-500 text-white hover:bg-red-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">
-                                  🔄   기본값으로 초기화
-                            </button>
-                            <button id="add-validation-row" class="bg-green-500 text-white hover:bg-green-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">
-                                + 항목 추가
-                            </button>
+                            <button id="save-data-button" class="bg-blue-500 text-white hover:bg-blue-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">💾 현재 내용 저장</button>
+                            <button id="reset-data-button" class="bg-red-500 text-white hover:bg-red-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">🔄 기본값으로 초기화</button>
+                            <button id="add-validation-row" class="bg-green-500 text-white hover:bg-green-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors">+ 항목 추가</button>
                         </div>
                     </div>
-                    
                     <div class="overflow-x-auto">
                         <table id="validation-input-table" class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0">
-                            <thead id="validation-table-header" class="bg-gray-100 sticky top-0">
-                                <!-- Table Headers will be injected here (2 rows) -->
-                            </thead>
-                            <tbody id="validation-table-body">
-                                <!-- Input Rows will be injected here -->
-                            </tbody>
+                            <thead id="validation-table-header" class="bg-gray-100 sticky top-0"></thead>
+                            <tbody id="validation-table-body"></tbody>
                         </table>
                     </div>
                 </div>
             </div>
         </div>
         
-        <!-- Analysis Trigger Button (Keep for manual re-run) -->
         <div class="mb-10 text-center">
             <button id="run-analysis-button" class="bg-blue-600 text-white hover:bg-blue-700 text-xl font-bold py-3 px-8 rounded-xl shadow-xl transition-all transform hover:scale-[1.02] active:scale-[0.98]">
                    📊    입력 데이터 기반 인사이트 분석 재실행
             </button>
         </div>
-        <!-- Analysis Results Container (REMOVED 'hidden' class) -->
+        
         <div id="analysis-results"> 
-            <!-- 1. Overall Performance Summary Table -->
             <div class="mb-10">
-                <!-- *** 수정: (2.1) <h2>에 ID 추가 *** -->
-                <h2 id="summary-main-title" class="text-2xl font-bold text-gray-800 mb-4">
-                    종합 성과 요약 
-                    <span id="summary-title" class="text-indigo-600 text-lg ml-2"></span>
-                </h2>
-                <!-- *** 수정: (2.4) 가로 스크롤 컨테이너 추가 *** -->
+                <h2 id="summary-main-title" class="text-2xl font-bold text-gray-800 mb-4">종합 성과 요약 <span id="summary-title" class="text-indigo-600 text-lg ml-2"></span></h2>
                 <div class="scroll-container overflow-x-auto rounded-xl shadow-lg border">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-indigo-50">
-                            <tr id="summary-header" class="text-sm font-semibold text-indigo-700 uppercase tracking-wider">
-                                <!-- Summary Headers -->
-                            </tr>
+                            <tr id="summary-header" class="text-sm font-semibold text-indigo-700 uppercase tracking-wider"></tr>
                         </thead>
-                        <tbody id="summary-body" class="bg-white divide-y divide-gray-200">
-                            <!-- Summary Data -->
-                        </tbody>
+                        <tbody id="summary-body" class="bg-white divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
             </div>
-            <!-- 2. Visualization and Insights (3-Column Layout) -->
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                
-                <!-- Left 2/3: 4-Quadrant Matrix (Existing Logic) -->
                 <div class="xl:col-span-2 space-y-6">
                     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
-                        <!-- *** (Problem 4) 수정: 타이틀 변경 *** -->
-                        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
-                            소재 성과 매트리스
-                            <!-- *** (Problem 2) 수정: 부제 span 삭제 *** -->
-                        </h2>
-                        
-                        <div class="quadrant-matrix" id="quadrant-matrix">
-                            <!-- Quadrant Lines (NEW) -->
-                            <div class="matrix-lines">
-                                <div class="v-line"></div>
-                                <div class="h-line"></div>
-                            </div>
-                            
-                            <!-- *** (Problem 1) 수정: Top-Left와 Top-Right 순서 변경 *** -->
-                            
-                            <!-- Quadrant 1 -> 2: Top Left (Potential) -->
-                            <div class="quadrant quadrant-top-left">
-                                <!-- *** (Request 1) 수정: h-full 제거, justify-center 추가 *** -->
-                                <div class="relative z-10 flex flex-col justify-center text-center">
-                                    <h3 class="text-xl font-extrabold text-blue-700">High Potential</h3>
-                                    <p class="text-sm text-gray-500 mt-2">노출 효율(Low) 소재 매력도(High)</p>
-                                    <p class="text-sm text-gray-700 mt-2">훅킹성은 높지만 잘 알려지지 않은 소재</p>
-                                    <div class="mt-4">
-                                        <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-blue-800 bg-blue-100">
-                                            Action : 타겟팅 확장
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Quadrant 2 -> 1: Top Right (Top) -->
-                            <div class="quadrant quadrant-top-right">
-                                <!-- *** (Request 1) 수정: h-full 제거, justify-center 추가 *** -->
-                                <div class="relative z-10 flex flex-col justify-center text-center">
-                                    <h3 class="text-xl font-extrabold text-green-700">STAR</h3>
-                                    <p class="text-sm text-gray-500 mt-2">노출 효율(High) 소재 매력도(High)</p>
-                                    <p class="text-sm text-gray-700 mt-2">대중적으로 가장 반응이 우수한 소재</p>
-                                    <div class="mt-4">
-                                        <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-green-800 bg-green-100">
-                                            Action : 유지 / 예산 증대
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Quadrant 3: Bottom Left (Low) -->
-                            <div class="quadrant quadrant-bottom-left">
-                                <!-- *** (Request 1) 수정: h-full 제거, justify-center 추가 *** -->
-                                <div class="relative z-10 flex flex-col justify-center text-center">
-                                    <h3 class="text-xl font-extrabold text-red-700">Question Mark</h3>
-                                    <p class="text-sm text-gray-500 mt-2">노출 효율(Low) 소재 매력도(Low)</p>
-                                    <p class="text-sm text-gray-700 mt-2">예산 낭비 가능성이 높은 소재</p>
-                                    <div class="mt-4">
-                                        <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-red-800 bg-red-100">
-                                            Action : 광고OFF / 예산이관
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Quadrant 4: Bottom Right (Focus) -->
-                            <div class="quadrant quadrant-bottom-right">
-                                <!-- *** (Request 1) 수정: h-full 제거, justify-center 추가 *** -->
-                                <div class="relative z-10 flex flex-col justify-center text-center">
-                                    <h3 class="text-xl font-extrabold text-amber-700">Niche</h3>
-                                    <p class="text-sm text-gray-500 mt-2">노출 효율(High) 소재 매력도(Low)</p>
-                                    <p class="text-sm text-gray-700 mt-2">소수의 집단에서 반응이 높은 소재</p>
-                                    <div class="mt-4">
-                                        <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-amber-800 bg-amber-100">
-                                            Action : 범용적 소재 / 훅킹성 강화
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <!-- Dots are injected here -->
-                        </div>
-                        
-                        <!-- *** (Problem 3) 수정: 하단 라벨 텍스트 전체 삭제 *** -->
+                        <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">소재 성과 매트리스</h2>
+                        <div class="quadrant-matrix" id="quadrant-matrix"></div>
                     </div>
                 </div>
-                <!-- Right 1/3: Key Insights (Existing Logic) -->
                 <div class="xl:col-span-1 space-y-6">
                     <div class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200 h-full">
-                        <!-- *** 수정: (2.1) 타이틀 변경 *** -->
                         <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                             MEDIA INSIGHT
                         </h2>
-                        <ul id="insight-list" class="space-y-4 text-gray-700 text-sm">
-                            <!-- Insights will be injected here -->
-                        </ul>
+                        <ul id="insight-list" class="space-y-4 text-gray-700 text-sm"></ul>
                     </div>
                 </div>
             </div>
-            
-            <!-- 3. Efficiency Data Table (Existing Logic) -->
             <div class="mt-10">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">캠페인 상세 효율 지표 (소재별)</h2>
                 <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-gray-100 sticky top-0">
-                            <tr id="table-header" class="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <!-- Headers will be injected here -->
-                            </tr>
+                            <tr id="table-header" class="text-xs font-medium text-gray-500 uppercase tracking-wider"></tr>
                         </thead>
-                        <tbody id="table-body" class="bg-white divide-y divide-gray-200">
-                            <!-- Data rows will be injected here -->
-                        </tbody>
+                        <tbody id="table-body" class="bg-white divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
             </div>
-            
         </div>
     </div>
     
-    <!-- [NEW] (항목 1) 5단계: 샘플 보기 모달 -->
+    <!-- 샘플 보기 모달 -->
     <div id="sample-modal-backdrop" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.5);">
-        <div id="sample-modal-content" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-6xl max-h-[90vh]">
-            <header class="flex items-center justify-between p-4 border-b bg-gray-50">
-                <!-- [FIX] 모달 타이틀 변경 -->
-                <h2 class="text-xl font-bold text-gray-800">캠페인 목표 & 성과 검증 항목 입력</h2>
+        <div id="sample-modal-content" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-6xl max-h-[90vh] flex flex-col">
+            <header class="flex items-center justify-between p-4 border-b bg-gray-50 flex-shrink-0">
+                <h2 class="text-xl font-bold text-gray-800">캠페인 목표 & 성과 검증 항목 입력 (샘플)</h2>
                 <button id="sample-modal-close-button" class="text-gray-400 hover:text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
                 </button>
             </header>
-            <div id="sample-modal-body" class="p-6 overflow-auto" style="height: calc(90vh - 65px);">
-                <!-- [MODIFY] (항목 2) 5단계: 샘플 데이터가 여기에 동적으로 렌더링됩니다. -->
-                <p class="text-center text-gray-500">샘플 데이터를 불러오는 중입니다...</p>
+            <div id="sample-modal-body" class="p-6 overflow-y-auto" style="height: calc(90vh - 65px);">
+                <!-- 샘플 데이터가 동적으로 렌더링됩니다. -->
             </div>
         </div>
     </div>
     
-    <!-- [NEW] 안정화 1: 커스텀 확인 모달 HTML -->
+    <!-- 커스텀 확인 모달 -->
     <div id="custom-modal-backdrop" class="fixed inset-0 z-[200] hidden items-center justify-center p-4">
         <div id="custom-modal-content" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-md">
             <header class="flex items-center justify-between p-4 border-b bg-gray-50">
@@ -469,19 +291,14 @@
                 <p id="custom-modal-message" class="text-gray-700">이 작업을 정말로 실행하시겠습니까?</p>
             </div>
             <footer class="flex justify-end space-x-3 p-4 bg-gray-50">
-                <button id="custom-modal-cancel" class="bg-gray-200 text-gray-800 hover:bg-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">
-                    취소
-                </button>
-                <button id="custom-modal-confirm" class="bg-red-500 text-white hover:bg-red-600 font-semibold py-2 px-4 rounded-lg transition-colors">
-                    확인
-                </button>
+                <button id="custom-modal-cancel" class="bg-gray-200 text-gray-800 hover:bg-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors">취소</button>
+                <button id="custom-modal-confirm" class="bg-red-500 text-white hover:bg-red-600 font-semibold py-2 px-4 rounded-lg transition-colors">확인</button>
             </footer>
         </div>
     </div>
     
-    <!-- [NEW] (요청 9) '나만의 성과' (커스텀 기능) 모달 HTML -->
+    <!-- 커스텀 점수 설정 모달 -->
     <div id="custom-score-modal-backdrop" class="fixed inset-0 z-[150] hidden items-center justify-center p-4">
-        <!-- 커스텀 모달 내용 생략 (이전과 동일) -->
          <div id="custom-score-modal-content" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-4xl max-h-[80vh] flex flex-col">
             <header class="flex items-center justify-between p-4 border-b bg-gray-50">
                 <h2 class="text-xl font-bold text-gray-800">⚙️ 커스텀 점수 설정</h2>
@@ -489,88 +306,72 @@
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
                 </button>
             </header>
-            
-            <!-- 모달 본문 (스크롤) -->
             <div id="custom-score-modal-body" class="p-6 overflow-auto flex-grow">
-                
-                <!-- 탭 버튼 -->
                 <div class="mb-4 border-b border-gray-200">
                     <nav class="flex space-x-2" id="custom-score-tabs">
                         <button data-tab="da-score" class="tab-button active text-sm font-bold py-2 px-4 border-b-2 transition-colors">DA 점수 (A/B)</button>
                         <button data-tab="pm-score" class="tab-button text-sm font-bold py-2 px-4 border-b-2 border-transparent hover:border-gray-300 hover:text-gray-600 transition-colors">PM 점수 (C)</button>
                     </nav>
                 </div>
-                
-                <!-- 탭 컨텐츠 -->
                 <div id="custom-score-tab-content">
-                    <!-- DA 점수 탭 (이전과 동일) -->
                     <div id="tab-da-score" class="space-y-6">
-                        <p class="text-sm text-gray-600">DA 성과(A:노출, B:반응)를 계산하는 5점 척도 기준을 설정합니다. (값은 비율 또는 절대값입니다.)</p>
-                         <!-- A: CPM 점수 -->
+                        <p class="text-sm text-gray-600">DA 성과(A:노출, B:반응)를 계산하는 5점 척도 기준을 설정합니다.</p>
                         <div>
                             <h4 class="text-lg font-semibold text-gray-800 mb-2">A: CPM 점수 (목표 대비)</h4>
                             <div class="grid grid-cols-5 gap-2">
-                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점 (Best)</label><input type="number" data-setting-key="cpm.score5" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 0.8 (80%)</span></div>
-                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="cpm.score4" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 1.0 (100%)</span></div>
-                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="cpm.score3" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 1.3 (130%)</span></div>
-                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="cpm.score2" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 1.6 (160%)</span></div>
-                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점 (Worst)</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외 (1.6+)</span></div>
+                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점</label><input type="number" data-setting-key="cpm.score5" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="cpm.score4" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="cpm.score3" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="cpm.score2" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외</span></div>
                             </div>
                         </div>
-                        <!-- B(CTR) 점수 -->
                         <div>
-                            <h4 class="text-lg font-semibold text-gray-800 mb-2">B (파트1): CTR 점수 (목표 대비)</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">B: CTR 점수 (목표 대비)</h4>
                             <div class="grid grid-cols-5 gap-2">
-                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점 (Best)</label><input type="number" data-setting-key="ctr.score5" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&gt; 1.3 (130%)</span></div>
-                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="ctr.score4" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&gt; 1.1 (110%)</span></div>
-                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="ctr.score3" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&gt; 1.0 (100%)</span></div>
-                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="ctr.score2" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&gt; 0.5 (50%)</span></div>
-                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점 (Worst)</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외 (0.5 이하)</span></div>
+                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점</label><input type="number" data-setting-key="ctr.score5" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="ctr.score4" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="ctr.score3" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="ctr.score2" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외</span></div>
                             </div>
                         </div>
-                        <!-- B(CPC) 점수 -->
                          <div>
-                            <h4 class="text-lg font-semibold text-gray-800 mb-2">B (파트2): CPC 점수 (목표 대비)</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">B: CPC 점수 (목표 대비)</h4>
                             <div class="grid grid-cols-5 gap-2">
-                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점 (Best)</label><input type="number" data-setting-key="cpc.score5" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 0.85 (85%)</span></div>
-                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="cpc.score4" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 0.95 (95%)</span></div>
-                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="cpc.score3" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 1.04 (104%)</span></div>
-                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="cpc.score2" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 1.4 (140%)</span></div>
-                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점 (Worst)</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외 (1.4+)</span></div>
+                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점</label><input type="number" data-setting-key="cpc.score5" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="cpc.score4" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="cpc.score3" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="cpc.score2" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외</span></div>
                             </div>
                         </div>
                     </div>
-                    
-                    <!-- PM 점수 탭 -->
                     <div id="tab-pm-score" class="hidden space-y-6">
                         <p class="text-sm text-gray-600">PM 성과(C:전환)를 계산하는 5점 척도 기준을 설정합니다.</p>
-                         <!-- C(CVR) 점수 -->
                         <div>
-                            <h4 class="text-lg font-semibold text-gray-800 mb-2">C (파트1): CVR 점수 (목표 대비)</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">C: CVR 점수 (목표 대비)</h4>
                              <div class="grid grid-cols-5 gap-2">
-                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점 (Best)</label><input type="number" data-setting-key="cvr.score5" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&gt; 1.5 (150%)</span></div>
-                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="cvr.score4" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&ge; 1.15 (115%)</span></div>
-                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="cvr.score3" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&ge; 0.95 (95%)</span></div>
-                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="cvr.score2" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&ge; 0.75 (75%)</span></div>
-                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점 (Worst)</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외 (0.75 미만)</span></div>
+                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점</label><input type="number" data-setting-key="cvr.score5" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="cvr.score4" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="cvr.score3" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="cvr.score2" step="0.1" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외</span></div>
                             </div>
                         </div>
-                        <!-- C(CPA) 점수 -->
                          <div>
-                            <h4 class="text-lg font-semibold text-gray-800 mb-2">C (파트2): CPA 점수 (목표 대비)</h4>
+                            <h4 class="text-lg font-semibold text-gray-800 mb-2">C: CPA 점수 (목표 대비)</h4>
                              <div class="grid grid-cols-5 gap-2">
-                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점 (Best)</label><input type="number" data-setting-key="cpa.score5" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&lt; 0.70 (70%)</span></div>
-                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="cpa.score4" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&le; 0.90 (90%)</span></div>
-                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="cpa.score3" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&le; 1.05 (105%)</span></div>
-                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="cpa.score2" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"><span class="text-xs text-gray-500">&le; 1.25 (125%)</span></div>
-                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점 (Worst)</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외 (1.25 초과)</span></div>
+                                <div class="text-center p-2 bg-green-50 rounded-lg border border-green-200"><label class="block text-xs font-bold text-green-700">5점</label><input type="number" data-setting-key="cpa.score5" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-blue-50 rounded-lg border border-blue-200"><label class="block text-xs font-bold text-blue-700">4점</label><input type="number" data-setting-key="cpa.score4" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-gray-50 rounded-lg border border-gray-200"><label class="block text-xs font-bold text-gray-700">3점</label><input type="number" data-setting-key="cpa.score3" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-yellow-50 rounded-lg border border-yellow-200"><label class="block text-xs font-bold text-yellow-700">2점</label><input type="number" data-setting-key="cpa.score2" step="0.01" class="w-full mt-1 p-1 text-center border-gray-300 rounded-md"></div>
+                                <div class="text-center p-2 bg-red-50 rounded-lg border border-red-200"><label class="block text-xs font-bold text-red-700">1점</label><span class="text-xs text-gray-500 mt-1 p-1 block">그 외</span></div>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
-            
-            <!-- 모달 푸터 -->
             <footer class="flex justify-between items-center p-4 bg-gray-50 border-t">
                 <div><button id="custom-score-reset-button" class="bg-gray-200 text-gray-800 hover:bg-gray-300 font-semibold py-2 px-4 rounded-lg transition-colors text-sm">기본값 복원</button></div>
                 <div class="flex space-x-3">
@@ -735,28 +536,15 @@
             },
         };
         
-        // [FIX] 샘플 데이터를 DA(상단) -> PERF(하단) 순서로 정렬하여 가독성 개선
         const testProjectMockData = [
-             // --- DA Group (DA-Top, DA-Mid, DA-Low) ---
-             // 2. DA-Top (Star)
              { media: '네이버', placement: '스페셜DA', creativeName: '소재 B', cost: 10000000, imp: 5000000, click: 20000, targetCpm: 2100, targetCpc: 700, targetCtr: 0.003, conv: null, targetCvr: null, targetCpa: null, revenue: null },
-             // 4. DA-Mid (High Potential)
              { media: '네이버', placement: '타임보드', creativeName: '소재 D', cost: 8000000, imp: 4000000, click: 16000, targetCpm: 3000, targetCpc: 600, targetCtr: 0.003, conv: null, targetCvr: null, targetCpa: null, revenue: null },
-             // 6. DA-Mid (Niche)
              { media: 'META', placement: 'PPA', creativeName: '소재 F', cost: 5000000, imp: 2000000, click: 4000, targetCpm: 3000, targetCpc: 1500, targetCtr: 0.0015, conv: null, targetCvr: null, targetCpa: null, revenue: null },
-             // 7. DA-Low (Question Mark)
              { media: '에브리타임', placement: '홈배너', creativeName: '소재 G', cost: 1000000, imp: 200000, click: 300, targetCpm: 4000, targetCpc: 3000, targetCtr: 0.002, conv: null, targetCvr: null, targetCpa: null, revenue: null },
-             
-             // --- PERF Group (Perf-Top, Perf-Mid, Perf-Low) ---
-             // 1. Perf-Top (Star, ROAS 5점)
              { media: '구글', placement: 'GDN', creativeName: '소재 A', cost: 20000000, imp: 1500000, click: 30000, targetCpm: 15000, targetCpc: 800, targetCtr: 0.015, conv: 1500, targetCvr: 0.04, targetCpa: 15000, revenue: 140000000 },
-             // 3. Perf-Top (Star, B/C점수 Mid)
              { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 5000000, imp: 1000000, click: 5000, targetCpm: 6000, targetCpc: 1200, targetCtr: 0.004, conv: 200, targetCvr: 0.03, targetCpa: 30000, revenue: 22000000 },
-             // 5. Perf-Mid (High Potential)
              { media: '유튜브', placement: '범퍼', creativeName: '소재 E', cost: 6000000, imp: 10000000, click: 4000, targetCpm: 800, targetCpc: 1500, targetCtr: 0.003, conv: 100, targetCvr: 0.03, targetCpa: 70000, revenue: 15000000 },
-             // 8. Perf-Low (Question Mark)
              { media: '틱톡', placement: '도달', creativeName: '소재 H', cost: 2000000, imp: 1000000, click: 1000, targetCpm: 1500, targetCpc: 1500, targetCtr: 0.0015, conv: 10, targetCvr: 0.02, targetCpa: 150000, revenue: null },
-             // 9. Perf-Low (Question Mark, ROAS 1점)
              { media: '오픈마켓', placement: '배너', creativeName: '소재 I', cost: 3000000, imp: 1000000, click: 1000, targetCpm: 2500, targetCpc: 1000, targetCtr: 0.002, conv: 10, targetCvr: 0.02, targetCpa: 100000, revenue: 1000000 },
         ];
         
@@ -780,16 +568,13 @@
                     { name: '소재명', key: 'creativeName', type: 'text', placeholder: '소재명', width: 'w-24', group: '기본 정보' },
                     { name: '광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true, group: '기본 정보' },
                     { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '기본 정보' }, 
-                    
                     { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24', isLargeNumber: true, group: '노출 성과 (CPM)' },
                     { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true, group: '노출 성과 (CPM)' },
-                    
                     { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' }, 
                     { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' },
                     { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
                     { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
                     { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
-                    
                     { name: '전환수', key: 'conv', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '전환 성과 (CPA)' }, 
                     { name: '목표 전환율(%)', key: 'targetCvr', type: 'percent', placeholder: '목표CVR', width: 'w-24', group: '전환 성과 (CPA)' },
                     { name: '성과 전환율(%)', key: 'actualCvr', type: 'percent', placeholder: '성과CVR', width: 'w-24', calculated: true, group: '전환 성과 (CPA)' },
@@ -808,8 +593,6 @@
                 configCols.forEach(col => {
                     row[col.key] = null;
                 });
-                
-                // [FIX] 빈 값 오류 방지: 값이 있으면 넣고, 없으면 null 유지
                 if (sourceItem && Object.keys(sourceItem).length > 0) {
                     configCols.forEach(col => {
                         row[col.key] = sourceItem[col.key] !== undefined ? sourceItem[col.key] : null;
@@ -818,11 +601,9 @@
                     const parts = sourceItem.creative ? String(sourceItem.creative).split('_') : [null, null];
                     row.creativeName = sourceItem.creativeName || parts[0] || null; 
                     row.placement = sourceItem.placement || parts[1] || null; 
-                    
                     row.cost = sourceItem.cost || null;
                     row.imp = sourceItem.imp || null;
                     row.click = sourceItem.click || null;
-                    
                     if (row.isPrefill) {
                          if (sourceItem.media === '네이버') {
                             row.targetCpm = sourceItem.targetCpm || 2000;
@@ -849,7 +630,6 @@
         
         let isValidationTableOpen = true; 
         
-        // [FIX] 기본값: 예시 데이터로 초기화
         const defaultValidationData = { 
             'MAIN': mapCampaignDataToValidation(campaignData.MAIN.data),
             'settings': null 
@@ -935,7 +715,6 @@
             const rowElement = document.querySelector(`#validation-table-body tr[data-row-id="${rowId}"]`);
             if (!rowElement) return;
             const config = validationTableConfigs['MAIN'];
-            
             config.cols.forEach((col, colIndex) => {
                 if (col.calculated) {
                     const td = rowElement.children[colIndex]; 
@@ -944,7 +723,6 @@
                     if (!inputElement) return;
                     const rawValue = rowData[col.key];
                     let displayValue = '-';
-                    
                     if (rawValue !== null) {
                         if (col.type === 'currency') displayValue = formatNumber(Math.round(rawValue), 'currency').replace('원', ''); 
                         else if (col.type === 'percent') displayValue = `${(rawValue * 100).toFixed(2)}%`; 
@@ -962,9 +740,7 @@
                 if (!config) return;
                 let inputValue = event.target.value;
                 let rawValueToStore = inputValue; 
-                
                 if (config.isLargeNumber) {
-                    const originalCursorPos = event.target.selectionStart;
                     const cleanValue = inputValue.replace(/[^\d]/g, ''); 
                     const formattedValue = formatNumericInput(cleanValue);
                     event.target.value = formattedValue;
@@ -988,7 +764,6 @@
         }
         
         function addValidationRow() {
-            // [FIX] 새 행은 빈 값(null)으로 생성
             const row = mapCampaignDataToValidation([{}])[0];
             validationData['MAIN'].push(row); 
             renderValidationTable(validationData['MAIN'], validationTableHeader, validationTableBody);
@@ -1029,7 +804,6 @@
                 }
                 if (group.name === '전환 성과 (CPA)') {
                     th.classList.add('perf-col');
-                    // [FIX] 읽기 전용(샘플)일 때는 숨기지 않음
                     if (!isPerfInputVisible && !isReadOnly) th.classList.add('hidden'); 
                 }
                 trGroup.appendChild(th);
@@ -1063,7 +837,6 @@
                 else th.textContent = col.name;
                 if (col.group === '전환 성과 (CPA)') {
                     th.classList.add('perf-col');
-                    // [FIX] 읽기 전용(샘플)일 때는 숨기지 않음
                     if (!isPerfInputVisible && !isReadOnly) th.classList.add('hidden'); 
                 }
                 trDetail.appendChild(th);
@@ -1081,8 +854,7 @@
                     td.className = 'p-1 text-xs whitespace-nowrap border-r border-gray-100';
                     if (col.group === '전환 성과 (CPA)') {
                         td.classList.add('perf-col');
-                        // [FIX] 읽기 전용(샘플)일 때는 숨기지 않음
-                         if (targetBody.id === 'table-body' && !isPerfInputVisible && !isReadOnly) td.classList.add('hidden');
+                        if (targetBody.id === 'table-body' && !isPerfInputVisible && !isReadOnly) td.classList.add('hidden');
                     }
                     let rawValue = row[col.key];
                     let displayValue = (rawValue === null || typeof rawValue === 'undefined') ? '' : rawValue;
@@ -1110,13 +882,10 @@
                         inputElement.placeholder = col.placeholder;
                         inputElement.dataset.key = col.key;
                         let inputClasses = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' || col.isLargeNumber ? 'text-right' : 'text-left'}`;
-                        
                         if (col.isLargeNumber && typeof rawValue === 'number') displayValue = formatNumericInput(rawValue);
                         else if (col.type === 'percent' && typeof rawValue === 'number') displayValue = `${(rawValue * 100).toFixed(2).replace(/\.00$/, '')}%`;
                         else if ((col.type === 'currency' || col.type === 'number') && typeof rawValue === 'number') displayValue = rawValue;
-                        
                         if (isPrefillActive && row.isPrefill && (displayValue || displayValue === 0)) inputClasses += ' input-prefill';
-                        
                         inputElement.className = inputClasses;
                         inputElement.value = displayValue;
                         inputElement.dataset.defaultValue = displayValue;
@@ -1137,7 +906,6 @@
                             }
                             e.target.classList.remove('input-prefill');
                         });
-                        
                         inputElement.addEventListener('blur', (e) => {
                             handleValidationInputChange(row.id, col.key, e);
                             const index = validationData['MAIN'].findIndex(r => r.id === row.id);
@@ -1155,7 +923,6 @@
                     }
                     tr.appendChild(td);
                 });
-                
                 if (!isReadOnly) {
                     const actionTd = document.createElement('td');
                     actionTd.className = 'p-1 text-center';
@@ -1222,7 +989,7 @@
         };
         
         const getDaInsight = (scoreA, scoreB, settings) => {
-            if (scoreA === null || scoreB === null) return { grade: "데이터 부족", text: "미디어 성과를 작성해주세요." }; // [FIX] 빈 값 처리
+            if (scoreA === null || scoreB === null) return { grade: "데이터 부족", text: "미디어 성과를 작성해주세요." };
             if (scoreA >= 4 && scoreB >= 4) return { grade: "Top 소재", text: "노출이 매우 원활하고, 소재 관심도도 매우 높아 타겟팅과 메시지 효과적인 소재" };
             if (scoreA >= 4 && scoreB >= 3) return { grade: "Top 소재", text: "노출이 매우 원활하고, 소재 관심은 우수한 편이므로 좀 더 범용적인 소재로 개선 필요" };
             if (scoreA >= 4 && scoreB >= 1.5) return { grade: "Mid 소재", text: "노출은 매우 원할하지만, 소재 관심이 낮은 편으로 훅킹성을 높인 소재로 수정 필요" };
@@ -1243,7 +1010,7 @@
         };
         
         const getDaFeedback = (scoreA, scoreB, settings) => {
-            if (scoreA === null || scoreB === null) return '-'; // [FIX] 빈 값 처리
+            if (scoreA === null || scoreB === null) return '-';
             if (scoreA >= 4 && scoreB >= 4) return "유지/강화";
             if (scoreA >= 4 && scoreB >= 3) return "범용적 메시지 강화";
             if (scoreA >= 4 && scoreB >= 1.5) return "훅킹성 증대";
@@ -1264,7 +1031,7 @@
         };
         
         const getPerfInsight = (scoreB, scoreC, settings) => {
-            if (scoreB === null || scoreC === null) return { grade: "데이터 부족", text: "퍼포먼스 성과를 작성해주세요." }; // [FIX] 빈 값 처리
+            if (scoreB === null || scoreC === null) return { grade: "데이터 부족", text: "퍼포먼스 성과를 작성해주세요." };
             if (scoreB >= 4 && scoreC >= 4) return { grade: "Top 소재", text: "광고 반응과 전환 효율이 매우 높아 메시지와 판매 상품이 워킹하는 소재" };
             if (scoreB >= 4 && scoreC >= 3) return { grade: "Top 소재", text: "광고 반응은 매우 높지만 전환 효율은 우수한 편으로 액션에 다소 신중한 태도를 보이는 것으로 예상" };
             if (scoreB >= 4 && scoreC >= 1.5) return { grade: "Mid 소재", text: "광고 반응은 매우 높지만 전환 효율이 낮은 편으로 타 상품과 비교 중이거나 전환 프로세스에 허들이 있을 것으로 예상" };
@@ -1285,7 +1052,7 @@
         };
         
         const getPerfFeedback = (scoreB, scoreC, settings) => {
-            if (scoreB === null || scoreC === null) return '-'; // [FIX] 빈 값 처리
+            if (scoreB === null || scoreC === null) return '-';
             if (scoreB >= 4 && scoreC >= 4) return "유지/강화";
             if (scoreB >= 4 && scoreC >= 3) return "결정적인 베네핏 강조";
             if (scoreB >= 4 && scoreC >= 1.5) return "타사 대비 강점 강조 / 액션 허들 점검";
@@ -1321,15 +1088,11 @@
         function calculateScoresAndInsight(row, settings) { 
             let scoreA = null; let scoreB = null; let scoreC = null;
             let totalDaScore = null; let totalPmScore = null;
-            
             let daInsightGrade = "데이터 부족"; let daInsightText = "미디어 성과를 작성해주세요."; let daFeedback = "-";
             let pmInsightGrade = "데이터 부족"; let pmInsightText = "퍼포먼스 성과를 작성해주세요."; let pmFeedback = "-";
             let finalInsightGrade = "데이터 부족"; let finalInsightColor = "#94a3b8";
-            
             const mediaPrefix = (row.media || row.placement || row.creativeName) ? `${row.media || 'N/A'}/${row.placement || 'N/A'}/${row.creativeName || 'N/A'}` : '매체 상품과 소재명 없음';
-            
             const daCriticalMissing = row.cost === null || row.cost === 0 || row.imp === null || row.imp === 0 || row.click === null || row.targetCpm === null || row.targetCpc === null || row.targetCtr === null;
-            
             if (!daCriticalMissing) {
                 scoreA = getScoreCpm(row.actualCpm, row.targetCpm, settings); 
                 const bScoreCtr = getScoreCtr(row.actualCtr, row.targetCtr, settings); 
@@ -1356,21 +1119,17 @@
                  pmFeedback = getPerfFeedback(scoreB, scoreC, settings); 
                  totalPmScore = (scoreB + scoreC) / 2; 
             }
-            
             if (scoreC !== null && scoreB !== null) finalInsightGrade = pmInsightGrade;
             else if (scoreA !== null && scoreB !== null) finalInsightGrade = daInsightGrade;
-            
             if (finalInsightGrade.includes("Top")) finalInsightColor = '#10b981';
             else if (finalInsightGrade.includes("Mid")) finalInsightColor = '#f59e0b';
             else if (finalInsightGrade.includes("Low")) finalInsightColor = '#ef4444';
             else finalInsightColor = '#94a3b8';
-            
             if (daCriticalMissing) {
                  daInsightGrade = '데이터 부족'; daInsightText = '미디어 성과를 작성해주세요.'; daFeedback = '-';
                  finalInsightGrade = '데이터 부족'; finalInsightColor = '#94a3b8';
                  scoreA = null; scoreB = null; scoreC = null; totalDaScore = null; totalPmScore = null;
             }
-            
             return {
                 scoreA: scoreA !== null ? parseFloat(scoreA.toFixed(2)) : null,
                 scoreB: scoreB !== null ? parseFloat(scoreB.toFixed(2)) : null,
@@ -1409,7 +1168,6 @@
             const avgCvr = totalClick > 0 ? (totalConv / totalClick) : 0;
             const avgCpa = totalConv > 0 ? (totalCost / totalConv) : 0;
             const avgRoas = totalCost > 0 ? (totalRevenue / totalCost) * 100 : 0;
-            
             let summaryMetrics = [
                 { label: '총 광고비', key: 'cost', value: totalCost, type: 'currency' },
                 { label: '총 노출수', key: 'imp', value: totalImp, type: 'number', subMetrics: [{ label: '성과 CPM', value: avgCpm, type: 'currency' }] },
@@ -1436,16 +1194,15 @@
             targetContainer.innerHTML = ''; 
             
             const isSampleChart = targetContainer.id.includes('sample');
-            // [FIX] 샘플 차트 여부에 상관없이 동일한 클래스와 스타일 사용
             const quadrantClass = isSampleChart ? 'sample-quadrant' : 'quadrant';
-            const h3Class = 'text-xl font-extrabold text-blue-700'; // 통일
-            const pClass = 'text-sm text-gray-500 mt-2'; // 통일
+            const h3Class = 'text-xl font-extrabold text-blue-700';
+            const pClass = 'text-sm text-gray-500 mt-2';
             
             targetContainer.innerHTML = `
                 <div class="matrix-lines"><div class="v-line"></div><div class="h-line"></div></div>
                 <div class="${quadrantClass} quadrant-top-left">
                     <div class="relative z-10 flex flex-col justify-center text-center">
-                        <h3 class="${h3Class}">High Potential</h3>
+                        <h3 class="text-xl font-extrabold text-blue-700">High Potential</h3>
                         <p class="${pClass}">노출 효율(Low) 소재 매력도(High)</p>
                         <p class="text-sm text-gray-700 mt-2">훅킹성은 높지만 잘 알려지지 않은 소재</p>
                         <div class="mt-4"><span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-blue-800 bg-blue-100">Action : 타겟팅 확장</span></div>
@@ -1484,8 +1241,6 @@
             const PADDING = isSampleChart ? 20 : 40; 
             const plotW = W - 2 * PADDING; const plotH = H - 2 * PADDING;
             const scaleX = plotW / (MAX_SCORE - MIN_SCORE); const scaleY = plotH / (MAX_SCORE - MIN_SCORE);
-            
-            // [FIX] ReferenceError 수정: DOT_SIZE를 상위 스코프로 이동
             const DOT_SIZE = 14;
 
             data.data.forEach((item, index) => {
@@ -1495,11 +1250,9 @@
                     const dot = document.createElement('div');
                     dot.className = 'chart-dot';
                     dot.style.backgroundColor = item.color;
-                    
                     x = Math.max(PADDING + DOT_SIZE / 2, Math.min(W - PADDING - DOT_SIZE / 2, x));
                     y = Math.max(PADDING + DOT_SIZE / 2, Math.min(H - PADDING - DOT_SIZE / 2, y));
                     dot.style.left = `${x - DOT_SIZE / 2}px`; dot.style.top = `${y - DOT_SIZE / 2}px`;
-                    
                     dot.dataset.index = index;
                     dot.dataset.media = item.media || 'N/A';
                     dot.dataset.placement = item.placement || 'N/A';
@@ -1551,7 +1304,6 @@
             let creativeName = `${item.media} / ${item.placement} / ${item.creativeName}`;
             if (creativeName === 'N/A / N/A / N/A') creativeName = '이름 없음';
             let tooltipContent = `<div class="font-bold text-base">${creativeName}</div>`;
-            
             if (isPerfDot && item.scoreC) {
                 tooltipContent += `<div class="mt-1">등급: ${insightText} (PM)</div>`;
                 tooltipContent += `<div class="mt-0.5 text-xs text-green-300">PM 성과 : 전환 ${item.scoreC} / 반응 ${item.scoreB}</div>`;
@@ -1629,14 +1381,12 @@
             }
             const data = analysisData; const headerRow = targetHeader; const body = targetBody;
             body.innerHTML = ''; headerRow.innerHTML = '';
-            
             data.headers.forEach(header => {
                 const th = document.createElement('th');
                 th.className = 'px-4 py-3 text-left border-b border-gray-200 text-center sortable whitespace-nowrap';
                 const perfKeys = ['conv', 'revenue', 'actualCvr', 'actualCpa', 'roas', 'scoreC'];
                 if (perfKeys.includes(header.key)) {
                     th.classList.add('perf-col');
-                    // [FIX] 읽기 전용이든 아니든 표시 여부는 isPerfInputVisible을 따름 (단, renderValidationTable과 달리 결과 테이블은 일반적으로 보여주는 것이 맞음. 여기서는 기존 로직 유지하되, 결과 테이블에서도 보여줄지 여부는 isPerfInputVisible에 따름)
                     if (targetHeader.id === 'table-header' && !isPerfInputVisible) th.classList.add('hidden'); 
                 }
                 const pmInsightKeys = ['pmInsightGrade', 'pmFeedback'];
@@ -1656,7 +1406,6 @@
                 }
                 headerRow.appendChild(th);
             });
-            
             data.data.forEach(item => {
                 const tr = document.createElement('tr'); tr.className = 'hover:bg-indigo-50 transition-colors';
                 const keys = data.headers.map(h => h.key);
@@ -1709,7 +1458,6 @@
             const data = analysisData.data; const insightList = targetList; insightList.innerHTML = '';
             const daInsights = {}; const perfInsights = {}; const roasInsights = [];
             let hasValidDaData = false; let hasValidPerfData = false;
-            
             data.forEach(item => {
                 const mediaPrefix = (item.media || item.placement || item.creativeName) ? `${item.media || 'N/A'}/${item.placement || 'N/A'}/${item.creativeName || 'N/A'}` : '매체 상품과 소재명 없음';
                 if (item.revenue > 0 && item.cost > 0) {
@@ -1731,7 +1479,6 @@
             if (!hasValidDaData && !hasValidPerfData && roasInsights.length === 0) {
                  insightList.innerHTML = `<li class="text-gray-500">미디어 성과를 작성해주세요</li>`; return;
             }
-            
             const renderInsightSection = (title, insights, order, color) => {
                 const gradeHeader = document.createElement('li');
                 gradeHeader.className = `pt-4 mb-2 font-extrabold text-lg border-b-2 pb-1`;
@@ -1797,7 +1544,6 @@
                 const sampleSettings = JSON.parse(JSON.stringify(defaultScoreSettings));
                 const sampleScoredData = aggregateAndScoreData(sampleValidationData, sampleSettings); 
                 sampleAnalysisData = sampleScoredData; 
-                
                 sampleModalBody.innerHTML = `
                     <p class="mb-4 text-sm text-gray-700">이 샘플은 4개 분면(STAR, High Potential, Niche, Question Mark)과 Top/Mid/Low 등급이 고르게 분포되도록 구성되었습니다. DA 성과, PM 성과, ROAS 성과가 어떻게 표시되는지 확인할 수 있습니다.</p>
                     <h3 class="text-xl font-bold text-gray-800 mt-6 mb-2">[샘플] 입력 테이블 (읽기 전용)</h3>
@@ -1864,11 +1610,9 @@
             const customModalBackdrop = document.getElementById('custom-modal-backdrop');
             const customModalConfirm = document.getElementById('custom-modal-confirm');
             const customModalCancel = document.getElementById('custom-modal-cancel');
-            
             customModalConfirm.addEventListener('click', () => { if (modalResolve) modalResolve(true); hideCustomModal(); });
             customModalCancel.addEventListener('click', () => { if (modalResolve) modalResolve(false); hideCustomModal(); });
             customModalBackdrop.addEventListener('click', (e) => { if (e.target === customModalBackdrop) { if (modalResolve) modalResolve(false); hideCustomModal(); } });
-            
             try {
                 const savedStorage = localStorage.getItem(DASHBOARD_STORAGE_KEY);
                 if (savedStorage) {
@@ -1877,8 +1621,6 @@
                         if (!storageData.projects) storageData = { currentProject: 'default', projects: { 'default': defaultValidationData } };
                         currentProject = storageData.currentProject || 'default';
                     } catch(e) { console.error("Failed to parse localStorage", e); storageData = { currentProject: 'default', projects: { 'default': defaultValidationData } }; }
-                } else {
-                     // storageData defaults are already set
                 }
                 if (!storageData.projects[currentProject]) currentProject = 'default';
                 validationData = storageData.projects[currentProject];
@@ -1887,8 +1629,20 @@
                 addValidationRowButton.addEventListener('click', addValidationRow);
                 runAnalysisButton.addEventListener('click', runAnalysis);
                 showSampleModalButton.addEventListener('click', showSampleModal);
-                sampleModalCloseButton.addEventListener('click', () => { sampleModalBackdrop.classList.add('hidden'); sampleModalBackdrop.classList.remove('flex'); sampleAnalysisData = null; runAnalysis(); });
-                sampleModalBackdrop.addEventListener('click', (e) => { if (e.target === sampleModalBackdrop) { sampleModalBackdrop.classList.add('hidden'); sampleModalBackdrop.classList.remove('flex'); sampleAnalysisData = null; runAnalysis(); } });
+                
+                // [안정화] 닫기 시 requestAnimationFrame 사용
+                sampleModalCloseButton.addEventListener('click', () => { 
+                    sampleModalBackdrop.classList.add('hidden'); sampleModalBackdrop.classList.remove('flex'); 
+                    sampleAnalysisData = null; 
+                    requestAnimationFrame(() => runAnalysis()); 
+                });
+                sampleModalBackdrop.addEventListener('click', (e) => { 
+                    if (e.target === sampleModalBackdrop) { 
+                        sampleModalBackdrop.classList.add('hidden'); sampleModalBackdrop.classList.remove('flex'); 
+                        sampleAnalysisData = null; 
+                        requestAnimationFrame(() => runAnalysis());
+                    } 
+                });
                 
                 showCustomScoreModalButton.addEventListener('click', () => {
                     const currentSettings = loadProjectSettings(currentProject);
@@ -1897,7 +1651,6 @@
                 });
                 customScoreModalCloseButton.addEventListener('click', () => { customScoreModalBackdrop.classList.add('hidden'); customScoreModalBackdrop.classList.remove('flex'); });
                 customScoreModalBackdrop.addEventListener('click', (e) => { if (e.target === customScoreModalBackdrop) { customScoreModalBackdrop.classList.add('hidden'); customScoreModalBackdrop.classList.remove('flex'); } });
-                
                 customScoreTabs.addEventListener('click', (e) => {
                     if (e.target.classList.contains('tab-button')) {
                         const tabName = e.target.dataset.tab;
@@ -1906,7 +1659,6 @@
                         e.target.classList.add('active'); document.getElementById(`tab-${tabName}`).classList.remove('hidden');
                     }
                 });
-                
                 customScoreSaveProjectButton.addEventListener('click', () => {
                     const settingsFromModal = getCustomScoreSettingsFromModal();
                     saveProjectSettings(currentProject, settingsFromModal);
@@ -1924,7 +1676,6 @@
                     storageData.projects[currentProject] = validationData; storageData.currentProject = currentProject;
                     saveDataToLocalStorage();
                 });
-                
                 resetDataButton.addEventListener('click', async () => {
                     const confirmed = await showCustomConfirm('프로젝트 초기화', `'${currentProject}' 프로젝트의 성과를 기본값으로 초기화 하시겠습니까?\n\n저장된 내용이 모두 지워집니다.`, '초기화', 'red');
                     if (confirmed) {
@@ -1933,7 +1684,6 @@
                         saveDataToLocalStorage(); renderDashboard();
                     }
                 });
-                
                 newProjectButton.addEventListener('click', () => {
                     const newProjectName = prompt("새 프로젝트 이름을 입력하세요:", "새 프로젝트");
                     if (newProjectName && newProjectName.trim() !== "") {
@@ -1945,7 +1695,6 @@
                         validationData = newProjectData; updateProjectSelector(); saveDataToLocalStorage(); isPrefillActive = false; renderDashboard();
                     }
                 });
-                
                 deleteProjectButton.addEventListener('click', async () => {
                     if (currentProject === 'default') { showCustomConfirm("'default' 프로젝트", "'default' 프로젝트는 삭제할 수 없습니다.", '확인', 'blue'); return; }
                     const confirmed = await showCustomConfirm('프로젝트 삭제', `'${currentProject}' 프로젝트를 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`, '삭제', 'red');
@@ -1963,10 +1712,8 @@
                     renderDashboard();
                 });
                 renderDashboard(); 
-                
                 if (isValidationTableOpen) { document.getElementById('toggle-text').textContent = '입력 테이블 접기'; document.getElementById('toggle-icon').classList.add('rotate-180'); }
                 window.addEventListener('resize', () => { if (liveAnalysisData) renderChart(liveAnalysisData, matrixContainer); });
-                
             } catch (error) {
                  console.error("초기화 중 심각한 오류 발생:", error);
                  document.body.innerHTML = `<div class="p-8 bg-red-100 text-red-700">페이지 로드 중 오류가 발생했습니다. console을 확인해주세요. 오류: ${error.message}</div>`;
