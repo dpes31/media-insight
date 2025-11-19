@@ -32,13 +32,14 @@
         #sample-modal-backdrop {
             background-color: rgba(0, 0, 0, 0.5);
         }
+        /* [수정] 샘플 모달 너비 확대 (요청 3) */
         #sample-modal-content {
-            max-width: 90vw;
-            width: 1200px;
+            width: 95vw; /* 가로 폭 확대 */
+            max-width: 95vw;
             max-height: 90vh;
         }
         
-        /* [수정] 샘플 차트 컨테이너 - 메인과 동일한 스타일 적용 */
+        /* [수정] 샘플 차트 컨테이너 */
         .sample-quadrant-matrix {
             position: relative;
             width: 100%;
@@ -51,7 +52,6 @@
             overflow: hidden;
         }
         
-        /* [수정] 쿼드런트 스타일 통합 (샘플/메인 동일하게) */
         .quadrant, .sample-quadrant {
             padding: 1rem;
             display: flex;
@@ -60,10 +60,9 @@
             align-items: center; 
             position: relative;
             z-index: 10;
-            text-align: center; /* 텍스트 중앙 정렬 강제 */
+            text-align: center; 
         }
         
-        /* 4-Quadrant Matrix Styling */
         .quadrant-matrix {
             position: relative;
             width: 100%;
@@ -76,13 +75,11 @@
             overflow: hidden;
         }
         
-        /* Quadrant Colors */
         .quadrant-top-right { background-color: rgba(16, 185, 129, 0.05); }
         .quadrant-top-left { background-color: rgba(59, 130, 246, 0.05); }
         .quadrant-bottom-right { background-color: rgba(245, 158, 11, 0.05); }
         .quadrant-bottom-left { background-color: rgba(239, 68, 68, 0.05); }
         
-        /* Quadrant Middle Lines */
         .matrix-lines {
             position: absolute;
             top: 0; left: 0; right: 0; bottom: 0;
@@ -157,6 +154,11 @@
         #custom-modal-backdrop:not(.hidden) #custom-modal-content {
             transform: scale(1);
         }
+        
+        /* [수정] 프로젝트 셀렉터 스타일링 (placeholder 효과) */
+        select#project-selector.placeholder {
+            color: #9ca3af;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -168,7 +170,8 @@
         <div class="mb-8 flex items-center justify-between">
             <div class="flex items-center space-x-3">
                 <label for="project-selector" class="text-lg font-bold text-gray-800">프로젝트:</label>
-                <select id="project-selector" class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500"></select>
+                <select id="project-selector" class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 min-w-[200px]"></select>
+                <button id="rename-project-button" class="bg-gray-500 text-white hover:bg-gray-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors" title="프로젝트명 수정">수정</button>
                 <button id="delete-project-button" class="bg-red-500 text-white hover:bg-red-600 text-xs font-semibold py-1 px-3 rounded-md transition-colors" title="현재 프로젝트 삭제">삭제</button>
             </div>
             <button id="new-project-button" class="bg-green-500 text-white hover:bg-green-600 text-sm font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
@@ -185,8 +188,9 @@
                         <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1"><path fill-rule="evenodd" d="M11.013 2.51_a7.5_7.5_0_0_1_6.43_2.446_1_1_0_0_0_1.264-1.54_9.5_9.5_0_0_0-15.414_0_1_1_0_0_0_1.264_1.54_7.5_7.5_0_0_1_6.456-2.446zM2.083_8.384_1_1_0_0_0_3.62_6.843l-1.01_1.01a1_1_0_0_0_1.414_1.414l1.01-1.01A1_1_0_0_0_2.083_8.384zm14.293-1.54_1.01_1.01a1_1_0_0_0_1.414-1.414l-1.01-1.01a1_1_0_1_0-1.414_1.414zM10_13a3_3_0_1_0_0-6_3_3_0_0_0_0_6zm-5_2.121_1_1_0_0_0_1.414-1.414L5_12.293V10.5a5_5_0_1_1_10_0v1.793l-1.414_1.414a1_1_0_0_0_1.414_1.414L15_14.121V16.5a1_1_0_0_0_2_0v-3.879a1_1_0_0_0-.293-.707l-2.02-2.02A7.5_7.5_0_0_0_3.02_9.914l-2.02_2.02a1_1_0_0_0-.293.707V16.5a1_1_0_0_0_2_0v-2.379z" clip-rule="evenodd" /></svg>
                         커스텀 설정
                     </button>
+                    <!-- [수정] 버튼명 수정 (요청 8) -->
                     <button id="show-sample-modal-button" class="bg-gray-500 text-white hover:bg-gray-600 text-sm font-semibold py-2 px-4 rounded-lg transition-colors">
-                        [샘플 보기]
+                        샘플 보기
                     </button>
                     <button id="toggle-validation-table" class="bg-indigo-100 text-indigo-700 hover:bg-indigo-200 text-sm font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
                         <span id="toggle-text">입력 테이블 접기</span> 
@@ -268,15 +272,52 @@
     
     <!-- 샘플 보기 모달 -->
     <div id="sample-modal-backdrop" class="fixed inset-0 z-[100] hidden items-center justify-center p-4" style="background-color: rgba(0, 0, 0, 0.5);">
-        <div id="sample-modal-content" class="bg-white rounded-xl shadow-2xl overflow-hidden w-full max-w-6xl max-h-[90vh] flex flex-col">
+        <div id="sample-modal-content" class="bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
             <header class="flex items-center justify-between p-4 border-b bg-gray-50 flex-shrink-0">
-                <h2 class="text-xl font-bold text-gray-800">캠페인 목표 & 성과 검증 항목 입력 (샘플)</h2>
+                <!-- [수정] 타이틀 수정 (요청 6) -->
+                <h2 class="text-xl font-bold text-gray-800">샘플 대시보드</h2>
                 <button id="sample-modal-close-button" class="text-gray-400 hover:text-gray-600">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6"><path fill-rule="evenodd" d="M5.47 5.47a.75.75 0 0 1 1.06 0L12 10.94l5.47-5.47a.75.75 0 1 1 1.06 1.06L13.06 12l5.47 5.47a.75.75 0 1 1-1.06 1.06L12 13.06l-5.47 5.47a.75.75 0 0 1-1.06-1.06L10.94 12 5.47 6.53a.75.75 0 0 1 0-1.06Z" clip-rule="evenodd" /></svg>
                 </button>
             </header>
             <div id="sample-modal-body" class="p-6 overflow-y-auto" style="height: calc(90vh - 65px);">
-                <!-- 샘플 데이터가 동적으로 렌더링됩니다. -->
+                <!-- [수정] 문구 삭제 (요청 1) -->
+                
+                <!-- [수정] 섹션 제목 수정 (요청 7) -->
+                <h3 class="text-xl font-bold text-gray-800 mb-2">[샘플] 캠페인 목표 & 성과 검증 항목 입력</h3>
+                <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border"> 
+                    <table class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0">
+                        <thead id="sample-validation-table-header" class="bg-gray-100 sticky top-0"></thead>
+                        <tbody id="sample-validation-table-body"></tbody>
+                    </table>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mt-6 mb-2">종합 성과 요약 (샘플)</h3>
+                <div class="scroll-container overflow-x-auto rounded-xl shadow-lg border">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-indigo-50"><tr id="sample-summary-header" class="text-sm font-semibold text-indigo-700 uppercase tracking-wider"></tr></thead>
+                        <tbody id="sample-summary-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
+                <!-- [수정] 레이아웃 변경: 2열 제거하고 세로 배치 (요청 4) -->
+                <div class="mt-6 space-y-6">
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">소재 성과 매트리스 (샘플)</h3>
+                        <div id="sample-quadrant-matrix" class="sample-quadrant-matrix"></div>
+                    </div>
+                    <div>
+                        <h3 class="text-xl font-bold text-gray-800 mb-2">MEDIA INSIGHT (샘플)</h3>
+                        <div class="bg-indigo-50 p-4 rounded-xl shadow-lg border border-indigo-200 overflow-auto">
+                            <ul id="sample-insight-list" class="space-y-4 text-gray-700 text-sm"></ul>
+                        </div>
+                    </div>
+                </div>
+                <h3 class="text-xl font-bold text-gray-800 mt-6 mb-2">캠페인 상세 효율 지표 (샘플)</h3>
+                <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border">
+                    <table class="min-w-full divide-y divide-gray-200">
+                        <thead class="bg-gray-100 sticky top-0"><tr id="sample-table-header" class="text-xs font-medium text-gray-500 uppercase tracking-wider"></tr></thead>
+                        <tbody id="sample-table-body" class="bg-white divide-y divide-gray-200"></tbody>
+                    </table>
+                </div>
             </div>
         </div>
     </div>
@@ -505,6 +546,7 @@
             'MAIN': {
                 name: '통합 캠페인',
                 metrics: { xAxis: '소재 관심도 (B)', yAxis: '유효 노출 기여도 (A)' },
+                // [수정] 상세 지표 열 통합 (인사이트, 피드백)
                 headers: [ 
                     { name: '매체', key: 'media' }, 
                     { name: '상품', key: 'placement' },
@@ -523,10 +565,8 @@
                     { name: 'A 점수', key: 'scoreA' }, 
                     { name: 'B 점수', key: 'scoreB' }, 
                     { name: 'C 점수', key: 'scoreC' },
-                    { name: 'DA 인사이트', key: 'daInsightGrade' }, 
-                    { name: 'DA 피드백', key: 'daFeedback' },
-                    { name: 'PM 인사이트', key: 'pmInsightGrade' },
-                    { name: 'PM 피드백', key: 'pmFeedback' }
+                    { name: '인사이트', key: 'integratedInsight' }, // 통합된 열
+                    { name: '피드백', key: 'integratedFeedback' }    // 통합된 열
                 ],
                 data: [
                     { media: '네이버', creative: '소재A_스페셜DA', cost: 11480000, imp: 7200000, click: 16000, cpm: null, ctr: null, cpc: null, scoreA: null, scoreB: null, total: null, insight: null, color: null, mediaInsight: null },
@@ -649,7 +689,8 @@
         const resetDataButton = document.getElementById('reset-data-button');
         const projectSelector = document.getElementById('project-selector');
         const newProjectButton = document.getElementById('new-project-button');
-        const deleteProjectButton = document.getElementById('delete-project-button'); 
+        const deleteProjectButton = document.getElementById('delete-project-button');
+        const renameProjectButton = document.getElementById('rename-project-button'); // 추가된 버튼
         const showSampleModalButton = document.getElementById('show-sample-modal-button');
         const sampleModalBackdrop = document.getElementById('sample-modal-backdrop');
         const sampleModalBody = document.getElementById('sample-modal-body');
@@ -664,24 +705,42 @@
         const customScoreResetButton = document.getElementById('custom-score-reset-button');
         
         function updateProjectSelector() {
-            projectSelector.innerHTML = ''; 
-            Object.keys(storageData.projects).forEach(projectName => {
+            projectSelector.innerHTML = '';
+            const projects = Object.keys(storageData.projects);
+            
+            if (projects.length === 0) {
+                // 프로젝트가 하나도 없을 때 placeholder
                 const option = document.createElement('option');
-                option.value = projectName;
-                option.textContent = projectName;
-                if (projectName === currentProject) option.selected = true;
+                option.text = "프로젝트 명";
+                option.value = "";
+                option.disabled = true;
+                option.selected = true;
                 projectSelector.appendChild(option);
-            });
+                projectSelector.classList.add('placeholder');
+            } else {
+                projectSelector.classList.remove('placeholder');
+                projects.forEach(projectName => {
+                    const option = document.createElement('option');
+                    option.value = projectName;
+                    // [수정] 'default'를 '기본 프로젝트'로 표시 (요청 3)
+                    option.textContent = projectName === 'default' ? '기본 프로젝트' : projectName;
+                    if (projectName === currentProject) option.selected = true;
+                    projectSelector.appendChild(option);
+                });
+            }
         }
         
         function togglePerfColumns() {
             isPerfInputVisible = !isPerfInputVisible;
             const perfCols = document.querySelectorAll('#validation-input-table .perf-col');
             perfCols.forEach(col => { col.classList.toggle('hidden', !isPerfInputVisible); });
-            const pmInsightCols = document.querySelectorAll('#table-header .pm-insight-col, #table-body .pm-insight-col');
-            pmInsightCols.forEach(col => { col.classList.toggle('hidden', !isPerfInputVisible); });
+            
+            // [수정] 상세 지표 테이블의 통합 열 내부 내용 갱신 필요하므로 재렌더링
+            if (liveAnalysisData) renderTable(liveAnalysisData, document.getElementById('table-header'), document.getElementById('table-body'));
+            
             const perfToggleBtn = document.getElementById('toggle-perf-cols');
-            if (perfToggleBtn) perfToggleBtn.textContent = isPerfInputVisible ? '[-] 퍼포먼스 성과 숨기기' : '[+] 퍼포먼스 성과 입력';
+            // [수정] 버튼 텍스트 변경 (요청 1)
+            if (perfToggleBtn) perfToggleBtn.textContent = isPerfInputVisible ? '[-] 전환 성과 숨김' : '[+] 전환 성과 입력';
         }
         function toggleValidationTable() {
             isValidationTableOpen = !isValidationTableOpen;
@@ -795,7 +854,7 @@
                         <div class="flex items-center justify-center relative">
                             <span>${group.name}</span>
                             <button id="toggle-perf-cols" class="ml-2 text-xs bg-indigo-500 text-white rounded px-2 py-0.5 hover:bg-indigo-700 transition-colors">
-                                ${isPerfInputVisible ? '[-] 퍼포먼스 성과 숨기기' : '[+] 퍼포먼스 성과 입력'}
+                                ${isPerfInputVisible ? '[-] 전환 성과 숨김' : '[+] 전환 성과 입력'}
                             </button>
                         </div>
                     `;
@@ -804,6 +863,7 @@
                 }
                 if (group.name === '전환 성과 (CPA)') {
                     th.classList.add('perf-col');
+                    // [수정] 샘플 모달(isReadOnly)이 아니고 메인 테이블일 때만 숨김 처리 확인
                     if (!isPerfInputVisible && !isReadOnly) th.classList.add('hidden'); 
                 }
                 trGroup.appendChild(th);
@@ -872,7 +932,11 @@
                         const inputElement = document.createElement('input');
                         inputElement.type = 'text';
                         inputElement.readOnly = true;
-                        let readonlyClasses = (isCalculated && !isReadOnly) ? 'bg-indigo-50 font-semibold text-indigo-700' : 'bg-gray-100 text-gray-700'; 
+                        
+                        // [수정] 샘플 보기(isReadOnly)에서도 계산된 필드는 보라색 강조 적용 (요청 5)
+                        // 기존: let readonlyClasses = (isCalculated && !isReadOnly) ? ...
+                        let readonlyClasses = isCalculated ? 'bg-indigo-50 font-semibold text-indigo-700' : 'bg-gray-100 text-gray-700'; 
+                        
                         inputElement.className = `w-full p-1 border rounded-md text-xs pointer-events-none text-center ${readonlyClasses} ${col.type === 'number' || col.type === 'currency' || col.type === 'percent' || col.isLargeNumber ? 'text-right' : 'text-left'}`; 
                         inputElement.value = displayValue;
                         td.appendChild(inputElement);
@@ -1389,16 +1453,15 @@
                     th.classList.add('perf-col');
                     if (targetHeader.id === 'table-header' && !isPerfInputVisible) th.classList.add('hidden'); 
                 }
-                const pmInsightKeys = ['pmInsightGrade', 'pmFeedback'];
-                if (pmInsightKeys.includes(header.key)) {
-                    th.classList.add('pm-insight-col');
-                    if (targetHeader.id === 'table-header' && !isPerfInputVisible) th.classList.add('hidden');
-                }
-                if (header.key === 'cost') th.innerHTML = `${header.name} <span class="header-subtext">(소진 금액)</span>`;
+                // [수정] 통합 열 헤더 처리
+                if (header.key === 'integratedInsight') th.textContent = '인사이트';
+                else if (header.key === 'integratedFeedback') th.textContent = '피드백';
+                else if (header.key === 'cost') th.innerHTML = `${header.name} <span class="header-subtext">(소진 금액)</span>`;
                 else if (header.key === 'scoreA') th.innerHTML = `${header.name} <span class="header-subtext">(노출 영향력)</span>`;
                 else if (header.key === 'scoreB') th.innerHTML = `${header.name} <span class="header-subtext">(소재 관심도)</span>`;
                 else if (header.key === 'scoreC') th.innerHTML = `${header.name} <span class="header-subtext">(전환 기여도)</span>`;
                 else th.textContent = header.name;
+                
                 th.dataset.key = header.key;
                 if (targetHeader.id === 'table-header') { 
                     th.addEventListener('click', () => sortData(header.key));
@@ -1416,11 +1479,6 @@
                         td.classList.add('perf-col');
                          if (targetBody.id === 'table-body' && !isPerfInputVisible) td.classList.add('hidden');
                     }
-                    const pmInsightKeys = ['pmInsightGrade', 'pmFeedback'];
-                    if (pmInsightKeys.includes(key)) {
-                        td.classList.add('pm-insight-col');
-                        if (targetBody.id === 'table-body' && !isPerfInputVisible) td.classList.add('hidden');
-                    }
                     let cellValue = item[key];
                     switch(key) {
                         case 'cost': case 'revenue': case 'cpm': case 'cpc': case 'actualCpa': td.textContent = formatNumber(cellValue, 'currency'); break;
@@ -1429,19 +1487,43 @@
                         case 'roas': td.textContent = `${Math.round(cellValue).toLocaleString('ko-KR')}%`; break;
                         case 'scoreA': case 'scoreB': case 'scoreC':
                             td.textContent = formatNumber(cellValue, 'score'); td.classList.add('font-bold', 'text-gray-800'); break;
-                        case 'daInsightGrade': case 'pmInsightGrade':
-                            const insightText = cellValue;
-                            if (insightText === '-' || insightText === '데이터 부족') td.textContent = '-';
-                            else td.innerHTML = `<span class="px-3 py-1 inline-flex text-xs leading-5 font-semibold rounded-full" style="background-color:${item.color}1A; color:${item.color}">${insightText}</span>`;
+                        // [수정] 통합 인사이트 열 렌더링 (요청 2)
+                        case 'integratedInsight':
+                            const daText = (item.daInsightGrade && item.daInsightGrade !== '-' && item.daInsightGrade !== '데이터 부족') ? item.daInsightGrade : '-';
+                            const pmText = (item.pmInsightGrade && item.pmInsightGrade !== '-' && item.pmInsightGrade !== '데이터 부족') ? item.pmInsightGrade : '-';
+                            let insightHtml = `<div><span class="text-xs font-bold text-gray-500 mr-1">DA:</span><span class="px-2 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full" style="background-color:${item.color}1A; color:${item.color}">${daText}</span></div>`;
+                            if (item.scoreC !== null) { // PM 데이터가 있을 때만
+                                // PM 등급에 따른 색상 계산 (간단히 로직 재사용)
+                                let pmColor = '#94a3b8';
+                                if(pmText.includes("Top")) pmColor = '#10b981'; else if(pmText.includes("Mid")) pmColor = '#f59e0b'; else if(pmText.includes("Low")) pmColor = '#ef4444';
+                                insightHtml += `<div class="mt-1"><span class="text-xs font-bold text-gray-500 mr-1">PM:</span><span class="px-2 py-0.5 inline-flex text-xs leading-4 font-semibold rounded-full" style="background-color:${pmColor}1A; color:${pmColor}">${pmText}</span></div>`;
+                            }
+                            td.innerHTML = insightHtml;
+                            td.classList.remove('text-center'); td.classList.add('text-left');
                             break;
-                        case 'daFeedback': case 'pmFeedback':
-                            let actionText = cellValue; let colorClass = 'text-gray-800';
-                            if (item.insight.includes("Top")) colorClass = 'text-green-600 bg-green-100';
-                            else if (item.insight.includes("Mid")) colorClass = 'text-amber-600 bg-amber-100';
-                            else if (item.insight.includes("Low")) colorClass = 'text-red-600 bg-red-100';
-                            else { actionText = '-'; colorClass = ''; }
-                            if (actionText === '-' || actionText === '데이터 부족') td.textContent = '-';
-                            else td.innerHTML = `<span class="font-bold rounded-lg px-2 py-1 ${colorClass}">${actionText}</span>`;
+                        // [수정] 통합 피드백 열 렌더링 (요청 2)
+                        case 'integratedFeedback':
+                            const daAction = (item.daFeedback && item.daFeedback !== '-') ? item.daFeedback : '-';
+                            const pmAction = (item.pmFeedback && item.pmFeedback !== '-') ? item.pmFeedback : '-';
+                            
+                            // DA 스타일
+                            let daClass = 'text-gray-800';
+                            if (item.daInsightGrade.includes("Top")) daClass = 'text-green-600 bg-green-100';
+                            else if (item.daInsightGrade.includes("Mid")) daClass = 'text-amber-600 bg-amber-100';
+                            else if (item.daInsightGrade.includes("Low")) daClass = 'text-red-600 bg-red-100';
+                            
+                            let feedbackHtml = `<div><span class="text-xs font-bold text-gray-500 mr-1">DA:</span><span class="font-bold rounded-lg px-2 py-0.5 text-xs ${daClass}">${daAction}</span></div>`;
+                            
+                            if (item.scoreC !== null) { // PM 데이터가 있을 때만
+                                // PM 스타일
+                                let pmClass = 'text-gray-800';
+                                if (item.pmInsightGrade.includes("Top")) pmClass = 'text-green-600 bg-green-100';
+                                else if (item.pmInsightGrade.includes("Mid")) pmClass = 'text-amber-600 bg-amber-100';
+                                else if (item.pmInsightGrade.includes("Low")) pmClass = 'text-red-600 bg-red-100';
+                                feedbackHtml += `<div class="mt-1"><span class="text-xs font-bold text-gray-500 mr-1">PM:</span><span class="font-bold rounded-lg px-2 py-0.5 text-xs ${pmClass}">${pmAction}</span></div>`;
+                            }
+                            td.innerHTML = feedbackHtml;
+                            td.classList.remove('text-center'); td.classList.add('text-left');
                             break;
                         default: td.textContent = cellValue; td.classList.remove('text-center'); td.classList.add('text-left'); break;
                     }
@@ -1536,6 +1618,8 @@
         }
         
         function showSampleModal() {
+            // [수정] 스크롤 초기화 (요청 9)
+            sampleModalBody.scrollTop = 0;
             sampleModalBody.innerHTML = '<p class="text-center text-gray-500">샘플 데이터 분석 중...</p>';
             sampleModalBackdrop.classList.remove('hidden');
             sampleModalBackdrop.classList.add('flex');
@@ -1544,9 +1628,11 @@
                 const sampleSettings = JSON.parse(JSON.stringify(defaultScoreSettings));
                 const sampleScoredData = aggregateAndScoreData(sampleValidationData, sampleSettings); 
                 sampleAnalysisData = sampleScoredData; 
+                
                 sampleModalBody.innerHTML = `
-                    <p class="mb-4 text-sm text-gray-700">이 샘플은 4개 분면(STAR, High Potential, Niche, Question Mark)과 Top/Mid/Low 등급이 고르게 분포되도록 구성되었습니다. DA 성과, PM 성과, ROAS 성과가 어떻게 표시되는지 확인할 수 있습니다.</p>
-                    <h3 class="text-xl font-bold text-gray-800 mt-6 mb-2">[샘플] 입력 테이블 (읽기 전용)</h3>
+                    <!-- [수정] 문구 삭제 (요청 1) -->
+                    <!-- [수정] 섹션 제목 수정 (요청 7) -->
+                    <h3 class="text-xl font-bold text-gray-800 mb-2">[샘플] 캠페인 목표 & 성과 검증 항목 입력</h3>
                     <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border"> 
                         <table class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0">
                             <thead id="sample-validation-table-header" class="bg-gray-100 sticky top-0"></thead>
@@ -1560,18 +1646,21 @@
                             <tbody id="sample-summary-body" class="bg-white divide-y divide-gray-200"></tbody>
                         </table>
                     </div>
-                    <div class="grid grid-cols-1 xl:grid-cols-3 gap-6 mt-6">
-                        <div class="xl:col-span-2 space-y-6">
+                    
+                    <!-- [수정] 레이아웃 변경 (요청 4) -->
+                    <div class="mt-6 space-y-6">
+                        <div>
                             <h3 class="text-xl font-bold text-gray-800 mb-2">소재 성과 매트리스 (샘플)</h3>
                             <div id="sample-quadrant-matrix" class="sample-quadrant-matrix"></div>
                         </div>
-                        <div class="xl:col-span-1 space-y-6">
+                        <div>
                             <h3 class="text-xl font-bold text-gray-800 mb-2">MEDIA INSIGHT (샘플)</h3>
-                            <div class="bg-indigo-50 p-4 rounded-xl shadow-lg border border-indigo-200 h-full overflow-auto">
+                            <div class="bg-indigo-50 p-4 rounded-xl shadow-lg border border-indigo-200 overflow-auto">
                                 <ul id="sample-insight-list" class="space-y-4 text-gray-700 text-sm"></ul>
                             </div>
                         </div>
                     </div>
+                    
                     <h3 class="text-xl font-bold text-gray-800 mt-6 mb-2">캠페인 상세 효율 지표 (샘플)</h3>
                     <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border">
                         <table class="min-w-full divide-y divide-gray-200">
@@ -1695,11 +1784,35 @@
                         validationData = newProjectData; updateProjectSelector(); saveDataToLocalStorage(); isPrefillActive = false; renderDashboard();
                     }
                 });
+                // [수정] 프로젝트 이름 수정 기능 추가 (요청 3)
+                renameProjectButton.addEventListener('click', () => {
+                    if (!currentProject || currentProject === '') { showCustomConfirm('알림', '수정할 프로젝트를 선택해주세요.', '확인', 'blue'); return; }
+                    const currentDisplayName = currentProject === 'default' ? '기본 프로젝트' : currentProject;
+                    const newName = prompt("프로젝트 이름을 수정하세요:", currentDisplayName);
+                    if (newName && newName.trim() !== "" && newName !== currentProject) {
+                        const cleanName = newName.trim();
+                        if (storageData.projects[cleanName]) { showCustomConfirm('오류', '이미 존재하는 프로젝트 이름입니다.', '확인', 'blue'); return; }
+                        
+                        // 데이터 이동
+                        storageData.projects[cleanName] = storageData.projects[currentProject];
+                        delete storageData.projects[currentProject];
+                        
+                        currentProject = cleanName;
+                        storageData.currentProject = currentProject;
+                        saveDataToLocalStorage();
+                        updateProjectSelector();
+                        renderDashboard();
+                    }
+                });
                 deleteProjectButton.addEventListener('click', async () => {
-                    if (currentProject === 'default') { showCustomConfirm("'default' 프로젝트", "'default' 프로젝트는 삭제할 수 없습니다.", '확인', 'blue'); return; }
+                    if (currentProject === 'default') { showCustomConfirm("'default' 프로젝트", "'기본 프로젝트'는 삭제할 수 없습니다.", '확인', 'blue'); return; }
                     const confirmed = await showCustomConfirm('프로젝트 삭제', `'${currentProject}' 프로젝트를 정말 삭제하시겠습니까?\n\n이 작업은 되돌릴 수 없습니다.`, '삭제', 'red');
                     if (confirmed) {
-                        delete storageData.projects[currentProject]; currentProject = 'default'; storageData.currentProject = 'default';
+                        delete storageData.projects[currentProject]; 
+                        // 남은 프로젝트 중 하나 선택
+                        const remainingProjects = Object.keys(storageData.projects);
+                        currentProject = remainingProjects.length > 0 ? remainingProjects[0] : 'default';
+                        storageData.currentProject = currentProject;
                         saveDataToLocalStorage(); updateProjectSelector(); renderDashboard();
                     }
                 });
@@ -1711,7 +1824,11 @@
                     } else { isPrefillActive = validationData.MAIN.some(row => row.isPrefill); }
                     renderDashboard();
                 });
+                
+                // [수정] 초기화 시 퍼포먼스 컬럼 숨김 상태 강제 적용 (요청 4)
+                isPerfInputVisible = false;
                 renderDashboard(); 
+                
                 if (isValidationTableOpen) { document.getElementById('toggle-text').textContent = '입력 테이블 접기'; document.getElementById('toggle-icon').classList.add('rotate-180'); }
                 window.addEventListener('resize', () => { if (liveAnalysisData) renderChart(liveAnalysisData, matrixContainer); });
             } catch (error) {
