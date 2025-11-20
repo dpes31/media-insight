@@ -239,14 +239,21 @@
                         </div>
                     </div>
                 </div>
-                <!-- Insight -->
+                <!-- Insight (Moved here from top in previous steps, maintained) -->
                 <div class="xl:col-span-1 space-y-6">
                     <div class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200 h-full">
-                        <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
-                            <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                            MEDIA INSIGHT
+                        <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center justify-between">
+                            <span class="flex items-center">
+                                <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
+                                MEDIA INSIGHT
+                            </span>
+                            <!-- [NEW] View Toggle Button -->
+                            <div class="flex bg-white rounded-lg p-1 shadow-sm">
+                                <button id="insight-view-grade" class="px-2 py-1 text-xs font-bold rounded-md bg-indigo-100 text-indigo-700 transition-all">등급별</button>
+                                <button id="insight-view-media" class="px-2 py-1 text-xs font-bold rounded-md text-gray-500 hover:bg-gray-50 transition-all">소재별</button>
+                            </div>
                         </h2>
-                        <ul id="insight-list" class="space-y-4 text-gray-700 text-sm"></ul>
+                        <ul id="insight-list" class="space-y-4 text-gray-700 text-sm max-h-[480px] overflow-y-auto pr-1"></ul>
                     </div>
                 </div>
             </div>
@@ -289,8 +296,15 @@
                 <div id="sample-chart-section"></div>
                 <!-- (4) Insight -->
                  <div id="sample-insight-section" class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200">
-                    <h2 class="text-xl font-bold text-indigo-700 mb-4">MEDIA INSIGHT (샘플)</h2>
-                    <ul id="sample-insight-list" class="space-y-4 text-gray-700 text-sm"></ul>
+                    <h2 class="text-xl font-bold text-indigo-700 mb-4 flex items-center justify-between">
+                        <span>MEDIA INSIGHT (샘플)</span>
+                        <!-- [NEW] Sample Modal View Toggle -->
+                        <div class="flex bg-white rounded-lg p-1 shadow-sm">
+                            <button id="sample-insight-view-grade" class="px-2 py-1 text-xs font-bold rounded-md bg-indigo-100 text-indigo-700 transition-all">등급별</button>
+                            <button id="sample-insight-view-media" class="px-2 py-1 text-xs font-bold rounded-md text-gray-500 hover:bg-gray-50 transition-all">소재별</button>
+                        </div>
+                    </h2>
+                    <ul id="sample-insight-list" class="space-y-4 text-gray-700 text-sm max-h-[400px] overflow-y-auto pr-1"></ul>
                 </div>
                 <!-- (5) Detail Table -->
                 <div>
@@ -311,7 +325,7 @@
         </div>
     </div>
 
-    <!-- 커스텀 설정 모달 (6단계 - 준비만 됨, 기능 없음) -->
+    <!-- 커스텀 설정 모달 (6단계 - 준비만 됨) -->
     <div id="custom-score-modal-backdrop" class="fixed inset-0 z-[110] hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
         <div id="custom-score-modal-content" class="bg-white rounded-2xl shadow-2xl w-full flex flex-col overflow-hidden max-w-4xl max-h-[80vh]">
              <div class="p-6 border-b flex justify-between items-center bg-gray-50">
@@ -340,7 +354,9 @@
         let isPerfInputVisible = false; 
         let isScoreVisible = false;
         let currentProject = 'default';
-        let isPrefillActive = true; 
+        let isPrefillActive = true;
+        // [NEW] Insight View Mode (grade | media)
+        let insightViewMode = 'grade'; 
         
         // [MODIFY] Updated Default Score Settings (Strict Criteria)
         const defaultScoreSettings = {
@@ -395,18 +411,14 @@
             },
         };
 
+        // [MODIFY] 9 Sample Data (Balanced)
         const testProjectMockData = [
-            // Top 3
             { media: '네이버', placement: '스페셜DA', creativeName: '소재 A', cost: 10000000, imp: 5000000, click: 20000, conv: null, revenue: null, targetCpm: 3000, targetCpc: 600, targetCtr: 0.002, targetCvr: null, targetCpa: null },
             { media: '구글', placement: 'UAC', creativeName: '소재 B', cost: 20000000, imp: 2000000, click: 40000, conv: 2000, revenue: 100000000, targetCpm: 12000, targetCpc: 600, targetCtr: 0.01, targetCvr: 0.03, targetCpa: 15000 },
             { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 8000000, imp: 4000000, click: 10000, conv: null, revenue: null, targetCpm: 2500, targetCpc: 1000, targetCtr: 0.002, targetCvr: null, targetCpa: null },
-
-            // Mid 3
             { media: '버즈빌', placement: '네트워크', creativeName: '소재 D', cost: 5000000, imp: 4000000, click: 16000, conv: null, revenue: null, targetCpm: 1000, targetCpc: 500, targetCtr: 0.003, targetCvr: null, targetCpa: null },
             { media: '네이버', placement: '타임보드', creativeName: '소재 E', cost: 20000000, imp: 4000000, click: 20000, conv: null, revenue: null, targetCpm: 8000, targetCpc: 2000, targetCtr: 0.006, targetCvr: null, targetCpa: null },
             { media: 'META', placement: 'PPA', creativeName: '소재 F', cost: 3000000, imp: 3000000, click: 30000, conv: 150, revenue: 9000000, targetCpm: 2000, targetCpc: 2000, targetCtr: 0.01, targetCvr: 0.005, targetCpa: 20000 },
-
-            // Low 3
             { media: '에브리타임', placement: '홈배너', creativeName: '소재 G', cost: 2000000, imp: 500000, click: 500, conv: null, revenue: null, targetCpm: 3000, targetCpc: 3000, targetCtr: 0.0012, targetCvr: null, targetCpa: null },
             { media: '구글', placement: 'GDN', creativeName: '소재 H', cost: 5000000, imp: 1000000, click: 1000, conv: null, revenue: null, targetCpm: 4200, targetCpc: 4000, targetCtr: 0.002, targetCvr: null, targetCpa: null },
             { media: '카카오', placement: '메시지', creativeName: '소재 I', cost: 1000000, imp: 100000, click: 400, conv: 2, revenue: null, targetCpm: 5000, targetCpc: 4000, targetCtr: 0.005, targetCvr: 0.005, targetCpa: 350000 },
@@ -621,7 +633,7 @@
             trGroup.className = 'bg-gray-200 border-b-2 border-gray-300';
             config.headerGroups.forEach(group => {
                 const th = document.createElement('th');
-                th.className = 'px-2 py-2 text-xs font-bold text-gray-700 uppercase tracking-wider sticky top-0 bg-gray-200/100';
+                th.className = 'px-2 py-2 text-xs font-bold text-gray-700 uppercase tracking-wider sticky top-0 bg-gray-300';
                 th.colSpan = group.cols.length;
                 if (group.name === '클릭 성과 (CPC/CTR)') {
                     th.innerHTML = `<div class="flex items-center justify-center relative"><span>${group.name}</span><button id="toggle-perf-cols" class="ml-2 text-xs bg-indigo-500 text-white rounded px-2 py-0.5 hover:bg-indigo-700 transition-colors">${isPerfInputVisible ? '전환 성과 숨김' : '전환 성과 입력'}</button></div>`;
@@ -1422,12 +1434,41 @@
             // Initial Toggle State Ensure
             isPerfInputVisible = false;
             isScoreVisible = false; // [NEW]
+            
+            // [NEW] Insight View Mode Toggle
+            insightViewMode = 'grade'; 
 
             updateProjectSelector();
             
             viewSampleButton.addEventListener('click', showSampleModal);
             document.getElementById('close-sample-modal').addEventListener('click', () => document.getElementById('sample-modal').classList.add('hidden'));
             document.getElementById('close-sample-modal-btn').addEventListener('click', () => document.getElementById('sample-modal').classList.add('hidden'));
+            
+            // Main Insight View Toggle
+            const mainViewGradeBtn = document.getElementById('insight-view-grade');
+            const mainViewMediaBtn = document.getElementById('insight-view-media');
+            const toggleMainInsightView = (mode) => {
+                insightViewMode = mode;
+                if(mode === 'grade') {
+                    mainViewGradeBtn.classList.replace('text-gray-500','text-indigo-700'); mainViewGradeBtn.classList.replace('hover:bg-gray-50','bg-indigo-100');
+                    mainViewMediaBtn.classList.replace('text-indigo-700','text-gray-500'); mainViewMediaBtn.classList.replace('bg-indigo-100','hover:bg-gray-50');
+                } else {
+                    mainViewMediaBtn.classList.replace('text-gray-500','text-indigo-700'); mainViewMediaBtn.classList.replace('hover:bg-gray-50','bg-indigo-100');
+                    mainViewGradeBtn.classList.replace('text-indigo-700','text-gray-500'); mainViewGradeBtn.classList.replace('bg-indigo-100','hover:bg-gray-50');
+                }
+                renderInsights(liveAnalysisData, document.getElementById('insight-list'));
+            };
+            mainViewGradeBtn.addEventListener('click', () => toggleMainInsightView('grade'));
+            mainViewMediaBtn.addEventListener('click', () => toggleMainInsightView('media'));
+
+            // Sample Insight View Toggle (Delegated or dynamic)
+            // Since sample modal is dynamic, we add listeners inside showSampleModal or use delegation if static. 
+            // It's static in HTML now, so we can add listeners here.
+            // But wait, sample modal HTML is injected dynamically in showSampleModal? 
+            // No, it is static in HTML structure above. So we can attach listeners here.
+            
+            // However, we need separate state for sample modal view mode? Or share? Let's share for simplicity or separate.
+            // Let's make it simple: reset to 'grade' when opening modal.
             
             newProjectButton.addEventListener('click', () => {
                 const name = prompt("새 프로젝트 이름을 입력하세요:");
