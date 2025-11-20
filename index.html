@@ -437,14 +437,15 @@
         };
 
         // Re-balanced Sample Data (Top 3, Mid 3, Low 3)
+        // [Modified] Specific media set to null for performance metrics
         const testProjectMockData = [
              // Top 3 (STAR 1, Niche 1, High Potential 1)
-            { media: '네이버', placement: '스페셜DA', creativeName: '소재 A', cost: 10000000, imp: 8000000, click: 40000, conv: 2000, revenue: 50000000, targetCpm: 1500, targetCpc: 300, targetCtr: 0.004, targetCvr: 0.04, targetCpa: 6000 }, // Top (Perf+DA)
-            { media: '구글', placement: 'GDN', creativeName: '소재 B', cost: 15000000, imp: 10000000, click: 50000, conv: 1000, revenue: null, targetCpm: 2000, targetCpc: 400, targetCtr: 0.004, targetCvr: 0.02, targetCpa: 15000 }, // Top (DA), Mid(Perf)
-            { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 8000000, imp: 3000000, click: 20000, conv: 1500, revenue: 40000000, targetCpm: 3000, targetCpc: 500, targetCtr: 0.005, targetCvr: 0.05, targetCpa: 6000 }, // Top (Perf), Mid(DA)
+            { media: '네이버', placement: '스페셜DA', creativeName: '소재 A', cost: 10000000, imp: 8000000, click: 40000, conv: null, revenue: null, targetCpm: 1500, targetCpc: 300, targetCtr: 0.004, targetCvr: null, targetCpa: null }, // Top (DA Only) - modified
+            { media: '구글', placement: 'GDN', creativeName: '소재 B', cost: 15000000, imp: 10000000, click: 50000, conv: null, revenue: null, targetCpm: 2000, targetCpc: 400, targetCtr: 0.004, targetCvr: null, targetCpa: null }, // Top (DA Only) - modified
+            { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 8000000, imp: 3000000, click: 20000, conv: null, revenue: null, targetCpm: 3000, targetCpc: 500, targetCtr: 0.005, targetCvr: null, targetCpa: null }, // Top (DA Only) - modified
 
             // Mid 3
-            { media: '버즈빌', placement: '네트워크', creativeName: '소재 D', cost: 5000000, imp: 4000000, click: 8000, conv: 200, revenue: 5000000, targetCpm: 1000, targetCpc: 500, targetCtr: 0.002, targetCvr: 0.02, targetCpa: 25000 },
+            { media: '버즈빌', placement: '네트워크', creativeName: '소재 D', cost: 5000000, imp: 4000000, click: 8000, conv: null, revenue: null, targetCpm: 1000, targetCpc: 500, targetCtr: 0.002, targetCvr: null, targetCpa: null }, // Mid (DA Only) - modified
             { media: '네이버', placement: '타임보드', creativeName: '소재 E', cost: 20000000, imp: 2000000, click: 10000, conv: 100, revenue: null, targetCpm: 10000, targetCpc: 2000, targetCtr: 0.005, targetCvr: 0.01, targetCpa: 200000 },
             { media: 'META', placement: 'PPA', creativeName: '소재 F', cost: 3000000, imp: 500000, click: 5000, conv: 150, revenue: 9000000, targetCpm: 5000, targetCpc: 500, targetCtr: 0.01, targetCvr: 0.03, targetCpa: 20000 },
 
@@ -1240,11 +1241,17 @@
                          else if(col.key==='actualCpa') val = safeDivide(cost, conv);
                     }
 
-                    if(col.type==='currency' && val!==null) val = formatNumber(Math.round(val), 'currency');
-                    else if(col.type==='percent' && val!==null) val = formatNumber(val, 'percent');
-                    else if(col.isLargeNumber && val!==null) val = parseInt(val).toLocaleString('ko-KR');
+                    // [NEW] 3. 샘플 입력 테이블 컬러링 적용 (indigo-50)
+                    let innerContent = val;
+                    if(col.type==='currency' && val!==null) innerContent = formatNumber(Math.round(val), 'currency');
+                    else if(col.type==='percent' && val!==null) innerContent = formatNumber(val, 'percent');
+                    else if(col.isLargeNumber && val!==null) innerContent = parseInt(val).toLocaleString('ko-KR');
                     
-                    td.textContent = val || '-';
+                    if (col.calculated) {
+                        td.innerHTML = `<div class="w-full p-1 rounded-md text-xs bg-indigo-50 font-semibold text-indigo-700 text-center">${innerContent || '-'}</div>`;
+                    } else {
+                        td.textContent = innerContent || '-';
+                    }
                     tr.appendChild(td);
                 });
                 tbody.appendChild(tr);
