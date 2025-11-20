@@ -70,13 +70,9 @@
         .chart-dot-perf {
             position: absolute; width: 14px; height: 14px; border-radius: 50%; /* Circle */
             cursor: pointer; z-index: 49; transition: transform 0.2s, box-shadow 0.2s;
-            border: 2px solid #fff; /* White border to distinguish */
-            box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
-        }
-        /* Ring effect for PM dots to distinguish from DA if needed, or just use color */
-        .chart-dot-perf::after {
-            content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
-            border-radius: 50%; border: 1px solid rgba(0,0,0,0.1);
+            border: 2px solid #fff; 
+            /* Ring effect for PM dots to distinguish from DA */
+            box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.5), 0 0 8px rgba(0, 0, 0, 0.3); 
         }
         .chart-dot-perf:hover { transform: scale(1.5); z-index: 59; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
 
@@ -85,7 +81,7 @@
             position: absolute; width: 16px; height: 16px; border-radius: 50%;
             cursor: pointer; z-index: 55; transition: transform 0.2s, box-shadow 0.2s;
             border: 2px solid #fff; 
-            background: conic-gradient(from 90deg, #6366f1 0% 50%, #10b981 50% 100%); /* Example gradient */
+            background: conic-gradient(from 90deg, #6366f1 0% 50%, #10b981 50% 100%); /* Indigo/Green Split */
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
         }
         .chart-dot-grouped:hover { transform: scale(1.5); z-index: 65; }
@@ -195,7 +191,6 @@
                         </div>
                     </div>
                     
-                    <!-- Scroll Container with Max Height for Sticky Header -->
                     <div class="overflow-x-auto max-h-[600px] scroll-container border rounded-lg">
                         <table id="validation-input-table" class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0 relative">
                             <thead id="validation-table-header" class="bg-gray-100 z-20"></thead>
@@ -315,6 +310,39 @@
             </div>
         </div>
     </div>
+
+    <!-- 커스텀 설정 모달 (6단계 - 준비만 됨, 기능 없음) -->
+    <div id="custom-score-modal-backdrop" class="fixed inset-0 z-[110] hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
+        <div id="custom-score-modal-content" class="bg-white rounded-2xl shadow-2xl w-full flex flex-col overflow-hidden max-w-4xl max-h-[80vh]">
+             <div class="p-6 border-b flex justify-between items-center bg-gray-50">
+                <h3 class="text-2xl font-bold text-gray-800 flex items-center">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
+                    나만의 성과 기준 설정
+                </h3>
+                <button id="close-custom-score-modal" class="text-gray-500 hover:text-gray-700 transition-colors">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                </button>
+            </div>
+            <div class="p-6 flex-1 overflow-y-auto bg-white" id="custom-score-modal-body">
+                <!-- Tabs -->
+                <div class="flex space-x-4 mb-6 border-b">
+                    <button class="tab-button px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600 active" data-tab="da">DA 성과 기준</button>
+                    <button class="tab-button px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600" data-tab="perf">퍼포먼스 성과 기준</button>
+                    <button class="tab-button px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600" data-tab="insight">인사이트 문구 설정</button>
+                </div>
+                
+                <!-- Content (Placeholder) -->
+                <div class="p-8 text-center text-gray-500">
+                    기능 준비 중입니다. (6단계)
+                </div>
+            </div>
+             <div class="p-4 border-t bg-gray-50 flex justify-end space-x-3 items-center">
+                <span id="custom-score-save-status" class="text-green-600 font-medium text-sm hidden flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>저장되었습니다!</span>
+                <button id="reset-custom-score-btn" class="text-gray-600 hover:text-red-600 text-sm font-semibold px-4 py-2 transition-colors">기본값으로 초기화</button>
+                <button id="save-custom-score-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-md">설정 저장</button>
+            </div>
+        </div>
+    </div>
     
     <script>
         const DASHBOARD_STORAGE_KEY = 'campaignDashboardStorage';
@@ -365,7 +393,8 @@
                     { name: '광고비(원)', key: 'cost' }, { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, { name: '전환수', key: 'conv' },
                     { name: 'CPM(원)', key: 'actualCpm' }, { name: 'CTR(%)', key: 'actualCtr' }, { name: 'CPC(원)', key: 'actualCpc' }, 
                     { name: 'CVR(%)', key: 'actualCvr' }, { name: 'CPA(원)', key: 'actualCpa' },
-                    { name: 'INSIGHT/피드백', key: 'insight_feedback_merged' },
+                    { name: 'DA 인사이트', key: 'daInsight' }, { name: 'DA 피드백', key: 'daAction' },
+                    { name: 'PM 인사이트', key: 'pmInsight' }, { name: 'PM 피드백', key: 'pmAction' },
                     { name: 'A 점수', key: 'scoreA' }, { name: 'B 점수', key: 'scoreB' }, { name: 'C 점수', key: 'scoreC' },
                     { name: '매출액(원)', key: 'revenue' }, { name: 'ROAS(%)', key: 'roas' }
                 ],
@@ -377,16 +406,57 @@
             },
         };
 
+        // [MODIFY] 9 Sample Data (3 Top, 3 Mid, 3 Low) with Balanced Quadrants (Revised with new Strict Scoring)
+        // Target Criteria: CPM<70%(5), <90%(4), <105%(3), <125%(2)
+        // CTR>150%(5), >115%(4), >95%(3), >75%(2)
         const testProjectMockData = [
-            { media: '네이버', placement: '스페셜DA', creativeName: '소재 A', cost: 10000000, imp: 8000000, click: 40000, conv: null, revenue: null, targetCpm: 1500, targetCpc: 300, targetCtr: 0.004, targetCvr: null, targetCpa: null },
-            { media: '구글', placement: 'GDN', creativeName: '소재 B', cost: 15000000, imp: 10000000, click: 50000, conv: null, revenue: null, targetCpm: 2000, targetCpc: 400, targetCtr: 0.004, targetCvr: null, targetCpa: null },
-            { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 8000000, imp: 3000000, click: 20000, conv: null, revenue: null, targetCpm: 3000, targetCpc: 500, targetCtr: 0.005, targetCvr: null, targetCpa: null },
-            { media: '버즈빌', placement: '네트워크', creativeName: '소재 D', cost: 5000000, imp: 4000000, click: 8000, conv: null, revenue: null, targetCpm: 1000, targetCpc: 500, targetCtr: 0.002, targetCvr: null, targetCpa: null },
-            { media: '네이버', placement: '타임보드', creativeName: '소재 E', cost: 20000000, imp: 2000000, click: 10000, conv: 100, revenue: null, targetCpm: 10000, targetCpc: 2000, targetCtr: 0.005, targetCvr: 0.01, targetCpa: 200000 },
-            { media: 'META', placement: 'PPA', creativeName: '소재 F', cost: 3000000, imp: 500000, click: 5000, conv: 150, revenue: 9000000, targetCpm: 5000, targetCpc: 500, targetCtr: 0.01, targetCvr: 0.03, targetCpa: 20000 },
-            { media: '에브리타임', placement: '홈배너', creativeName: '소재 G', cost: 2000000, imp: 1000000, click: 1000, conv: 10, revenue: null, targetCpm: 1500, targetCpc: 1500, targetCtr: 0.001, targetCvr: 0.01, targetCpa: 100000 },
-            { media: '구글', placement: 'UAC', creativeName: '소재 H', cost: 5000000, imp: 200000, click: 500, conv: 5, revenue: 100000, targetCpm: 20000, targetCpc: 8000, targetCtr: 0.002, targetCvr: 0.01, targetCpa: 1000000 },
-            { media: '카카오', placement: '메시지', creativeName: '소재 I', cost: 1000000, imp: 50000, click: 200, conv: 2, revenue: null, targetCpm: 15000, targetCpc: 4000, targetCtr: 0.004, targetCvr: 0.01, targetCpa: 500000 },
+            // --- Top 3 ---
+            // 1. STAR (DA High): Naver/SpecialDA/Material A
+            // A(CPM): 2000/3000 = 0.66 (<0.7) -> 5
+            // B(CTR): 0.004/0.002 = 2.0 (>1.5) -> 5
+            { media: '네이버', placement: '스페셜DA', creativeName: '소재 A', cost: 10000000, imp: 5000000, click: 20000, conv: null, revenue: null, targetCpm: 3000, targetCpc: 600, targetCtr: 0.002, targetCvr: null, targetCpa: null },
+            
+            // 2. STAR (PM High): Google/UAC/Material B
+            // C(CPA): 10000/15000 = 0.66 (<0.7) -> 5
+            // B(CTR): 0.02/0.01 = 2.0 (>1.5) -> 5
+            { media: '구글', placement: 'UAC', creativeName: '소재 B', cost: 20000000, imp: 2000000, click: 40000, conv: 2000, revenue: 100000000, targetCpm: 12000, targetCpc: 600, targetCtr: 0.01, targetCvr: 0.03, targetCpa: 15000 },
+            
+            // 3. STAR (DA High): Kakao/BizBoard/Material C
+            // A(CPM): 2000/2500 = 0.8 (<0.9) -> 4
+            // B(CTR): 0.0025/0.002 = 1.25 (>1.15) -> 4
+            { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 8000000, imp: 4000000, click: 10000, conv: null, revenue: null, targetCpm: 2500, targetCpc: 1000, targetCtr: 0.002, targetCvr: null, targetCpa: null },
+
+            // --- Mid 3 ---
+            // 4. High Potential (DA): A Low(2), B High(4)
+            // A(CPM): 1250/1000 = 1.25 (<=1.25) -> 2
+            // B(CTR): 0.004/0.003 = 1.33 (>1.15) -> 4
+            { media: '버즈빌', placement: '네트워크', creativeName: '소재 D', cost: 5000000, imp: 4000000, click: 16000, conv: null, revenue: null, targetCpm: 1000, targetCpc: 500, targetCtr: 0.003, targetCvr: null, targetCpa: null },
+
+            // 5. Niche (DA): A High(5), B Low(2)
+            // A(CPM): 5000/8000 = 0.62 (<0.7) -> 5
+            // B(CTR): 0.005/0.006 = 0.83 (>0.75) -> 2
+            { media: '네이버', placement: '타임보드', creativeName: '소재 E', cost: 20000000, imp: 4000000, click: 20000, conv: null, revenue: null, targetCpm: 8000, targetCpc: 2000, targetCtr: 0.006, targetCvr: null, targetCpa: null },
+
+            // 6. Mid (PM): C Mid(3), B Mid(3)
+            // C(CPA): 20000/20000 = 1.0 (<=1.05) -> 3
+            // B(CTR): 0.01/0.01 = 1.0 (>=0.95) -> 3
+            { media: 'META', placement: 'PPA', creativeName: '소재 F', cost: 3000000, imp: 3000000, click: 30000, conv: 150, revenue: 9000000, targetCpm: 2000, targetCpc: 2000, targetCtr: 0.01, targetCvr: 0.005, targetCpa: 20000 },
+
+            // --- Low 3 ---
+            // 7. Question Mark (DA Low): A Low(1), B Low(2)
+            // A(CPM): 4000/3000 = 1.33 (>1.25) -> 1
+            // B(CTR): 0.001/0.0012 = 0.83 (>0.75) -> 2
+            { media: '에브리타임', placement: '홈배너', creativeName: '소재 G', cost: 2000000, imp: 500000, click: 500, conv: null, revenue: null, targetCpm: 3000, targetCpc: 3000, targetCtr: 0.0012, targetCvr: null, targetCpa: null },
+
+            // 8. Question Mark (DA Low): A Low(2), B Low(1)
+            // A(CPM): 5000/4200 = 1.19 (<=1.25) -> 2
+            // B(CTR): 0.001/0.002 = 0.5 (<0.75) -> 1
+            { media: '구글', placement: 'GDN', creativeName: '소재 H', cost: 5000000, imp: 1000000, click: 1000, conv: null, revenue: null, targetCpm: 4200, targetCpc: 4000, targetCtr: 0.002, targetCvr: null, targetCpa: null },
+
+            // 9. Low (PM Low): C Low(1), B Low(2)
+            // C(CPA): 500000/350000 = 1.42 (>1.25) -> 1
+            // B(CTR): 0.004/0.005 = 0.8 (>0.75) -> 2
+            { media: '카카오', placement: '메시지', creativeName: '소재 I', cost: 1000000, imp: 100000, click: 400, conv: 2, revenue: null, targetCpm: 5000, targetCpc: 4000, targetCtr: 0.005, targetCvr: 0.005, targetCpa: 350000 },
         ];
 
         let sortColumn = 'cost';
@@ -437,7 +507,7 @@
                 row.isPrefill = !!sourceItem.media; 
                 
                 configCols.forEach(col => {
-                    row[col.key] = sourceItem[col.key] || null;
+                    row[col.key] = sourceItem[col.key] ?? null; // [FIX] undefined handling
                 });
 
                 row.media = sourceItem.media || null;
@@ -979,12 +1049,29 @@
                         const tooltip = document.getElementById('chart-tooltip');
                         let html = `<div class="font-bold border-b pb-1 mb-1 text-sm">중복된 소재 (${group.length})</div>`;
                         group.forEach(g => {
+                            // [FIX] Detailed Tooltip for Grouped Dots
                             const typeLabel = g.type === 'da' ? 'DA' : 'PM';
                             const grade = g.type === 'da' ? g.item.daInsight : g.item.pmInsight;
-                            const colorClass = g.type === 'da' ? 'text-indigo-300' : 'text-green-300';
-                            html += `<div class="mb-2 text-xs">
-                                <span class="font-bold">[${g.item.creativeName}] (${typeLabel})</span> <span class="text-gray-300">${grade}</span><br>
-                                <span class="${colorClass}">${typeLabel} 성과: ${g.type==='da'?g.item.scoreA:g.item.scoreC} / ${g.item.scoreB}</span>
+                            const scoreA = g.item.scoreA !== null ? g.item.scoreA.toFixed(1) : 'N/A';
+                            const scoreC = g.item.scoreC !== null ? g.item.scoreC.toFixed(1) : 'N/A';
+                            const scoreB = g.item.scoreB.toFixed(1);
+                            
+                            // DA/PM Specific Score Display
+                            let scoreDetail = '';
+                            let totalScore = '';
+                            if (g.type === 'da') {
+                                scoreDetail = `DA 성과 : 노출 ${scoreA} / 반응 ${scoreB}`;
+                                totalScore = `DA 성과 총점 : ${((g.item.scoreA + g.item.scoreB)/2).toFixed(2)}`;
+                            } else {
+                                scoreDetail = `PM 성과 : 전환 ${scoreC} / 반응 ${scoreB}`;
+                                totalScore = `PM 성과 총점 : ${((g.item.scoreC + g.item.scoreB)/2).toFixed(2)}`;
+                            }
+
+                            html += `<div class="mb-3 text-xs border-b border-gray-700 pb-2 last:border-0">
+                                <div class="font-bold text-sm text-white mb-1">${g.item.media}/${g.item.placement}/${g.item.creativeName}</div>
+                                <div class="mb-1">등급 : ${grade} (${typeLabel})</div>
+                                <div class="text-indigo-300 mb-0.5">${scoreDetail}</div>
+                                <div class="text-gray-400">${totalScore}</div>
                             </div>`;
                         });
                         tooltip.innerHTML = html;
