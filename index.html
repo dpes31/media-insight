@@ -66,9 +66,8 @@
         }
         .chart-dot:hover { transform: scale(1.5); z-index: 60; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
         
-        /* PM Dot is also circle now */
         .chart-dot-perf {
-            position: absolute; width: 14px; height: 14px; border-radius: 50%; /* Changed to circle */
+            position: absolute; width: 14px; height: 14px; border-radius: 50%; /* Circle */
             cursor: pointer; z-index: 49; transition: transform 0.2s, box-shadow 0.2s;
             border: 2px solid #6366f1; background-color: rgba(255, 255, 255, 0.7);
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
@@ -103,10 +102,20 @@
             max-height: 90vh;
         }
         
-        /* 커스텀 설정 모달 스타일 (6단계 준비) */
-        #custom-score-modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
-        #custom-score-modal-content { max-width: 90vw; width: 900px; max-height: 80vh; }
-        .tab-button.active { border-color: #4f46e5; color: #4f46e5; background-color: #eef2ff; }
+        /* 커스텀 설정 모달 스타일 */
+        #custom-score-modal-backdrop {
+            background-color: rgba(0, 0, 0, 0.5);
+        }
+        #custom-score-modal-content {
+            max-width: 90vw;
+            width: 900px;
+            max-height: 80vh;
+        }
+        .tab-button.active {
+            border-color: #4f46e5;
+            color: #4f46e5;
+            background-color: #eef2ff;
+        }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -138,11 +147,6 @@
                 </button>
             </div>
             <div class="flex space-x-2">
-                 <!-- 나만의 성과 버튼 (6단계 - 기능 없음) -->
-                 <!-- <button id="open-custom-score-modal" class="bg-gray-100 text-gray-700 hover:bg-gray-200 border border-gray-300 text-sm font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M11.49 3.17c-.38-1.56-2.6-1.56-2.98 0a1.532 1.532 0 01-2.286.948c-1.372-.836-2.942.734-2.106 2.106.54.886.061 2.042-.947 2.287-1.561.379-1.561 2.6 0 2.978a1.532 1.532 0 01.947 2.287c-.836 1.372.734 2.942 2.106 2.106a1.532 1.532 0 012.287.947c.379 1.561 2.6 1.561 2.978 0a1.533 1.533 0 012.287-.947c1.372.836 2.942-.734 2.106-2.106a1.533 1.533 0 01.947-2.287c1.561-.379 1.561-2.6 0-2.978a1.532 1.532 0 01-.947-2.287c.836-1.372-.734-2.942-2.106-2.106a1.532 1.532 0 01-2.287-.947zM10 13a3 3 0 100-6 3 3 0 000 6z" clip-rule="evenodd" /></svg>
-                    나만의 성과
-                </button> -->
                 <button id="new-project-button" class="bg-green-500 text-white hover:bg-green-600 text-sm font-semibold py-2 px-4 rounded-lg transition-colors flex items-center">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-5 h-5 mr-1"><path d="M10.75 4.75a.75.75 0 00-1.5 0v4.5h-4.5a.75.75 0 000 1.5h4.5v4.5a.75.75 0 001.5 0v-4.5h4.5a.75.75 0 000-1.5h-4.5v-4.5z" /></svg>
                     새 프로젝트
@@ -350,11 +354,11 @@
         let currentProject = 'default';
         let isPrefillActive = true; 
         
-        // 6단계 준비용 (기본값)
+        // [MODIFY] Updated Default Score Settings (Strict Criteria)
         const defaultScoreSettings = {
-            cpm: { 5: 0.8, 4: 1.0, 3: 1.3, 2: 1.6 },
-            ctr: { 5: 1.3, 4: 1.1, 3: 1.0, 2: 0.5 },
-            cpc: { 5: 0.85, 4: 0.95, 3: 1.04, 2: 1.4 },
+            cpm: { 5: 0.7, 4: 0.9, 3: 1.05, 2: 1.25 },
+            ctr: { 5: 1.5, 4: 1.15, 3: 0.95, 2: 0.75 },
+            cpc: { 5: 0.7, 4: 0.9, 3: 1.05, 2: 1.25 },
             cvr: { 5: 1.5, 4: 1.15, 3: 0.95, 2: 0.75 },
             cpa: { 5: 0.7, 4: 0.9, 3: 1.05, 2: 1.25 },
             roas: { 5: 600, 4: 400, 3: 250, 2: 150 }
@@ -388,7 +392,8 @@
                 name: '통합 캠페인',
                 headers: [
                     { name: '매체', key: 'media' }, { name: '상품', key: 'placement' }, { name: '소재명', key: 'creativeName' },
-                    { name: '광고비(원)', key: 'cost' }, { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, { name: '전환수', key: 'conv' },
+                    { name: '광고비(원)', key: 'cost' }, { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, 
+                    { name: '전환수', key: 'conv' }, 
                     { name: 'CPM(원)', key: 'actualCpm' }, { name: 'CTR(%)', key: 'actualCtr' }, { name: 'CPC(원)', key: 'actualCpc' }, 
                     { name: 'CVR(%)', key: 'actualCvr' }, { name: 'CPA(원)', key: 'actualCpa' },
                     { name: 'INSIGHT/피드백', key: 'insight_feedback_merged' },
@@ -732,9 +737,37 @@
             });
         }
         
-        const getScoreCpm = (a, t) => (a===null||t===null||t<=0)?1:(a/t<0.8?5:a/t<1.0?4:a/t<1.3?3:a/t<1.6?2:1);
-        const getScoreCtr = (a, t) => (a===null||t===null||t<=0)?1:(a/t>1.3?5:a/t>1.1?4:a/t>1.0?3:a/t>0.5?2:1);
-        const getScoreCpc = (a, t) => (a===null||t===null||t<=0)?1:(a/t<0.85?5:a/t<0.95?4:a/t<1.04?3:a/t<1.4?2:1);
+        // [MODIFY] Updated Scoring Logic (Strict Criteria)
+        const getScoreCpm = (a, t) => {
+            if (a===null||t===null||t<=0) return 1;
+            const r = a/t;
+            if (r < 0.70) return 5;  
+            if (r <= 0.90) return 4; 
+            if (r <= 1.05) return 3; 
+            if (r <= 1.25) return 2; 
+            return 1;                
+        };
+
+        const getScoreCtr = (a, t) => {
+            if (a===null||t===null||t<=0) return 1;
+            const r = a/t;
+            if (r > 1.50) return 5;  
+            if (r >= 1.15) return 4; 
+            if (r >= 0.95) return 3; 
+            if (r >= 0.75) return 2; 
+            return 1;                
+        };
+
+        const getScoreCpc = (a, t) => {
+            if (a===null||t===null||t<=0) return 1;
+            const r = a/t;
+            if (r < 0.70) return 5;  
+            if (r <= 0.90) return 4; 
+            if (r <= 1.05) return 3; 
+            if (r <= 1.25) return 2; 
+            return 1;                
+        };
+
         const getScoreCvr = (a, t) => (a===null||t===null||t<=0)?null:(a/t>1.50?5:a/t>=1.15?4:a/t>=0.95?3:a/t>=0.75?2:1);
         const getScoreCpa = (a, t) => (a===null||t===null||t<=0)?null:(a/t<0.70?5:a/t<=0.90?4:a/t<=1.05?3:a/t<=1.25?2:1);
 
