@@ -9,7 +9,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap" rel="stylesheet">
     <style>
         body { font-family: 'Inter', sans-serif; background-color: #f7f9fb; }
-        .scroll-container::-webkit-scrollbar { height: 8px; }
+        .scroll-container::-webkit-scrollbar { height: 8px; width: 8px; }
         .scroll-container::-webkit-scrollbar-thumb { background-color: #cbd5e1; border-radius: 4px; }
         .scroll-container::-webkit-scrollbar-track { background: #f1f5f9; }
         
@@ -66,8 +66,9 @@
         }
         .chart-dot:hover { transform: scale(1.5); z-index: 60; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
         
+        /* PM Dot is also circle now */
         .chart-dot-perf {
-            position: absolute; width: 14px; height: 14px; border-radius: 3px;
+            position: absolute; width: 14px; height: 14px; border-radius: 50%; /* Changed to circle */
             cursor: pointer; z-index: 49; transition: transform 0.2s, box-shadow 0.2s;
             border: 2px solid #6366f1; background-color: rgba(255, 255, 255, 0.7);
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
@@ -79,13 +80,13 @@
         
         /* Table Headers */
         #validation-input-table thead th, #sample-input-table thead th {
-            text-align: center; vertical-align: middle; border-bottom: 1px solid #e5e7eb;
+            text-align: center; vertical-align: middle; border-bottom: 1px solid #e5e7eb; z-index: 10;
         }
         #validation-input-table thead tr:first-child th, #sample-input-table thead tr:first-child th {
-            border-bottom: none; border-right: 1px solid #d1d5db;
+            border-bottom: none; border-right: 1px solid #d1d5db; top: 0;
         }
         #validation-input-table thead tr:last-child th, #sample-input-table thead tr:last-child th {
-             border-right: 1px solid #e5e7eb; padding-top: 4px;
+             border-right: 1px solid #e5e7eb; padding-top: 4px; top: 33px;
         }
         
         .header-subtext {
@@ -97,15 +98,13 @@
         
         /* Custom Modal Size */
         #sample-modal-content {
-            max-width: 95vw; /* 가로 폭 키움 */
+            max-width: 95vw;
             width: 1600px;
             max-height: 90vh;
         }
         
-        /* 커스텀 설정 모달 스타일 (6단계 준비) */
         #custom-score-modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
         #custom-score-modal-content { max-width: 90vw; width: 900px; max-height: 80vh; }
-        .tab-button.active { border-color: #4f46e5; color: #4f46e5; background-color: #eef2ff; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -123,13 +122,11 @@
                 <select id="project-selector" class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 min-w-[200px]">
                     <!-- Options loaded by JS -->
                 </select>
-                <!-- 프로젝트 수정 버튼 -->
                 <button id="edit-project-button" class="text-gray-500 hover:text-indigo-600 transition-colors p-1" title="프로젝트 이름 수정">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 </button>
-                <!-- 프로젝트 삭제 버튼 -->
                 <button id="delete-project-button" class="text-gray-500 hover:text-red-600 transition-colors p-1" title="프로젝트 삭제">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -182,14 +179,10 @@
                         </div>
                     </div>
                     
-                    <div class="overflow-x-auto">
-                        <table id="validation-input-table" class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0">
-                            <thead id="validation-table-header" class="bg-gray-100 sticky top-0">
-                                <!-- Table Headers will be injected here -->
-                            </thead>
-                            <tbody id="validation-table-body">
-                                <!-- Input Rows will be injected here -->
-                            </tbody>
+                    <div class="overflow-x-auto max-h-[600px] scroll-container border rounded-lg">
+                        <table id="validation-input-table" class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0 relative">
+                            <thead id="validation-table-header" class="bg-gray-100 z-20"></thead>
+                            <tbody id="validation-table-body"></tbody>
                         </table>
                     </div>
                 </div>
@@ -203,7 +196,6 @@
         </div>
         
         <div id="analysis-results"> 
-            <!-- 1. Overall Performance Summary Table -->
             <div class="mb-10">
                 <h2 id="summary-main-title" class="text-2xl font-bold text-gray-800 mb-4">
                     종합 성과 요약 
@@ -212,107 +204,50 @@
                 <div class="scroll-container overflow-x-auto rounded-xl shadow-lg border">
                     <table class="min-w-full divide-y divide-gray-200">
                         <thead class="bg-indigo-50">
-                            <tr id="summary-header" class="text-sm font-semibold text-indigo-700 uppercase tracking-wider">
-                                <!-- Summary Headers -->
-                            </tr>
+                            <tr id="summary-header" class="text-sm font-semibold text-indigo-700 uppercase tracking-wider"></tr>
                         </thead>
-                        <tbody id="summary-body" class="bg-white divide-y divide-gray-200">
-                            <!-- Summary Data -->
-                        </tbody>
+                        <tbody id="summary-body" class="bg-white divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
             </div>
-            <!-- 2. Visualization and Insights (3-Column Layout) -->
+            
             <div class="grid grid-cols-1 xl:grid-cols-3 gap-10">
-                <!-- Left 2/3: 4-Quadrant Matrix -->
+                <!-- Matrix -->
                 <div class="xl:col-span-2 space-y-6">
                     <div class="bg-white p-6 rounded-xl shadow-lg border border-gray-200">
                         <h2 class="text-2xl font-bold text-gray-800 mb-4 flex items-center">
                             소재 성과 매트리스
                         </h2>
                         <div class="quadrant-matrix" id="quadrant-matrix">
-                            <div class="matrix-lines">
-                                <div class="v-line"></div>
-                                <div class="h-line"></div>
-                            </div>
-                            <div class="quadrant quadrant-top-left">
-                                <div class="relative z-10 flex flex-col justify-center text-center">
-                                    <h3 class="text-xl font-extrabold text-blue-700">High Potential</h3>
-                                    <p class="text-sm text-gray-500 mt-2">노출 효율(Low) 소재 매력도(High)</p>
-                                    <p class="text-sm text-gray-700 mt-2">훅킹성은 높지만 잘 알려지지 않은 소재</p>
-                                    <div class="mt-4">
-                                        <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-blue-800 bg-blue-100">
-                                            Action : 타겟팅 확장
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="quadrant quadrant-top-right">
-                                <div class="relative z-10 flex flex-col justify-center text-center">
-                                    <h3 class="text-xl font-extrabold text-green-700">STAR</h3>
-                                    <p class="text-sm text-gray-500 mt-2">노출 효율(High) 소재 매력도(High)</p>
-                                    <p class="text-sm text-gray-700 mt-2">대중적으로 가장 반응이 우수한 소재</p>
-                                    <div class="mt-4">
-                                        <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-green-800 bg-green-100">
-                                            Action : 유지 / 예산 증대
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="quadrant quadrant-bottom-left">
-                                <div class="relative z-10 flex flex-col justify-center text-center">
-                                    <h3 class="text-xl font-extrabold text-red-700">Question Mark</h3>
-                                    <p class="text-sm text-gray-500 mt-2">노출 효율(Low) 소재 매력도(Low)</p>
-                                    <p class="text-sm text-gray-700 mt-2">예산 낭비 가능성이 높은 소재</p>
-                                    <div class="mt-4">
-                                        <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-red-800 bg-red-100">
-                                            Action : 광고OFF / 예산이관
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
-                            <div class="quadrant quadrant-bottom-right">
-                                <div class="relative z-10 flex flex-col justify-center text-center">
-                                    <h3 class="text-xl font-extrabold text-amber-700">Niche</h3>
-                                    <p class="text-sm text-gray-500 mt-2">노출 효율(High) 소재 매력도(Low)</p>
-                                    <p class="text-sm text-gray-700 mt-2">소수의 집단에서 반응이 높은 소재</p>
-                                    <div class="mt-4">
-                                        <span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-amber-800 bg-amber-100">
-                                            Action : 범용적 소재 / 훅킹성 강화
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
+                            <div class="matrix-lines"><div class="v-line"></div><div class="h-line"></div></div>
+                            <div class="quadrant quadrant-top-left"><div class="relative z-10 flex flex-col justify-center text-center"><h3 class="text-xl font-extrabold text-blue-700">High Potential</h3><p class="text-sm text-gray-500 mt-2">노출 효율(Low) 소재 매력도(High)</p><p class="text-sm text-gray-700 mt-2">훅킹성은 높지만 잘 알려지지 않은 소재</p><div class="mt-4"><span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-blue-800 bg-blue-100">Action : 타겟팅 확장</span></div></div></div>
+                            <div class="quadrant quadrant-top-right"><div class="relative z-10 flex flex-col justify-center text-center"><h3 class="text-xl font-extrabold text-green-700">STAR</h3><p class="text-sm text-gray-500 mt-2">노출 효율(High) 소재 매력도(High)</p><p class="text-sm text-gray-700 mt-2">대중적으로 가장 반응이 우수한 소재</p><div class="mt-4"><span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-green-800 bg-green-100">Action : 유지 / 예산 증대</span></div></div></div>
+                            <div class="quadrant quadrant-bottom-left"><div class="relative z-10 flex flex-col justify-center text-center"><h3 class="text-xl font-extrabold text-red-700">Question Mark</h3><p class="text-sm text-gray-500 mt-2">노출 효율(Low) 소재 매력도(Low)</p><p class="text-sm text-gray-700 mt-2">예산 낭비 가능성이 높은 소재</p><div class="mt-4"><span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-red-800 bg-red-100">Action : 광고OFF / 예산이관</span></div></div></div>
+                            <div class="quadrant quadrant-bottom-right"><div class="relative z-10 flex flex-col justify-center text-center"><h3 class="text-xl font-extrabold text-amber-700">Niche</h3><p class="text-sm text-gray-500 mt-2">노출 효율(High) 소재 매력도(Low)</p><p class="text-sm text-gray-700 mt-2">소수의 집단에서 반응이 높은 소재</p><div class="mt-4"><span class="inline-block py-1 px-3 rounded-full text-sm font-semibold text-amber-800 bg-amber-100">Action : 범용적 소재 / 훅킹성 강화</span></div></div></div>
                         </div>
                     </div>
                 </div>
-                <!-- Right 1/3: Key Insights -->
+                <!-- Insight -->
                 <div class="xl:col-span-1 space-y-6">
                     <div class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200 h-full">
                         <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center">
                             <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 inline-block mr-2" viewBox="0 0 24 24" fill="currentColor"><path fill-rule="evenodd" d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
                             MEDIA INSIGHT
                         </h2>
-                        <ul id="insight-list" class="space-y-4 text-gray-700 text-sm">
-                            <!-- Insights will be injected here -->
-                        </ul>
+                        <ul id="insight-list" class="space-y-4 text-gray-700 text-sm"></ul>
                     </div>
                 </div>
             </div>
             
-            <!-- 3. Efficiency Data Table -->
+            <!-- Efficiency Table -->
             <div class="mt-10">
                 <h2 class="text-2xl font-bold text-gray-800 mb-4">캠페인 상세 효율 지표 (소재별)</h2>
-                <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border">
-                    <table class="min-w-full divide-y divide-gray-200">
-                        <thead class="bg-gray-100 sticky top-0">
-                            <tr id="table-header" class="text-xs font-medium text-gray-500 uppercase tracking-wider">
-                                <!-- Headers will be injected here -->
-                            </tr>
+                <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border max-h-[600px]">
+                    <table class="min-w-full divide-y divide-gray-200 relative border-separate border-spacing-0">
+                        <thead class="bg-gray-100 sticky top-0 z-20">
+                            <tr id="table-header" class="text-xs font-medium text-gray-500 uppercase tracking-wider"></tr>
                         </thead>
-                        <tbody id="table-body" class="bg-white divide-y divide-gray-200">
-                            <!-- Data rows will be injected here -->
-                        </tbody>
+                        <tbody id="table-body" class="bg-white divide-y divide-gray-200"></tbody>
                     </table>
                 </div>
             </div>
@@ -329,34 +264,28 @@
                 </button>
             </div>
             <div id="sample-modal-body" class="p-8 overflow-y-auto bg-slate-50 space-y-10">
-                <!-- (1) 샘플 입력 데이터 -->
+                <!-- (1) Input -->
                 <div>
                     <h2 class="text-xl font-bold text-gray-800 mb-4">[샘플] 캠페인 목표 & 성과 검증 항목 입력</h2>
-                    <div class="overflow-x-auto rounded-xl border shadow-sm bg-white">
-                        <table id="sample-input-table" class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0">
-                           <!-- Sample Input Data Rendered Here -->
-                        </table>
+                    <div class="overflow-x-auto rounded-xl border shadow-sm bg-white max-h-[400px] scroll-container">
+                        <table id="sample-input-table" class="min-w-full divide-y divide-gray-200 border-separate border-spacing-0 relative"></table>
                     </div>
                 </div>
-                
-                <!-- (2) 성과 요약 -->
+                <!-- (2) Summary -->
                 <div id="sample-summary-section"></div>
-                
-                <!-- (3) 차트 (순서 변경) -->
+                <!-- (3) Chart -->
                 <div id="sample-chart-section"></div>
-                
-                <!-- (4) 인사이트 (차트 하단으로 이동) -->
+                <!-- (4) Insight -->
                  <div id="sample-insight-section" class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200">
                     <h2 class="text-xl font-bold text-indigo-700 mb-4">MEDIA INSIGHT (샘플)</h2>
                     <ul id="sample-insight-list" class="space-y-4 text-gray-700 text-sm"></ul>
                 </div>
-
-                <!-- (5) 상세 지표 -->
+                <!-- (5) Detail Table -->
                 <div>
                     <h2 class="text-xl font-bold text-gray-800 mb-4">캠페인 상세 효율 지표 (샘플)</h2>
-                    <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border bg-white">
-                        <table class="min-w-full divide-y divide-gray-200">
-                            <thead class="bg-gray-100">
+                    <div class="scroll-container overflow-x-auto rounded-xl shadow-inner border bg-white max-h-[400px]">
+                        <table class="min-w-full divide-y divide-gray-200 relative border-separate border-spacing-0">
+                            <thead class="bg-gray-100 sticky top-0 z-20">
                                 <tr id="sample-table-header" class="text-xs font-medium text-gray-500 uppercase tracking-wider"></tr>
                             </thead>
                             <tbody id="sample-table-body" class="bg-white divide-y divide-gray-200"></tbody>
@@ -365,19 +294,16 @@
                 </div>
             </div>
             <div class="p-4 border-t bg-gray-50 flex justify-end">
-                <button id="close-sample-modal-btn" class="bg-gray-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-gray-900 transition-colors">
-                    닫기
-                </button>
+                <button id="close-sample-modal-btn" class="bg-gray-800 text-white px-6 py-2 rounded-lg font-bold hover:bg-gray-900 transition-colors">닫기</button>
             </div>
         </div>
     </div>
     
     <script>
-        const appId = typeof __app_id !== 'undefined' ? __app_id : 'default-app-id';
-        const firebaseConfig = typeof __firebase_config !== 'undefined' ? JSON.parse(__firebase_config) : {};
         const DASHBOARD_STORAGE_KEY = 'campaignDashboardStorage';
         
         let isPerfInputVisible = false; 
+        let isScoreVisible = false;
         let currentProject = 'default';
         let isPrefillActive = true; 
         
@@ -408,25 +334,13 @@
             'MAIN': {
                 name: '통합 캠페인',
                 headers: [
-                    { name: '매체', key: 'media' }, 
-                    { name: '상품', key: 'placement' },
-                    { name: '소재명', key: 'creativeName' },
-                    { name: '광고비(원)', key: 'cost' },
-                    { name: '노출수', key: 'imp' },
-                    { name: '클릭수', key: 'click' },
-                    { name: 'CPM(원)', key: 'cpm' }, 
-                    { name: 'CTR(%)', key: 'ctr' }, 
-                    { name: 'CPC(원)', key: 'cpc' },
-                    { name: '전환수', key: 'conv' }, 
-                    { name: '매출액(원)', key: 'revenue' },
-                    { name: '성과 CVR(%)', key: 'actualCvr' },
-                    { name: '성과 CPA(원)', key: 'actualCpa' },
-                    { name: 'ROAS(%)', key: 'roas' },
-                    { name: 'A 점수', key: 'scoreA' }, 
-                    { name: 'B 점수', key: 'scoreB' }, 
-                    { name: 'C 점수', key: 'scoreC' },
-                    { name: 'INSIGHT', key: 'insight_merged' }, 
-                    { name: '피드백', key: 'action_merged' }
+                    { name: '매체', key: 'media' }, { name: '상품', key: 'placement' }, { name: '소재명', key: 'creativeName' },
+                    { name: '광고비(원)', key: 'cost' }, { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, { name: '전환수', key: 'conv' },
+                    { name: 'CPM(원)', key: 'cpm' }, { name: 'CTR(%)', key: 'ctr' }, { name: 'CPC(원)', key: 'cpc' }, 
+                    { name: 'CVR(%)', key: 'actualCvr' }, { name: 'CPA(원)', key: 'actualCpa' },
+                    { name: 'INSIGHT/피드백', key: 'insight_feedback_merged' },
+                    { name: 'A 점수', key: 'scoreA' }, { name: 'B 점수', key: 'scoreB' }, { name: 'C 점수', key: 'scoreC' },
+                    { name: '매출액(원)', key: 'revenue' }, { name: 'ROAS(%)', key: 'roas' }
                 ],
                 data: [
                     { media: '네이버', creative: '소재A_스페셜DA', cost: 11480000, imp: 7200000, click: 16000, cpm: null, ctr: null, cpc: null, scoreA: null, scoreB: null, total: null, insight: null, color: null, mediaInsight: null },
@@ -436,22 +350,15 @@
             },
         };
 
-        // Re-balanced Sample Data (Top 3, Mid 3, Low 3)
-        // [Modified] Specific media set to null for performance metrics
         const testProjectMockData = [
-             // Top 3 (STAR 1, Niche 1, High Potential 1)
-            { media: '네이버', placement: '스페셜DA', creativeName: '소재 A', cost: 10000000, imp: 8000000, click: 40000, conv: null, revenue: null, targetCpm: 1500, targetCpc: 300, targetCtr: 0.004, targetCvr: null, targetCpa: null }, // Top (DA Only) - modified
-            { media: '구글', placement: 'GDN', creativeName: '소재 B', cost: 15000000, imp: 10000000, click: 50000, conv: null, revenue: null, targetCpm: 2000, targetCpc: 400, targetCtr: 0.004, targetCvr: null, targetCpa: null }, // Top (DA Only) - modified
-            { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 8000000, imp: 3000000, click: 20000, conv: null, revenue: null, targetCpm: 3000, targetCpc: 500, targetCtr: 0.005, targetCvr: null, targetCpa: null }, // Top (DA Only) - modified
-
-            // Mid 3
-            { media: '버즈빌', placement: '네트워크', creativeName: '소재 D', cost: 5000000, imp: 4000000, click: 8000, conv: null, revenue: null, targetCpm: 1000, targetCpc: 500, targetCtr: 0.002, targetCvr: null, targetCpa: null }, // Mid (DA Only) - modified
+            { media: '네이버', placement: '스페셜DA', creativeName: '소재 A', cost: 10000000, imp: 8000000, click: 40000, conv: null, revenue: null, targetCpm: 1500, targetCpc: 300, targetCtr: 0.004, targetCvr: null, targetCpa: null },
+            { media: '구글', placement: 'GDN', creativeName: '소재 B', cost: 15000000, imp: 10000000, click: 50000, conv: null, revenue: null, targetCpm: 2000, targetCpc: 400, targetCtr: 0.004, targetCvr: null, targetCpa: null },
+            { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 8000000, imp: 3000000, click: 20000, conv: null, revenue: null, targetCpm: 3000, targetCpc: 500, targetCtr: 0.005, targetCvr: null, targetCpa: null },
+            { media: '버즈빌', placement: '네트워크', creativeName: '소재 D', cost: 5000000, imp: 4000000, click: 8000, conv: null, revenue: null, targetCpm: 1000, targetCpc: 500, targetCtr: 0.002, targetCvr: null, targetCpa: null },
             { media: '네이버', placement: '타임보드', creativeName: '소재 E', cost: 20000000, imp: 2000000, click: 10000, conv: 100, revenue: null, targetCpm: 10000, targetCpc: 2000, targetCtr: 0.005, targetCvr: 0.01, targetCpa: 200000 },
             { media: 'META', placement: 'PPA', creativeName: '소재 F', cost: 3000000, imp: 500000, click: 5000, conv: 150, revenue: 9000000, targetCpm: 5000, targetCpc: 500, targetCtr: 0.01, targetCvr: 0.03, targetCpa: 20000 },
-
-            // Low 3
             { media: '에브리타임', placement: '홈배너', creativeName: '소재 G', cost: 2000000, imp: 1000000, click: 1000, conv: 10, revenue: null, targetCpm: 1500, targetCpc: 1500, targetCtr: 0.001, targetCvr: 0.01, targetCpa: 100000 },
-            { media: '구글', placement: '유튜브', creativeName: '소재 H', cost: 5000000, imp: 200000, click: 500, conv: 5, revenue: 100000, targetCpm: 20000, targetCpc: 8000, targetCtr: 0.002, targetCvr: 0.01, targetCpa: 1000000 },
+            { media: '구글', placement: 'UAC', creativeName: '소재 H', cost: 5000000, imp: 200000, click: 500, conv: 5, revenue: 100000, targetCpm: 20000, targetCpc: 8000, targetCtr: 0.002, targetCvr: 0.01, targetCpa: 1000000 },
             { media: '카카오', placement: '메시지', creativeName: '소재 I', cost: 1000000, imp: 50000, click: 200, conv: 2, revenue: null, targetCpm: 15000, targetCpc: 4000, targetCtr: 0.004, targetCvr: 0.01, targetCpa: 500000 },
         ];
 
@@ -474,21 +381,18 @@
                     { name: '소재명', key: 'creativeName', type: 'text', placeholder: '소재명', width: 'w-24', group: '기본 정보' },
                     { name: '광고비(원)', key: 'cost', type: 'number', placeholder: '금액', width: 'w-24', isLargeNumber: true, group: '기본 정보' },
                     { name: '노출수', key: 'imp', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '기본 정보' }, 
-                    
                     { name: '목표 CPM(원)', key: 'targetCpm', type: 'currency', placeholder: '목표CPM', width: 'w-24', isLargeNumber: true, group: '노출 성과 (CPM)' },
-                    { name: '성과 CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true, group: '노출 성과 (CPM)' },
-                    
+                    { name: 'CPM(원)', key: 'actualCpm', type: 'currency', placeholder: '성과CPM', width: 'w-24', calculated: true, group: '노출 성과 (CPM)' },
                     { name: '클릭수', key: 'click', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' }, 
                     { name: '목표 CPC(원)', key: 'targetCpc', type: 'currency', placeholder: '목표CPC', width: 'w-24', isLargeNumber: true, group: '클릭 성과 (CPC/CTR)' },
-                    { name: '성과 CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
+                    { name: 'CPC(원)', key: 'actualCpc', type: 'currency', placeholder: '성과CPC', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
                     { name: '목표 CTR(%)', key: 'targetCtr', type: 'percent', placeholder: '목표CTR', width: 'w-24', group: '클릭 성과 (CPC/CTR)' },
-                    { name: '성과 CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
-                    
+                    { name: 'CTR(%)', key: 'actualCtr', type: 'percent', placeholder: '성과CTR', width: 'w-24', calculated: true, group: '클릭 성과 (CPC/CTR)' },
                     { name: '전환수', key: 'conv', type: 'number', placeholder: '횟수', width: 'w-20', isLargeNumber: true, group: '전환 성과 (CPA)' }, 
                     { name: '목표 전환율(%)', key: 'targetCvr', type: 'percent', placeholder: '목표CVR', width: 'w-24', group: '전환 성과 (CPA)' },
-                    { name: '성과 전환율(%)', key: 'actualCvr', type: 'percent', placeholder: '성과CVR', width: 'w-24', calculated: true, group: '전환 성과 (CPA)' },
+                    { name: 'CVR(%)', key: 'actualCvr', type: 'percent', placeholder: '성과CVR', width: 'w-24', calculated: true, group: '전환 성과 (CPA)' },
                     { name: '목표 CPA(원)', key: 'targetCpa', type: 'currency', placeholder: '목표CPA', width: 'w-24', isLargeNumber: true, group: '전환 성과 (CPA)' },
-                    { name: '성과 CPA(원)', key: 'actualCpa', type: 'currency', placeholder: '성과CPA', width: 'w-24', calculated: true, group: '전환 성과 (CPA)' },
+                    { name: 'CPA(원)', key: 'actualCpa', type: 'currency', placeholder: '성과CPA', width: 'w-24', calculated: true, group: '전환 성과 (CPA)' },
                     { name: '매출액(원)', key: 'revenue', type: 'currency', placeholder: '금액(옵션)', width: 'w-24', isLargeNumber: true, group: '전환 성과 (CPA)' },
                 ],
             },
@@ -497,42 +401,24 @@
         const mapCampaignDataToValidation = (sourceData) => {
             const dataToMap = sourceData; 
             const configCols = validationTableConfigs['MAIN'].cols;
-            
             return dataToMap.map((sourceItem) => {
                 const row = { id: crypto.randomUUID() };
                 row.isPrefill = !!sourceItem.media; 
-                
-                configCols.forEach(col => {
-                    row[col.key] = sourceItem[col.key] || null;
-                });
-
+                configCols.forEach(col => { row[col.key] = sourceItem[col.key] || null; });
                 row.media = sourceItem.media || null;
                 const parts = sourceItem.creative ? String(sourceItem.creative).split('_') : [null, null];
                 row.creativeName = sourceItem.creativeName || parts[0] || null; 
                 row.placement = sourceItem.placement || parts[1] || null; 
-                
-                // Defaults for initial mock data (Main Page)
                 if (row.isPrefill) {
-                     if (sourceItem.media === '네이버') {
-                        row.targetCpm = sourceItem.targetCpm || 2000;
-                        row.targetCpc = sourceItem.targetCpc || 740;
-                        row.targetCtr = sourceItem.targetCtr || 0.0020;
-                    } else if (sourceItem.media === '카카오') {
-                        row.targetCpm = sourceItem.targetCpm || 900;
-                        row.targetCpc = sourceItem.targetCpc || 400;
-                        row.targetCtr = sourceItem.targetCtr || 0.0025;
-                    } else if (sourceItem.media === '구글') {
-                        row.targetCpm = sourceItem.targetCpm || 5000;
-                        row.targetCpc = sourceItem.targetCpc || 2000;
-                        row.targetCtr = sourceItem.targetCtr || 0.0040;
-                    }
+                     if (sourceItem.media === '네이버') { row.targetCpm = 2000; row.targetCpc = 740; row.targetCtr = 0.0020; }
+                     else if (sourceItem.media === '카카오') { row.targetCpm = 900; row.targetCpc = 400; row.targetCtr = 0.0025; }
+                     else if (sourceItem.media === '구글') { row.targetCpm = 5000; row.targetCpc = 2000; row.targetCtr = 0.0040; }
                 }
                 return row;
             });
         };
         
         let isValidationTableOpen = true; 
-        
         const defaultValidationData = { 'MAIN': mapCampaignDataToValidation(campaignData.MAIN.data) };
         let storageData = { currentProject: 'default', projects: { 'default': defaultValidationData } };
         let validationData = storageData.projects[currentProject];
@@ -547,7 +433,6 @@
         const addValidationRowButton = document.getElementById('add-validation-row');
         const saveDataButton = document.getElementById('save-data-button');
         const resetDataButton = document.getElementById('reset-data-button');
-        
         const projectSelector = document.getElementById('project-selector');
         const newProjectButton = document.getElementById('new-project-button');
         const editProjectButton = document.getElementById('edit-project-button');
@@ -562,13 +447,10 @@
                 option.textContent = projectName === 'default' ? '프로젝트 명' : projectName;
                 if (projectName === currentProject) {
                     option.selected = true;
-                    if (projectName === 'default') {
-                         option.classList.add('text-gray-500'); // Default gray text
-                    }
+                    if (projectName === 'default') option.classList.add('text-gray-500');
                 }
                 projectSelector.appendChild(option);
             });
-             // Initial Color Check
             if(currentProject === 'default') projectSelector.classList.add('text-gray-500');
             else projectSelector.classList.remove('text-gray-500');
         }
@@ -576,13 +458,17 @@
         function togglePerfColumns() {
             isPerfInputVisible = !isPerfInputVisible;
             const perfCols = document.querySelectorAll('#validation-input-table .perf-col');
-            perfCols.forEach(col => {
-                col.classList.toggle('hidden', !isPerfInputVisible);
-            });
+            perfCols.forEach(col => col.classList.toggle('hidden', !isPerfInputVisible));
             const perfToggleBtn = document.getElementById('toggle-perf-cols');
-            if (perfToggleBtn) {
-                perfToggleBtn.textContent = isPerfInputVisible ? '전환 성과 숨김' : '전환 성과 입력';
-            }
+            if (perfToggleBtn) perfToggleBtn.textContent = isPerfInputVisible ? '전환 성과 숨김' : '전환 성과 입력';
+        }
+
+        function toggleScoreColumns() {
+            isScoreVisible = !isScoreVisible;
+            const scoreCols = document.querySelectorAll('.score-col');
+            scoreCols.forEach(col => col.classList.toggle('hidden', !isScoreVisible));
+            const btns = document.querySelectorAll('.toggle-score-btn');
+            btns.forEach(btn => btn.textContent = isScoreVisible ? '점수 숨김' : '점수 보기');
         }
 
         function toggleValidationTable() {
@@ -603,7 +489,6 @@
         function calculateValidationMetrics(row) {
             const { cost, imp, click, conv } = row;
             const safeDivide = (n, d) => (typeof n!=='number'||typeof d!=='number'||d<=0||isNaN(n)||isNaN(d)||n===null||d===null) ? null : n/d;
-            
             row.actualCpm = safeDivide(cost, imp) !== null ? safeDivide(cost, imp) * 1000 : null;
             row.actualCpc = safeDivide(cost, click);
             row.actualCtr = safeDivide(click, imp); 
@@ -615,7 +500,6 @@
             const rowElement = document.querySelector(`#validation-table-body tr[data-row-id="${rowId}"]`);
             if (!rowElement) return;
             const config = validationTableConfigs['MAIN'];
-            
             config.cols.forEach((col, colIndex) => {
                 if (col.calculated) {
                     const td = rowElement.children[colIndex]; 
@@ -641,7 +525,6 @@
                 if (!config) return;
                 let inputValue = event.target.value;
                 let rawValueToStore = inputValue; 
-                
                 if (config.isLargeNumber) {
                     const cleanValue = inputValue.replace(/[^\d]/g, ''); 
                     event.target.value = formatNumericInput(cleanValue);
@@ -652,12 +535,8 @@
                     if ((key.includes('targetCtr') || key.includes('targetCvr')) && rawValueToStore !== null) {
                         rawValueToStore = rawValueToStore / 100;
                     }
-                } else if (config.type === 'text') {
-                    rawValueToStore = inputValue;
-                }
-                
+                } else if (config.type === 'text') rawValueToStore = inputValue;
                 validationData['MAIN'][index][key] = rawValueToStore;
-                
                 const baseMetrics = ['cost', 'imp', 'click', 'conv', 'revenue'];
                 if (baseMetrics.includes(key)) {
                     calculateValidationMetrics(validationData['MAIN'][index]);
@@ -683,7 +562,6 @@
             const config = validationTableConfigs['MAIN'];
             validationCampaignLabel.textContent = config.label;
             validationTableHeader.innerHTML = '';
-            
             const trGroup = document.createElement('tr');
             trGroup.className = 'bg-gray-200 border-b-2 border-gray-300';
             config.headerGroups.forEach(group => {
@@ -692,27 +570,21 @@
                 th.colSpan = group.cols.length;
                 if (group.name === '클릭 성과 (CPC/CTR)') {
                     th.innerHTML = `<div class="flex items-center justify-center relative"><span>${group.name}</span><button id="toggle-perf-cols" class="ml-2 text-xs bg-indigo-500 text-white rounded px-2 py-0.5 hover:bg-indigo-700 transition-colors">${isPerfInputVisible ? '전환 성과 숨김' : '전환 성과 입력'}</button></div>`;
-                } else {
-                    th.textContent = group.name;
-                }
+                } else th.textContent = group.name;
                 if (group.name === '전환 성과 (CPA)') {
                     th.classList.add('perf-col');
                     if (!isPerfInputVisible) th.classList.add('hidden');
                 }
                 trGroup.appendChild(th);
             });
-            
-            // Event delegation for toggle
             const perfToggleBtn = trGroup.querySelector('#toggle-perf-cols');
             if (perfToggleBtn) perfToggleBtn.addEventListener('click', (e) => { e.stopPropagation(); togglePerfColumns(); });
-
             const thDeleteTop = document.createElement('th');
             thDeleteTop.className = 'px-1 py-2 text-xs font-bold text-gray-700 sticky top-0 bg-gray-300 w-10';
             thDeleteTop.textContent = '삭제';
             thDeleteTop.rowSpan = 2;
             trGroup.appendChild(thDeleteTop);
             validationTableHeader.appendChild(trGroup);
-            
             const trDetail = document.createElement('tr');
             trDetail.className = 'bg-gray-100 border-b border-gray-200';
             config.cols.forEach(col => {
@@ -727,7 +599,6 @@
                 trDetail.appendChild(th);
             });
             validationTableHeader.appendChild(trDetail);
-            
             validationTableBody.innerHTML = '';
             validationData['MAIN'].forEach(row => {
                 const tr = document.createElement('tr');
@@ -742,7 +613,6 @@
                     }
                     let rawValue = row[col.key];
                     let displayValue = (rawValue === null || typeof rawValue === 'undefined') ? '' : rawValue;
-                    
                     if (col.calculated) {
                         if (rawValue !== null) {
                             if (col.type === 'currency') displayValue = formatNumber(Math.round(rawValue), 'currency').replace('원', '');
@@ -754,9 +624,7 @@
                         let inputClasses = `w-full p-1 border rounded-md text-xs focus:ring-indigo-500 focus:border-indigo-500 ${['number','currency','percent'].includes(col.type) || col.isLargeNumber ? 'text-right' : 'text-left'}`;
                         if (col.isLargeNumber && typeof rawValue === 'number') displayValue = formatNumericInput(rawValue);
                         else if (col.type === 'percent' && typeof rawValue === 'number') displayValue = `${(rawValue * 100).toFixed(2).replace(/\.00$/, '')}%`;
-                        
                         if (isPrefillActive && row.isPrefill && (displayValue || displayValue === 0)) inputClasses += ' input-prefill';
-                        
                         const input = document.createElement('input');
                         input.type = 'text'; input.className = inputClasses; input.value = displayValue;
                         input.placeholder = col.placeholder; input.dataset.key = col.key;
@@ -915,10 +783,10 @@
 
             if (sC!==null && sB!==null) {
                 insight = pmGrade;
-                mInsight = `${prefix}: ${getPerfInsight(sB, sC).text}`;
+                mInsight = `${getPerfInsight(sB, sC).text}`; 
             } else if (sA!==null && sB!==null) {
                 insight = daGrade;
-                mInsight = `${prefix}: ${getDaInsight(sA, sB).text}`;
+                mInsight = `${getDaInsight(sA, sB).text}`; 
             }
             
             if (insight.includes("Top")) color = '#10b981';
@@ -931,7 +799,7 @@
             }
             
             if (daMiss) {
-                insight='미디어 성과를 작성해주세요'; mInsight=`${prefix}: ${insight}`; color='#94a3b8';
+                insight='미디어 성과를 작성해주세요'; mInsight=`${insight}`; color='#94a3b8';
             }
 
             return { 
@@ -1041,73 +909,89 @@
             const data = analysisData.data;
             targetList.innerHTML = '';
             
-            const daInsights = {};
-            const perfInsights = {};
-            const roasInsights = [];
-            let hasValidDaData = false;
-            let hasValidPerfData = false;
+            const gradeInsights = { "Top 소재": [], "Mid 소재": [], "Low 소재": [], "ROAS 성과": [] }; 
+            let hasData = false;
             
             data.forEach(item => {
                 const prefix = (item.media || item.placement || item.creativeName) ? `${item.media || 'N/A'}/${item.placement || 'N/A'}/${item.creativeName || 'N/A'}` : '매체 상품과 소재명 없음';
                 
                 if (item.revenue > 0 && item.cost > 0) {
                     const roasData = getRoasInsight(item.roas, prefix);
-                    if (roasData) roasInsights.push(roasData);
+                    if (roasData) {
+                         gradeInsights["ROAS 성과"].push({ text: roasData.text, prefix: prefix });
+                         hasData = true;
+                    }
                 }
 
                 if (item.scoreC !== null && item.scoreB !== null) {
-                    hasValidPerfData = true;
-                    const grade = item.pmInsight;
-                    if (!perfInsights[grade]) perfInsights[grade] = [];
-                    perfInsights[grade].push({ insight: item.mediaInsight, color: item.color });
-                } else if (item.scoreA !== null && item.scoreB !== null) {
-                    hasValidDaData = true;
-                    const grade = item.daInsight;
-                    if (!daInsights[grade]) daInsights[grade] = [];
-                    daInsights[grade].push({ insight: item.mediaInsight, color: item.color });
+                    hasData = true;
+                    let gradeKey = item.pmInsight.replace('소재', ' 소재').replace('  ', ' ');
+                    if(gradeKey === 'Low소재') gradeKey = 'Low 소재';
+                    if(gradeKey === 'Mid소재') gradeKey = 'Mid 소재';
+                    if(gradeKey === 'Top소재') gradeKey = 'Top 소재';
+
+                    if (gradeInsights[gradeKey]) {
+                        gradeInsights[gradeKey].push({ insight: item.mediaInsight, color: item.color, type: '[PM]', prefix: prefix });
+                    }
+                } 
+                else if (item.scoreA !== null && item.scoreB !== null) {
+                    hasData = true;
+                    let gradeKey = item.daInsight.replace('소재', ' 소재').replace('  ', ' ');
+                    if(gradeKey === 'Low소재') gradeKey = 'Low 소재';
+                    if(gradeKey === 'Mid소재') gradeKey = 'Mid 소재';
+                    if(gradeKey === 'Top소재') gradeKey = 'Top 소재';
+                    
+                    if (gradeInsights[gradeKey]) {
+                        gradeInsights[gradeKey].push({ insight: item.mediaInsight, color: item.color, type: '[DA]', prefix: prefix });
+                    }
                 }
             });
             
-             const renderSection = (title, insights, color) => {
+            if (!hasData) {
+                 targetList.innerHTML = `<li class="text-gray-500">미디어 성과를 작성해주세요</li>`;
+                 return;
+            }
+            
+            const renderGroup = (title, items, color) => {
+                if (!items || items.length === 0) return;
+                
                 const header = document.createElement('li');
                 header.className = `pt-4 mb-2 font-extrabold text-lg border-b-2 pb-1`;
                 header.style.borderColor = color; header.style.color = color;
-                header.innerHTML = title;
+                header.innerHTML = `[${title}]`;
                 targetList.appendChild(header);
                 
-                const order = ["Top 소재", "Top소재", "Mid 소재", "Mid소재", "Low소재", "데이터 부족", "오류"];
-                order.forEach(grade => {
-                    if(insights[grade]) {
-                        insights[grade].forEach(item => {
-                            const li = document.createElement('li');
-                            li.className = 'text-gray-700 text-sm flex items-start';
-                            const parts = item.insight.split(/:(.+)/);
-                            const p = parts[0]?parts[0].trim():''; const t = parts[1]?parts[1].trim():item.insight;
-                            li.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 mr-2 flex-shrink-0" style="color:${item.color}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg><span><strong class="font-bold text-gray-900 block">${p}</strong><span class="block mt-1">${t}</span></span>`;
-                            targetList.appendChild(li);
-                        });
+                items.forEach(item => {
+                    const li = document.createElement('li');
+                    li.className = 'text-gray-700 text-sm flex items-start mb-2';
+                    
+                    let iconColor = item.color || color;
+                    let textContent = item.insight || item.text;
+                    let prefixContent = item.prefix;
+                    
+                    if(title === 'ROAS 성과') {
+                        const parts = item.text.split(/:(.+)/);
+                        prefixContent = parts[0].trim();
+                        textContent = parts[1] ? parts[1].trim() : item.text;
+                    } else {
+                         prefixContent = `${item.type} ${item.prefix}`;
                     }
+
+                    li.innerHTML = `
+                        <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 mr-2 flex-shrink-0" style="color:${iconColor}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
+                        <span>
+                            <strong class="font-bold text-gray-900 block">${prefixContent}</strong>
+                            <span class="block mt-1">${textContent}</span>
+                        </span>
+                    `;
+                    targetList.appendChild(li);
                 });
             };
 
-            if (hasValidPerfData) renderSection("[퍼포먼스 인사이트]", perfInsights, '#6366f1');
-            if (hasValidDaData) renderSection("[DA 인사이트]", daInsights, '#059669');
-            
-            if (roasInsights.length > 0) {
-                const header = document.createElement('li');
-                header.className = `pt-4 mb-2 font-extrabold text-lg border-b-2 pb-1`;
-                header.style.borderColor = '#ca8a04'; header.style.color = '#ca8a04';
-                header.innerHTML = "[ROAS 성과]";
-                targetList.appendChild(header);
-                roasInsights.forEach(item => {
-                     const li = document.createElement('li');
-                    li.className = 'text-gray-700 text-sm flex items-start';
-                    const parts = item.text.split(/:(.+)/);
-                    const p = parts[0].trim(); const t = parts[1].trim();
-                    li.innerHTML = `<svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 mr-2 flex-shrink-0" style="color:#ca8a04" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg><span><strong class="font-bold text-gray-900 block">${p}</strong><span class="block mt-1">${t}</span></span>`;
-                    targetList.appendChild(li);
-                });
-            }
+            renderGroup("Top 소재", gradeInsights["Top 소재"], '#10b981'); 
+            renderGroup("Mid 소재", gradeInsights["Mid 소재"], '#f59e0b'); 
+            renderGroup("Low 소재", gradeInsights["Low 소재"], '#ef4444'); 
+            renderGroup("ROAS 성과", gradeInsights["ROAS 성과"], '#ca8a04'); 
         }
 
         function renderTable(analysisData, tableBodyId) {
@@ -1125,22 +1009,42 @@
             
             const headersToRender = [
                 { name: '매체', key: 'media' }, { name: '상품', key: 'placement' }, { name: '소재명', key: 'creativeName' },
-                { name: '광고비(원)', key: 'cost' }, { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' },
+                { name: '광고비(원)', key: 'cost' }, { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, { name: '전환수', key: 'conv' },
                 { name: 'CPM(원)', key: 'cpm' }, { name: 'CTR(%)', key: 'ctr' }, { name: 'CPC(원)', key: 'cpc' },
-                { name: '전환수', key: 'conv' }, { name: '매출액(원)', key: 'revenue' },
-                { name: '성과 CVR(%)', key: 'actualCvr' }, { name: '성과 CPA(원)', key: 'actualCpa' }, { name: 'ROAS(%)', key: 'roas' },
+                { name: 'CVR(%)', key: 'actualCvr' }, { name: 'CPA(원)', key: 'actualCpa' }, 
+                { name: 'INSIGHT/피드백', key: 'insight_feedback_merged' },
                 { name: 'A 점수', key: 'scoreA' }, { name: 'B 점수', key: 'scoreB' }, { name: 'C 점수', key: 'scoreC' },
-                { name: 'INSIGHT/피드백', key: 'insight_feedback_merged' }
+                { name: '매출액(원)', key: 'revenue' }, { name: 'ROAS(%)', key: 'roas' }
             ];
             
             headersToRender.forEach(header => {
                 const th = document.createElement('th');
                 th.className = 'px-4 py-3 text-center border-b border-gray-200 whitespace-nowrap bg-gray-100';
-                if (header.key === 'cost') th.innerHTML = `${header.name} <span class="header-subtext">(소진 금액)</span>`;
-                else if (header.key === 'scoreA') th.innerHTML = `${header.name} <span class="header-subtext">(노출 영향력)</span>`;
-                else if (header.key === 'scoreB') th.innerHTML = `${header.name} <span class="header-subtext">(소재 관심도)</span>`;
-                else if (header.key === 'scoreC') th.innerHTML = `${header.name} <span class="header-subtext">(전환 기여도)</span>`;
-                else th.textContent = header.name;
+                
+                if (['scoreA', 'scoreB', 'scoreC', 'revenue', 'roas'].includes(header.key)) {
+                    th.classList.add('score-col');
+                    if (!isScoreVisible) th.classList.add('hidden');
+                }
+                
+                if (header.key === 'insight_feedback_merged') {
+                     th.innerHTML = `<div class="flex flex-col items-center justify-center relative">
+                        <span>${header.name}</span>
+                        <button class="toggle-score-btn mt-1 text-xs bg-indigo-500 text-white rounded px-2 py-0.5 hover:bg-indigo-700 transition-colors">${isScoreVisible ? '점수 숨김' : '점수 보기'}</button>
+                     </div>`;
+                    th.querySelector('.toggle-score-btn').addEventListener('click', (e) => {
+                         e.stopPropagation(); toggleScoreColumns(); 
+                    });
+                } else if (header.key === 'cost') {
+                     th.innerHTML = `${header.name} <span class="header-subtext">(소진 금액)</span>`;
+                } else if (header.key === 'scoreA') {
+                     th.innerHTML = `${header.name} <span class="header-subtext">(노출 영향력)</span>`;
+                } else if (header.key === 'scoreB') {
+                     th.innerHTML = `${header.name} <span class="header-subtext">(소재 관심도)</span>`;
+                } else if (header.key === 'scoreC') {
+                     th.innerHTML = `${header.name} <span class="header-subtext">(전환 기여도)</span>`;
+                } else {
+                    th.textContent = header.name;
+                }
                 tableHeader.appendChild(th);
             });
             
@@ -1152,14 +1056,17 @@
                     const td = document.createElement('td');
                     td.className = 'px-4 py-3 whitespace-nowrap text-sm text-gray-600 text-center';
                     
+                    if (['scoreA', 'scoreB', 'scoreC', 'revenue', 'roas'].includes(header.key)) {
+                        td.classList.add('score-col');
+                        if (!isScoreVisible) td.classList.add('hidden');
+                    }
+
                     if (header.key === 'insight_feedback_merged') {
-                        // DA Insight & Feedback
                         let html = `<div class="mb-1">
                             <span class="font-bold text-green-600">[DA] ${item.daInsight||'-'}</span>
                             <span class="block text-xs text-gray-500">${item.daAction||''}</span>
                         </div>`;
                         
-                        // PM Insight & Feedback (if exists)
                         if (item.scoreC) {
                             html += `<div class="mt-2 pt-2 border-t border-gray-200">
                                 <span class="font-bold text-indigo-600">[PM] ${item.pmInsight}</span>
@@ -1167,7 +1074,7 @@
                             </div>`;
                         }
                         td.innerHTML = html;
-                        td.className = 'px-4 py-3 text-sm text-left min-w-[250px]'; // Left align for text content
+                        td.className = 'px-4 py-3 text-sm text-left min-w-[250px]'; 
                     } else {
                         let val = item[header.key];
                         if(['cost','revenue','cpm','cpc','actualCpa'].includes(header.key)) td.textContent = formatNumber(val, 'currency');
@@ -1193,13 +1100,13 @@
             table.innerHTML = '';
             
             const thead = document.createElement('thead');
-            thead.className = "bg-gray-100 sticky top-0";
+            thead.className = "bg-gray-100 sticky top-0 z-20"; 
             
             const trGroup = document.createElement('tr');
             trGroup.className = 'bg-gray-200 border-b-2 border-gray-300';
             config.headerGroups.forEach(group => {
                 const th = document.createElement('th');
-                th.className = 'px-2 py-2 text-xs font-bold text-gray-700 uppercase tracking-wider sticky top-0 bg-gray-200/100'; // 요청: 헤더 회색 배경
+                th.className = 'px-2 py-2 text-xs font-bold text-gray-700 uppercase tracking-wider sticky top-0 bg-gray-200/100'; 
                 th.colSpan = group.cols.length;
                 th.textContent = group.name;
                 trGroup.appendChild(th);
@@ -1223,25 +1130,14 @@
             
             data.forEach(row => {
                 const tr = document.createElement('tr');
+                calculateValidationMetrics(row); 
+
                 config.cols.forEach(col => {
                     const td = document.createElement('td');
                     td.className = 'p-2 text-xs whitespace-nowrap border-r border-gray-100 text-center';
                     
-                    // [FIX] 1. 샘플 데이터 계산 및 포맷팅 로직 추가
                     let val = row[col.key];
-                    
-                    // Calculate if missing in mock data (for consistency)
-                    if(col.calculated) {
-                         const { cost, imp, click, conv } = row;
-                         const safeDivide = (n, d) => (d>0) ? n/d : 0;
-                         if(col.key==='actualCpm') val = safeDivide(cost, imp) * 1000;
-                         else if(col.key==='actualCpc') val = safeDivide(cost, click);
-                         else if(col.key==='actualCtr') val = safeDivide(click, imp);
-                         else if(col.key==='actualCvr') val = safeDivide(conv, click);
-                         else if(col.key==='actualCpa') val = safeDivide(cost, conv);
-                    }
 
-                    // [NEW] 3. 샘플 입력 테이블 컬러링 적용 (indigo-50)
                     let innerContent = val;
                     if(col.type==='currency' && val!==null) innerContent = formatNumber(Math.round(val), 'currency');
                     else if(col.type==='percent' && val!==null) innerContent = formatNumber(val, 'percent');
@@ -1262,8 +1158,10 @@
         function showSampleModal() {
             const modal = document.getElementById('sample-modal');
             const modalContent = document.getElementById('sample-modal-body');
-            modalContent.scrollTop = 0; // 요청: 스크롤 초기화
+            modalContent.scrollTop = 0; 
             
+            testProjectMockData.forEach(row => calculateValidationMetrics(row));
+
             renderSampleInputTable(testProjectMockData);
             
             const sampleAnalysis = aggregateAndScoreData(mapCampaignDataToValidation(testProjectMockData));
@@ -1348,6 +1246,7 @@
             
             // Initial Toggle State Ensure
             isPerfInputVisible = false;
+            isScoreVisible = false; // [NEW]
 
             updateProjectSelector();
             
