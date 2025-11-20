@@ -66,13 +66,29 @@
         }
         .chart-dot:hover { transform: scale(1.5); z-index: 60; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
         
+        /* PM Dot */
         .chart-dot-perf {
             position: absolute; width: 14px; height: 14px; border-radius: 50%; /* Circle */
             cursor: pointer; z-index: 49; transition: transform 0.2s, box-shadow 0.2s;
-            border: 2px solid #6366f1; background-color: rgba(255, 255, 255, 0.7);
+            border: 2px solid #fff; /* White border to distinguish */
             box-shadow: 0 0 8px rgba(0, 0, 0, 0.3);
         }
+        /* Ring effect for PM dots to distinguish from DA if needed, or just use color */
+        .chart-dot-perf::after {
+            content: ''; position: absolute; top: -4px; left: -4px; right: -4px; bottom: -4px;
+            border-radius: 50%; border: 1px solid rgba(0,0,0,0.1);
+        }
         .chart-dot-perf:hover { transform: scale(1.5); z-index: 59; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
+
+        /* Grouped Dot (Overlap) */
+        .chart-dot-grouped {
+            position: absolute; width: 16px; height: 16px; border-radius: 50%;
+            cursor: pointer; z-index: 55; transition: transform 0.2s, box-shadow 0.2s;
+            border: 2px solid #fff; 
+            background: conic-gradient(from 90deg, #6366f1 0% 50%, #10b981 50% 100%); /* Example gradient */
+            box-shadow: 0 0 8px rgba(0, 0, 0, 0.5);
+        }
+        .chart-dot-grouped:hover { transform: scale(1.5); z-index: 65; }
         
         .sortable { cursor: pointer; transition: background-color 0.2s; }
         .sortable:hover { background-color: #e5e7eb; }
@@ -102,20 +118,9 @@
             max-height: 90vh;
         }
         
-        /* 커스텀 설정 모달 스타일 */
-        #custom-score-modal-backdrop {
-            background-color: rgba(0, 0, 0, 0.5);
-        }
-        #custom-score-modal-content {
-            max-width: 90vw;
-            width: 900px;
-            max-height: 80vh;
-        }
-        .tab-button.active {
-            border-color: #4f46e5;
-            color: #4f46e5;
-            background-color: #eef2ff;
-        }
+        #custom-score-modal-backdrop { background-color: rgba(0, 0, 0, 0.5); }
+        #custom-score-modal-content { max-width: 90vw; width: 900px; max-height: 80vh; }
+        .tab-button.active { border-color: #4f46e5; color: #4f46e5; background-color: #eef2ff; }
     </style>
 </head>
 <body class="p-4 md:p-8">
@@ -133,13 +138,11 @@
                 <select id="project-selector" class="rounded-lg border-gray-300 shadow-sm focus:border-indigo-500 focus:ring-indigo-500 min-w-[200px]">
                     <!-- Options loaded by JS -->
                 </select>
-                <!-- 프로젝트 수정 버튼 -->
                 <button id="edit-project-button" class="text-gray-500 hover:text-indigo-600 transition-colors p-1" title="프로젝트 이름 수정">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" />
                     </svg>
                 </button>
-                <!-- 프로젝트 삭제 버튼 -->
                 <button id="delete-project-button" class="text-gray-500 hover:text-red-600 transition-colors p-1" title="프로젝트 삭제">
                     <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
                       <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
@@ -312,39 +315,6 @@
             </div>
         </div>
     </div>
-
-    <!-- 커스텀 설정 모달 (6단계 - 준비만 됨, 기능 없음) -->
-    <div id="custom-score-modal-backdrop" class="fixed inset-0 z-[110] hidden flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm p-4">
-        <div id="custom-score-modal-content" class="bg-white rounded-2xl shadow-2xl w-full flex flex-col overflow-hidden max-w-4xl max-h-[80vh]">
-             <div class="p-6 border-b flex justify-between items-center bg-gray-50">
-                <h3 class="text-2xl font-bold text-gray-800 flex items-center">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-6 w-6 mr-2 text-indigo-600" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" /></svg>
-                    나만의 성과 기준 설정
-                </h3>
-                <button id="close-custom-score-modal" class="text-gray-500 hover:text-gray-700 transition-colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" class="h-8 w-8" fill="none" viewBox="0 0 24 24" stroke="currentColor"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" /></svg>
-                </button>
-            </div>
-            <div class="p-6 flex-1 overflow-y-auto bg-white" id="custom-score-modal-body">
-                <!-- Tabs -->
-                <div class="flex space-x-4 mb-6 border-b">
-                    <button class="tab-button px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600 active" data-tab="da">DA 성과 기준</button>
-                    <button class="tab-button px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600" data-tab="perf">퍼포먼스 성과 기준</button>
-                    <button class="tab-button px-4 py-2 font-semibold text-gray-600 border-b-2 border-transparent hover:text-indigo-600" data-tab="insight">인사이트 문구 설정</button>
-                </div>
-                
-                <!-- Content (Placeholder) -->
-                <div class="p-8 text-center text-gray-500">
-                    기능 준비 중입니다. (6단계)
-                </div>
-            </div>
-             <div class="p-4 border-t bg-gray-50 flex justify-end space-x-3 items-center">
-                <span id="custom-score-save-status" class="text-green-600 font-medium text-sm hidden flex items-center"><svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mr-1" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd" /></svg>저장되었습니다!</span>
-                <button id="reset-custom-score-btn" class="text-gray-600 hover:text-red-600 text-sm font-semibold px-4 py-2 transition-colors">기본값으로 초기화</button>
-                <button id="save-custom-score-btn" class="bg-indigo-600 text-white px-6 py-2 rounded-lg font-bold hover:bg-indigo-700 transition-colors shadow-md">설정 저장</button>
-            </div>
-        </div>
-    </div>
     
     <script>
         const DASHBOARD_STORAGE_KEY = 'campaignDashboardStorage';
@@ -392,8 +362,7 @@
                 name: '통합 캠페인',
                 headers: [
                     { name: '매체', key: 'media' }, { name: '상품', key: 'placement' }, { name: '소재명', key: 'creativeName' },
-                    { name: '광고비(원)', key: 'cost' }, { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, 
-                    { name: '전환수', key: 'conv' }, 
+                    { name: '광고비(원)', key: 'cost' }, { name: '노출수', key: 'imp' }, { name: '클릭수', key: 'click' }, { name: '전환수', key: 'conv' },
                     { name: 'CPM(원)', key: 'actualCpm' }, { name: 'CTR(%)', key: 'actualCtr' }, { name: 'CPC(원)', key: 'actualCpc' }, 
                     { name: 'CVR(%)', key: 'actualCvr' }, { name: 'CPA(원)', key: 'actualCpa' },
                     { name: 'INSIGHT/피드백', key: 'insight_feedback_merged' },
@@ -864,6 +833,10 @@
             let sA=null, sB=null, sC=null, total=null, insight='데이터 부족', color='#94a3b8', mInsight='데이터를 입력해주세요.';
             let daGrade=null, daFeed='', pmGrade=null, pmFeed='';
             
+            // [FIX] Color separation logic
+            let daColor = '#94a3b8';
+            let pmColor = '#94a3b8';
+
             const prefix = (row.media || row.placement || row.creativeName) ? `${row.media || 'N/A'}/${row.placement || 'N/A'}/${row.creativeName || 'N/A'}` : '매체 상품과 소재명 없음';
             
             const daMiss = row.cost===null||row.cost===0||row.imp===null||row.imp===0||row.click===null||row.targetCpm===null||row.targetCpc===null||row.targetCtr===null;
@@ -875,6 +848,11 @@
                 const daRes = getDaInsight(sA, sB);
                 daGrade = daRes.grade;
                 daFeed = getDaFeedback(sA, sB);
+                
+                // DA Color Logic
+                if (daGrade.includes("Top")) daColor = '#10b981';
+                else if (daGrade.includes("Mid")) daColor = '#f59e0b';
+                else if (daGrade.includes("Low")) daColor = '#ef4444';
             }
 
             const perfMiss = row.conv===null||row.targetCvr===null||row.targetCpa===null||row.click===null||row.click===0;
@@ -886,9 +864,15 @@
                     const pmRes = getPerfInsight(sB, sC);
                     pmGrade = pmRes.grade;
                     pmFeed = getPerfFeedback(sB, sC);
+                    
+                    // PM Color Logic
+                    if (pmGrade.includes("Top")) pmColor = '#10b981';
+                    else if (pmGrade.includes("Mid")) pmColor = '#f59e0b';
+                    else if (pmGrade.includes("Low")) pmColor = '#ef4444';
                 }
             }
-
+            
+            // Determine main insight for table display (fallback priority)
             if (sC!==null && sB!==null) {
                 insight = pmGrade;
                 mInsight = `${getPerfInsight(sB, sC).text}`; 
@@ -897,6 +881,7 @@
                 mInsight = `${getDaInsight(sA, sB).text}`; 
             }
             
+            // Main color (for table badge)
             if (insight.includes("Top")) color = '#10b981';
             else if (insight.includes("Mid")) color = '#f59e0b';
             else if (insight.includes("Low")) color = '#ef4444';
@@ -914,7 +899,8 @@
                 ...row, scoreA: sA?parseFloat(sA.toFixed(2)):null, scoreB: sB?parseFloat(sB.toFixed(2)):null, scoreC: sC?parseFloat(sC.toFixed(2)):null, 
                 total: total?parseFloat(total.toFixed(2)):null, insight, color, mediaInsight: mInsight,
                 daInsight: daGrade, daAction: daFeed, pmInsight: pmGrade, pmAction: pmFeed,
-                roas: (row.cost > 0 && row.revenue !== null) ? (row.revenue / row.cost) * 100 : 0
+                roas: (row.cost > 0 && row.revenue !== null) ? (row.revenue / row.cost) * 100 : 0,
+                daColor, pmColor // Return separated colors
             };
         }
         
@@ -949,7 +935,7 @@
             const matrixContainer = document.getElementById(data.isSample ? 'sample-quadrant-matrix' : 'quadrant-matrix');
             if (!matrixContainer) return;
             
-            matrixContainer.querySelectorAll('.chart-dot, .chart-dot-perf').forEach(d => d.remove());
+            matrixContainer.querySelectorAll('.chart-dot, .chart-dot-perf, .chart-dot-grouped').forEach(d => d.remove());
             
             if (!data || data.data.length === 0) return;
             
@@ -959,34 +945,50 @@
             const scaleX = (W - 2 * PADDING) / 5;
             const scaleY = (H - 2 * PADDING) / 5;
             
+            // Pre-calculate positions to detect overlap
+            const positions = {}; // Key: "x,y", Value: Array of items
+            
             data.data.forEach((item, index) => {
-                const createDot = (xVal, yVal, type) => {
+                if (item.scoreA && item.scoreB) {
+                    const x = PADDING + (item.scoreA * scaleX);
+                    const y = H - PADDING - (item.scoreB * scaleY);
+                    const key = `${Math.round(x)},${Math.round(y)}`;
+                    if(!positions[key]) positions[key] = [];
+                    positions[key].push({type: 'da', item, index, x, y});
+                }
+                if (item.scoreC && item.scoreB) {
+                    const x = PADDING + (item.scoreC * scaleX);
+                    const y = H - PADDING - (item.scoreB * scaleY);
+                    const key = `${Math.round(x)},${Math.round(y)}`;
+                    if(!positions[key]) positions[key] = [];
+                    positions[key].push({type: 'pm', item, index, x, y});
+                }
+            });
+
+            // Render dots (Grouped if needed)
+            Object.values(positions).forEach(group => {
+                if(group.length > 1) {
+                    // Render Grouped Dot
+                    const first = group[0];
                     const dot = document.createElement('div');
-                    dot.className = type === 'da' ? 'chart-dot' : 'chart-dot-perf';
-                    dot.style.backgroundColor = item.color;
-                    const x = PADDING + (xVal * scaleX);
-                    const y = H - PADDING - (yVal * scaleY);
-                    dot.style.left = `${Math.max(PADDING, Math.min(W-PADDING, x)) - 7}px`;
-                    dot.style.top = `${Math.max(PADDING, Math.min(H-PADDING, y)) - 7}px`;
+                    dot.className = 'chart-dot-grouped';
+                    dot.style.left = `${Math.max(PADDING, Math.min(W-PADDING, first.x)) - 8}px`;
+                    dot.style.top = `${Math.max(PADDING, Math.min(H-PADDING, first.y)) - 8}px`;
                     
                     dot.addEventListener('mouseenter', (e) => {
                         const tooltip = document.getElementById('chart-tooltip');
-                        const mediaName = `${item.media}/${item.placement}/${item.creativeName}`;
-                        let html = `<div class="font-bold text-base">${mediaName}</div>`;
-                        
-                        if (type === 'da') {
-                            html += `<div class="mt-1">등급: ${item.daInsight || 'N/A'} (DA)</div>
-                                     <div class="mt-0.5 text-xs text-indigo-300">DA 성과 : 노출 ${item.scoreA} / 반응 ${item.scoreB}</div>
-                                     <div class="mt-1 text-xs text-gray-400">DA 성과 총점: ${((item.scoreA+item.scoreB)/2).toFixed(2)}</div>`;
-                        } else {
-                            html += `<div class="mt-1">등급: ${item.pmInsight || 'N/A'} (PM)</div>
-                                     <div class="mt-0.5 text-xs text-green-300">PM 성과 : 전환 ${item.scoreC} / 반응 ${item.scoreB}</div>
-                                     <div class="mt-1 text-xs text-gray-400">PM 성과 총점: ${((item.scoreC+item.scoreB)/2).toFixed(2)}</div>`;
-                        }
-                        
+                        let html = `<div class="font-bold border-b pb-1 mb-1 text-sm">중복된 소재 (${group.length})</div>`;
+                        group.forEach(g => {
+                            const typeLabel = g.type === 'da' ? 'DA' : 'PM';
+                            const grade = g.type === 'da' ? g.item.daInsight : g.item.pmInsight;
+                            const colorClass = g.type === 'da' ? 'text-indigo-300' : 'text-green-300';
+                            html += `<div class="mb-2 text-xs">
+                                <span class="font-bold">[${g.item.creativeName}] (${typeLabel})</span> <span class="text-gray-300">${grade}</span><br>
+                                <span class="${colorClass}">${typeLabel} 성과: ${g.type==='da'?g.item.scoreA:g.item.scoreC} / ${g.item.scoreB}</span>
+                            </div>`;
+                        });
                         tooltip.innerHTML = html;
                         tooltip.classList.add('opacity-100');
-                        
                         const moveFn = (ev) => {
                             const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
                             let tx = ev.clientX + 15, ty = ev.clientY - 15;
@@ -996,16 +998,49 @@
                         };
                         moveFn(e);
                         dot.addEventListener('mousemove', moveFn);
-                        dot.addEventListener('mouseleave', () => {
-                            tooltip.classList.remove('opacity-100');
-                            dot.removeEventListener('mousemove', moveFn);
-                        }, {once:true});
+                        dot.addEventListener('mouseleave', () => { tooltip.classList.remove('opacity-100'); dot.removeEventListener('mousemove', moveFn); }, {once:true});
                     });
                     matrixContainer.appendChild(dot);
-                };
-
-                if (item.scoreA && item.scoreB) createDot(item.scoreA, item.scoreB, 'da');
-                if (item.scoreC && item.scoreB) createDot(item.scoreC, item.scoreB, 'perf');
+                } else {
+                    // Single Dot
+                    const g = group[0];
+                    const dot = document.createElement('div');
+                    dot.className = g.type === 'da' ? 'chart-dot' : 'chart-dot-perf';
+                    // [FIX] Use specific color (daColor or pmColor)
+                    dot.style.backgroundColor = g.type === 'da' ? g.item.daColor : g.item.pmColor;
+                    
+                    dot.style.left = `${Math.max(PADDING, Math.min(W-PADDING, g.x)) - 7}px`;
+                    dot.style.top = `${Math.max(PADDING, Math.min(H-PADDING, g.y)) - 7}px`;
+                    
+                    dot.addEventListener('mouseenter', (e) => {
+                        const tooltip = document.getElementById('chart-tooltip');
+                        const mediaName = `${g.item.media}/${g.item.placement}/${g.item.creativeName}`;
+                        let html = `<div class="font-bold text-base">${mediaName}</div>`;
+                        
+                        if (g.type === 'da') {
+                            html += `<div class="mt-1">등급: ${g.item.daInsight || 'N/A'} (DA)</div>
+                                     <div class="mt-0.5 text-xs text-indigo-300">DA 성과 : 노출 ${g.item.scoreA} / 반응 ${g.item.scoreB}</div>
+                                     <div class="mt-1 text-xs text-gray-400">DA 성과 총점: ${((g.item.scoreA+g.item.scoreB)/2).toFixed(2)}</div>`;
+                        } else {
+                            html += `<div class="mt-1">등급: ${g.item.pmInsight || 'N/A'} (PM)</div>
+                                     <div class="mt-0.5 text-xs text-green-300">PM 성과 : 전환 ${g.item.scoreC} / 반응 ${g.item.scoreB}</div>
+                                     <div class="mt-1 text-xs text-gray-400">PM 성과 총점: ${((g.item.scoreC+g.item.scoreB)/2).toFixed(2)}</div>`;
+                        }
+                        tooltip.innerHTML = html;
+                        tooltip.classList.add('opacity-100');
+                        const moveFn = (ev) => {
+                            const tw = tooltip.offsetWidth, th = tooltip.offsetHeight;
+                            let tx = ev.clientX + 15, ty = ev.clientY - 15;
+                            if (tx + tw > window.innerWidth) tx = ev.clientX - tw - 15;
+                            if (ty < 0) ty = ev.clientY + 15;
+                            tooltip.style.left = `${tx}px`; tooltip.style.top = `${ty}px`;
+                        };
+                        moveFn(e);
+                        dot.addEventListener('mousemove', moveFn);
+                        dot.addEventListener('mouseleave', () => { tooltip.classList.remove('opacity-100'); dot.removeEventListener('mousemove', moveFn); }, {once:true});
+                    });
+                    matrixContainer.appendChild(dot);
+                }
             });
         }
 
@@ -1031,6 +1066,7 @@
                     }
                 }
 
+                // [FIX] Changed logic: Do NOT use else-if. Check both independently.
                 if (item.scoreC !== null && item.scoreB !== null) {
                     hasData = true;
                     let gradeKey = item.pmInsight.replace('소재', ' 소재').replace('  ', ' ');
@@ -1039,10 +1075,11 @@
                     if(gradeKey === 'Top소재') gradeKey = 'Top 소재';
 
                     if (gradeInsights[gradeKey]) {
-                        gradeInsights[gradeKey].push({ insight: item.mediaInsight, color: item.color, type: '[PM]', prefix: prefix });
+                        gradeInsights[gradeKey].push({ insight: item.mediaInsight, color: item.pmColor, type: '[PM]', prefix: prefix }); // Use pmColor
                     }
                 } 
-                else if (item.scoreA !== null && item.scoreB !== null) {
+                
+                if (item.scoreA !== null && item.scoreB !== null) {
                     hasData = true;
                     let gradeKey = item.daInsight.replace('소재', ' 소재').replace('  ', ' ');
                     if(gradeKey === 'Low소재') gradeKey = 'Low 소재';
@@ -1050,7 +1087,7 @@
                     if(gradeKey === 'Top소재') gradeKey = 'Top 소재';
                     
                     if (gradeInsights[gradeKey]) {
-                        gradeInsights[gradeKey].push({ insight: item.mediaInsight, color: item.color, type: '[DA]', prefix: prefix });
+                        gradeInsights[gradeKey].push({ insight: item.mediaInsight, color: item.daColor, type: '[DA]', prefix: prefix }); // Use daColor
                     }
                 }
             });
