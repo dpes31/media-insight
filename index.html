@@ -66,7 +66,7 @@
         }
         .chart-dot:hover { transform: scale(1.5); z-index: 60; box-shadow: 0 0 10px rgba(0, 0, 0, 0.5); }
         
-        /* PM Dot (Circle) */
+        /* PM Dot */
         .chart-dot-perf {
             position: absolute; width: 14px; height: 14px; border-radius: 50%; 
             cursor: pointer; z-index: 49; transition: transform 0.2s, box-shadow 0.2s;
@@ -239,7 +239,7 @@
                         </div>
                     </div>
                 </div>
-                <!-- Insight (Moved here from top in previous steps, maintained) -->
+                <!-- Insight -->
                 <div class="xl:col-span-1 space-y-6">
                     <div class="bg-indigo-50 p-6 rounded-xl shadow-lg border border-indigo-200 h-full">
                         <h2 class="text-2xl font-bold text-indigo-700 mb-4 flex items-center justify-between">
@@ -391,6 +391,59 @@
             }
         };
 
+        // [RESTORE] renderSummaryTable function
+        function renderSummaryTable() {
+            if (!liveAnalysisData || liveAnalysisData.summary.length === 0) return;
+            const data = liveAnalysisData;
+            const headerRow = document.getElementById(data.isSample ? 'sample-sum-head' : 'summary-header');
+            const body = document.getElementById(data.isSample ? 'sample-sum-body' : 'summary-body');
+            
+            if (!headerRow || !body) return; // Safety check
+
+            headerRow.innerHTML = '';
+            body.innerHTML = '';
+            
+            data.summary.forEach(metric => {
+                const th = document.createElement('th');
+                th.className = 'px-6 py-3 text-center min-w-[150px]';
+                th.textContent = metric.label;
+                headerRow.appendChild(th);
+            });
+            
+            const tr = document.createElement('tr');
+            tr.className = 'text-gray-900';
+            
+            data.summary.forEach(metric => {
+                const td = document.createElement('td');
+                td.className = 'px-6 py-4 whitespace-nowrap text-center align-top';
+                
+                let mainValueText = formatNumber(metric.value, metric.type);
+                
+                if (metric.key === 'roas_avg') {
+                     mainValueText = `${Math.round(metric.value).toLocaleString('ko-KR')}%`;
+                }
+
+                let tdHtml = `<div class="text-lg font-bold">${mainValueText}</div>`;
+                
+                if (metric.subMetrics) {
+                    metric.subMetrics.forEach(sub => {
+                        let subValueText = formatNumber(sub.value, sub.type);
+                        if (sub.label === '성과 ROAS') {
+                             subValueText = `${Math.round(sub.value).toLocaleString('ko-KR')}%`;
+                        }
+                        
+                        tdHtml += `<div class="text-sm text-gray-600 mt-2">
+                                     <span class="font-semibold">${sub.label}:</span> ${subValueText}
+                                   </div>`;
+                    });
+                }
+                
+                td.innerHTML = tdHtml;
+                tr.appendChild(td);
+            });
+            body.appendChild(tr);
+        }
+
         const campaignData = {
             'MAIN': {
                 name: '통합 캠페인',
@@ -413,12 +466,17 @@
 
         // [MODIFY] 9 Sample Data (Balanced)
         const testProjectMockData = [
+            // Top 3
             { media: '네이버', placement: '스페셜DA', creativeName: '소재 A', cost: 10000000, imp: 5000000, click: 20000, conv: null, revenue: null, targetCpm: 3000, targetCpc: 600, targetCtr: 0.002, targetCvr: null, targetCpa: null },
             { media: '구글', placement: 'UAC', creativeName: '소재 B', cost: 20000000, imp: 2000000, click: 40000, conv: 2000, revenue: 100000000, targetCpm: 12000, targetCpc: 600, targetCtr: 0.01, targetCvr: 0.03, targetCpa: 15000 },
             { media: '카카오', placement: '비즈보드', creativeName: '소재 C', cost: 8000000, imp: 4000000, click: 10000, conv: null, revenue: null, targetCpm: 2500, targetCpc: 1000, targetCtr: 0.002, targetCvr: null, targetCpa: null },
+
+            // Mid 3
             { media: '버즈빌', placement: '네트워크', creativeName: '소재 D', cost: 5000000, imp: 4000000, click: 16000, conv: null, revenue: null, targetCpm: 1000, targetCpc: 500, targetCtr: 0.003, targetCvr: null, targetCpa: null },
             { media: '네이버', placement: '타임보드', creativeName: '소재 E', cost: 20000000, imp: 4000000, click: 20000, conv: null, revenue: null, targetCpm: 8000, targetCpc: 2000, targetCtr: 0.006, targetCvr: null, targetCpa: null },
             { media: 'META', placement: 'PPA', creativeName: '소재 F', cost: 3000000, imp: 3000000, click: 30000, conv: 150, revenue: 9000000, targetCpm: 2000, targetCpc: 2000, targetCtr: 0.01, targetCvr: 0.005, targetCpa: 20000 },
+
+            // Low 3
             { media: '에브리타임', placement: '홈배너', creativeName: '소재 G', cost: 2000000, imp: 500000, click: 500, conv: null, revenue: null, targetCpm: 3000, targetCpc: 3000, targetCtr: 0.0012, targetCvr: null, targetCpa: null },
             { media: '구글', placement: 'GDN', creativeName: '소재 H', cost: 5000000, imp: 1000000, click: 1000, conv: null, revenue: null, targetCpm: 4200, targetCpc: 4000, targetCtr: 0.002, targetCvr: null, targetCpa: null },
             { media: '카카오', placement: '메시지', creativeName: '소재 I', cost: 1000000, imp: 100000, click: 400, conv: 2, revenue: null, targetCpm: 5000, targetCpc: 4000, targetCtr: 0.005, targetCvr: 0.005, targetCpa: 350000 },
@@ -1434,41 +1492,12 @@
             // Initial Toggle State Ensure
             isPerfInputVisible = false;
             isScoreVisible = false; // [NEW]
-            
-            // [NEW] Insight View Mode Toggle
-            insightViewMode = 'grade'; 
 
             updateProjectSelector();
             
             viewSampleButton.addEventListener('click', showSampleModal);
             document.getElementById('close-sample-modal').addEventListener('click', () => document.getElementById('sample-modal').classList.add('hidden'));
             document.getElementById('close-sample-modal-btn').addEventListener('click', () => document.getElementById('sample-modal').classList.add('hidden'));
-            
-            // Main Insight View Toggle
-            const mainViewGradeBtn = document.getElementById('insight-view-grade');
-            const mainViewMediaBtn = document.getElementById('insight-view-media');
-            const toggleMainInsightView = (mode) => {
-                insightViewMode = mode;
-                if(mode === 'grade') {
-                    mainViewGradeBtn.classList.replace('text-gray-500','text-indigo-700'); mainViewGradeBtn.classList.replace('hover:bg-gray-50','bg-indigo-100');
-                    mainViewMediaBtn.classList.replace('text-indigo-700','text-gray-500'); mainViewMediaBtn.classList.replace('bg-indigo-100','hover:bg-gray-50');
-                } else {
-                    mainViewMediaBtn.classList.replace('text-gray-500','text-indigo-700'); mainViewMediaBtn.classList.replace('hover:bg-gray-50','bg-indigo-100');
-                    mainViewGradeBtn.classList.replace('text-indigo-700','text-gray-500'); mainViewGradeBtn.classList.replace('bg-indigo-100','hover:bg-gray-50');
-                }
-                renderInsights(liveAnalysisData, document.getElementById('insight-list'));
-            };
-            mainViewGradeBtn.addEventListener('click', () => toggleMainInsightView('grade'));
-            mainViewMediaBtn.addEventListener('click', () => toggleMainInsightView('media'));
-
-            // Sample Insight View Toggle (Delegated or dynamic)
-            // Since sample modal is dynamic, we add listeners inside showSampleModal or use delegation if static. 
-            // It's static in HTML now, so we can add listeners here.
-            // But wait, sample modal HTML is injected dynamically in showSampleModal? 
-            // No, it is static in HTML structure above. So we can attach listeners here.
-            
-            // However, we need separate state for sample modal view mode? Or share? Let's share for simplicity or separate.
-            // Let's make it simple: reset to 'grade' when opening modal.
             
             newProjectButton.addEventListener('click', () => {
                 const name = prompt("새 프로젝트 이름을 입력하세요:");
