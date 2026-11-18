@@ -1,0 +1,11 @@
+{
+  "name": "media-insight",
+  "private": true,
+  "scripts": {
+    "test": "node tests/import.test.cjs",
+    "test:browser": "node tests/browser.test.cjs"
+  },
+  "devDependencies": {
+    "playwright": "1.62.1"
+  }
+}
