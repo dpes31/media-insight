@@ -117,13 +117,14 @@
         #custom-score-modal-content { max-width: 90vw; width: 900px; max-height: 80vh; }
         .tab-button.active { border-color: #4f46e5; color: #4f46e5; background-color: #eef2ff; }
     </style>
+<link rel="stylesheet" href="workspace.css">
 </head>
 <body class="p-4 md:p-8">
     <div id="app" class="w-full mx-auto bg-white rounded-xl shadow-2xl p-8 md:p-12">
         <!-- Header -->
         <header class="mb-8 border-b pb-4">
-            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">통합 캠페인 성과 심층 분석 대시보드 (PC)</h1>
-            <p class="text-gray-500">DA/퍼포먼스 목표별 효율 분석 및 소재 등급별 직관적 인사이트 도출</p>
+            <h1 class="text-4xl font-extrabold text-gray-900 mb-2">캠페인 성과 분석</h1>
+            <p class="text-gray-500">목표와 실적을 연결하고 소재별 판단 근거를 확인하세요.</p>
         </header>
 
         <!-- Project Selector -->
@@ -348,6 +349,9 @@
         </div>
     </div>
     
+    <script src="vendor/xlsx.full.min.js"></script>
+    <script src="import-core.js"></script>
+    <script src="analysis.js"></script>
     <script>
         const DASHBOARD_STORAGE_KEY = 'campaignDashboardStorage';
         
@@ -359,30 +363,22 @@
         let insightViewMode = 'grade'; 
         
         // [MODIFY] Updated Default Score Settings (Strict Criteria)
-        const defaultScoreSettings = {
-            cpm: { 5: 0.7, 4: 0.9, 3: 1.05, 2: 1.25 },
-            ctr: { 5: 1.5, 4: 1.15, 3: 0.95, 2: 0.75 },
-            cpc: { 5: 0.7, 4: 0.9, 3: 1.05, 2: 1.25 },
-            cvr: { 5: 1.5, 4: 1.15, 3: 0.95, 2: 0.75 },
-            cpa: { 5: 0.7, 4: 0.9, 3: 1.05, 2: 1.25 },
-            roas: { 5: 600, 4: 400, 3: 250, 2: 150 }
-        };
-        
         function saveDataToLocalStorage() {
             try {
                 localStorage.setItem(DASHBOARD_STORAGE_KEY, JSON.stringify(storageData));
                 const saveStatus = document.getElementById('save-status');
                 saveStatus.classList.remove('hidden');
                 setTimeout(() => { saveStatus.classList.add('hidden'); }, 2000);
-            } catch (e) { console.error("Error saving", e); }
+            } catch (e) { alert("저장하지 못했습니다. 브라우저 저장 공간을 확인해 주세요."); }
         }
         
+        const escapeHtml = value => String(value ?? '').replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
         const formatNumericInput = (value) => {
             const cleanValue = value.toString().replace(/[^\d]/g, ''); 
             return cleanValue === '' ? '' : parseInt(cleanValue, 10).toLocaleString('ko-KR');
         };
         const formatNumber = (num, type) => {
-            if (typeof num !== 'number' || isNaN(num) || num === null) return '-';
+            if (typeof num !== 'number' || !Number.isFinite(num) || num === null) return '-';
             switch (type) {
                 case 'percent': return `${(num * 100).toFixed(2)}%`;
                 case 'currency': return `${Math.round(num).toLocaleString('ko-KR')}원`;
@@ -428,7 +424,7 @@
                 if (metric.subMetrics) {
                     metric.subMetrics.forEach(sub => {
                         let subValueText = formatNumber(sub.value, sub.type);
-                        if (sub.label === '성과 ROAS') {
+                        if (sub.label === '성과 ROAS' && sub.value !== null) {
                              subValueText = `${Math.round(sub.value).toLocaleString('ko-KR')}%`;
                         }
                         
@@ -542,7 +538,7 @@
         };
         
         let isValidationTableOpen = true; 
-        const defaultValidationData = { 'MAIN': mapCampaignDataToValidation(campaignData.MAIN.data) };
+        const defaultValidationData = { 'MAIN': mapCampaignDataToValidation([{}]) };
         let storageData = { currentProject: 'default', projects: { 'default': defaultValidationData } };
         let validationData = storageData.projects[currentProject];
         
@@ -609,16 +605,6 @@
             }
         }
         
-        function calculateValidationMetrics(row) {
-            const { cost, imp, click, conv } = row;
-            const safeDivide = (n, d) => (typeof n!=='number'||typeof d!=='number'||d<=0||isNaN(n)||isNaN(d)||n===null||d===null) ? null : n/d;
-            row.actualCpm = safeDivide(cost, imp) !== null ? safeDivide(cost, imp) * 1000 : null;
-            row.actualCpc = safeDivide(cost, click);
-            row.actualCtr = safeDivide(click, imp); 
-            row.actualCvr = safeDivide(conv, click);
-            row.actualCpa = safeDivide(cost, conv);
-        }
-
         function updateCalculatedColumnsInDOM(rowId, rowData) {
             const rowElement = document.querySelector(`#validation-table-body tr[data-row-id="${rowId}"]`);
             if (!rowElement) return;
@@ -783,230 +769,6 @@
         }
         
         // [MODIFY] Updated Scoring Logic (Strict Criteria)
-        const getScoreCpm = (a, t) => {
-            if (a===null||t===null||t<=0) return 1;
-            const r = a/t;
-            if (r < 0.70) return 5;  
-            if (r <= 0.90) return 4; 
-            if (r <= 1.05) return 3; 
-            if (r <= 1.25) return 2; 
-            return 1;                
-        };
-
-        const getScoreCtr = (a, t) => {
-            if (a===null||t===null||t<=0) return 1;
-            const r = a/t;
-            if (r > 1.50) return 5;  
-            if (r >= 1.15) return 4; 
-            if (r >= 0.95) return 3; 
-            if (r >= 0.75) return 2; 
-            return 1;                
-        };
-
-        const getScoreCpc = (a, t) => {
-            if (a===null||t===null||t<=0) return 1;
-            const r = a/t;
-            if (r < 0.70) return 5;  
-            if (r <= 0.90) return 4; 
-            if (r <= 1.05) return 3; 
-            if (r <= 1.25) return 2; 
-            return 1;                
-        };
-
-        const getScoreCvr = (a, t) => (a===null||t===null||t<=0)?null:(a/t>1.50?5:a/t>=1.15?4:a/t>=0.95?3:a/t>=0.75?2:1);
-        const getScoreCpa = (a, t) => (a===null||t===null||t<=0)?null:(a/t<0.70?5:a/t<=0.90?4:a/t<=1.05?3:a/t<=1.25?2:1);
-
-        const getDaInsight = (sA, sB) => {
-            if (sA >= 4 && sB >= 4) return { grade: "Top 소재", text: "노출이 매우 원활하고, 소재 관심도도 매우 높아 타겟팅과 메시지 효과적인 소재" };
-            if (sA >= 4 && sB >= 3) return { grade: "Top 소재", text: "노출이 매우 원활하고, 소재 관심은 우수한 편이므로 좀 더 범용적인 소재로 개선 필요" };
-            if (sA >= 4 && sB >= 1.5) return { grade: "Mid 소재", text: "노출은 매우 원할하지만, 소재 관심이 낮은 편으로 훅킹성을 높인 소재로 수정 필요" };
-            if (sA >= 4 && sB >= 0) return { grade: "Low소재", text: "노출은 매우 원활하지만 극소수의 집단에서 반응이 발생함으로 소재 훅킹성 증대 필요" };
-            if (sA >= 3 && sB >= 4) return { grade: "Top 소재", text: "노출이 적절하며, 소재 관심이 매우 높아 메시지 효과성이 높은 소재" };
-            if (sA >= 3 && sB >= 3) return { grade: "Top소재", text: "노출이 적절하고, 소재 관심도 동반되어 우수한 소재" };
-            if (sA >= 3 && sB >= 1.5) return { grade: "Mid 소재", text: "노출은 적절하지만 소재 관심이 낮은 편으로 타겟팅 확장 및 범용적인 소재로 개선 필요" };
-            if (sA >= 3 && sB >= 0) return { grade: "Low소재", text: "노출은 적절하지만 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
-            if (sA >= 1.5 && sB >= 4) return { grade: "Mid소재", text: "소재 관심이 매우 높지만 노출이 원활하지 않는 소재로 타겟팅 조정 및 예산 증액으로 노출 증대방안 고려" };
-            if (sA >= 1.5 && sB >= 3) return { grade: "Low소재", text: "소재 훅킹성은 있지만 노출이 원활하지 않는 소재로 타겟팅 확장 필요" };
-            if (sA >= 1.5 && sB >= 1.5) return { grade: "Low소재", text: "노출과 소재 관심이 낮은 편으로 소재 OFF 및 예산 이관 고려" };
-            if (sA >= 1.5 && sB >= 0) return { grade: "Low소재", text: "노출과 소재 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
-            if (sA >= 0 && sB >= 4) return { grade: "Low소재", text: "소재 관심은 매우 높지만 극소수의 집단에만 노출되어 타겟팅 확장 및 예산 증액으로 노출 증대방안 고려" };
-            if (sA >= 0 && sB >= 3) return { grade: "Low소재", text: "소재 훅킹성은 있지만 극소수의 집단에만 노출되어 타겟팅 조정 필요" };
-            if (sA >= 0 && sB >= 1.5) return { grade: "Low소재", text: "노출이 저조하고 소재 관심이 낮은 편으로 소재 OFF 및 예산 이관 고려" };
-            if (sA >= 0 && sB >= 0) return { grade: "Low소재", text: "노출과 소재 관심이 저조하여 소재 OFF 및 예산 이관 고려" };
-            return { grade: "오류", text: "점수 계산 오류" };
-        };
-        const getDaFeedback = (sA, sB) => {
-            if (sA === null || sB === null) return '';
-            if (sA >= 4 && sB >= 4) return "유지/강화";
-            if (sA >= 4 && sB >= 3) return "범용적 메시지 강화";
-            if (sA >= 4 && sB >= 1.5) return "훅킹성 증대";
-            if (sA >= 4 && sB >= 0) return "훅킹성 증대";
-            if (sA >= 3 && sB >= 4) return "유지/강화";
-            if (sA >= 3 && sB >= 3) return "유지/강화";
-            if (sA >= 3 && sB >= 1.5) return "타겟팅 확장/범용적 메시지";
-            if (sA >= 3 && sB >= 0) return "타겟팅 확장+훅킹성 증대";
-            if (sA >= 1.5 && sB >= 4) return "타겟팅 확장+예산 증대";
-            if (sA >= 1.5 && sB >= 3) return "타겟팅 조정";
-            if (sA >= 1.5 && sB >= 1.5) return "예산이관";
-            if (sA >= 1.5 && sB >= 0) return "예산이관";
-            if (sA >= 0 && sB >= 4) return "타겟팅 확장+예산 증대";
-            if (sA >= 0 && sB >= 3) return "타겟팅 조정+훅킹성 증대";
-            if (sA >= 0 && sB >= 1.5) return "예산이관";
-            if (sA >= 0 && sB >= 0) return "예산이관";
-            return "";
-        };
-        const getPerfInsight = (sB, sC) => {
-            if (sB === null || sC === null) return { grade: "데이터 부족", text: "퍼포먼스 성과 분석 불가" };
-            if (sB >= 4 && sC >= 4) return { grade: "Top 소재", text: "광고 반응과 전환 효율이 매우 높아 메시지가 워킹하는 소재" };
-            if (sB >= 4 && sC >= 3) return { grade: "Top 소재", text: "광고 반응은 매우 높지만 전환 효율은 우수한 편으로 액션에 다소 신중한 태도를 보이는 것으로 예상" };
-            if (sB >= 4 && sC >= 1.5) return { grade: "Mid 소재", text: "광고 반응은 매우 높지만 전환 효율이 낮은 편으로 타 상품과 비교 중이거나 전환 프로세스에 허들이 있을 것으로 예상" };
-            if (sB >= 4 && sC >= 0) return { grade: "Low소재", text: "광고 반응은 매우 높지만 전환 효율이 저조한 소재로 호기심은 있지만 상품 관심 자체가 없을 것으로 예상" };
-            if (sB >= 3 && sC >= 4) return { grade: "Top 소재", text: "광고 반응은 적절한 반면 전환 효율은 매우 높은 편으로 한 번에 다수 액션이 발생하거나 바이럴 된 것으로 예상" };
-            if (sB >= 3 && sC >= 3) return { grade: "Top소재", text: "광고 반응과 전환 효율이 우수한 편이지만 액션에 다소 신중한 태도를 보이고 있어서 베네핏 강조 시 개선 될 것으로 예상" }; 
-            if (sB >= 3 && sC >= 1.5) return { grade: "Mid 소재", text: "광고 반응은 적절하지만 전환 효율이 낮은 편으로 타 상품과 비교 중이거나 전환 프로세스에 허들이 있을 것으로 예상" };
-            if (sB >= 3 && sC >= 0) return { grade: "Low소재", text: "광고 반응은 적절하지만 전환 효율이 저조한 소재로 상품 관심 자체가 없을 것으로 예상" };
-            if (sB >= 1.5 && sC >= 4) return { grade: "Mid소재", text: "광고 반응은 낮지만 전환 효율이 매우 높은 편으로 매니아층이 있거나 바이럴 된 것으로 예상" };
-            if (sB >= 1.5 && sC >= 3) return { grade: "Mid소재", text: "광고 반응은 낮지만 전환 효율이 우수한 편으로 매니아층이 있는 것으로 예상" };
-            if (sB >= 1.5 && sC >= 1.5) return { grade: "Low소재", text: "광고 반응과 전환 효율이 낮은 편으로 소재 OFF 및 예산 이관 고려" };
-            if (sB >= 1.5 && sC >= 0) return { grade: "Low소재", text: "광고 반응이 낮은 편이고 전환 효율이 저조하여 소재 OFF 및 예산 이관 고려" };
-            if (sB >= 0 && sC >= 4) return { grade: "Mid소재", text: "광고 반응은 저조하지만 전환 효율이 매우 높은 편으로 매니아층이 있거나 바이럴 된 것으로 예상" };
-            if (sB >= 0 && sC >= 3) return { grade: "Low소재", text: "광고 반응은 저조하지만 전환 효율이 우수한 편으로 매니아층이 있는 것으로 예상" };
-            if (sB >= 0 && sC >= 1.5) return { grade: "Low소재", text: "광고 반응이 저조하고 전환 효율이 낮은 편으로 소재 OFF 및 예산 이관 고려" };
-            if (sB >= 0 && sC >= 0) return { grade: "Low소재", text: "광고 반응과 전환 효율이 모두 저조하여 소재 OFF 및 예산 이관 고려" };
-            return { grade: "오류", text: "퍼포먼스 점수 계산 오류" };
-        };
-        const getPerfFeedback = (sB, sC) => {
-            if (sB === null || sC === null) return '';
-            if (sB >= 4 && sC >= 4) return "유지/강화";
-            if (sB >= 4 && sC >= 3) return "결정적인 베네핏 강조";
-            if (sB >= 4 && sC >= 1.5) return "타사 대비 강점 강조 / 액션 허들 점검";
-            if (sB >= 4 && sC >= 0) return "판매 상품 교체";
-            if (sB >= 3 && sC >= 4) return "유지/강화";
-            if (sB >= 3 && sC >= 3) return "결정적인 베네핏 강조";
-            if (sB >= 3 && sC >= 1.5) return "타사 대비 강점 강조 / 액션 허들 점검";
-            if (sB >= 3 && sC >= 0) return "판매 상품 교체";
-            if (sB >= 1.5 && sC >= 4) return "훅킹성 증대 / 타겟팅 확장";
-            if (sB >= 1.5 && sC >= 3) return "훅킹성 증대";
-            if (sB >= 1.5 && sC >= 1.5) return "예산이관";
-            if (sB >= 1.5 && sC >= 0) return "예산이관";
-            if (sB >= 0 && sC >= 4) return "훅킹성 증대 / 타겟팅 확장";
-            if (sB >= 0 && sC >= 3) return "훅킹성 증대";
-            if (sB >= 0 && sC >= 1.5) return "예산이관";
-            if (sB >= 0 && sC >= 0) return "예산이관";
-            return "";
-        };
-        const getRoasInsight = (roas, prefix) => {
-            if (roas === null || isNaN(roas) || roas <= 0) return null;
-            let grade="1점", text="광고비 소진 대비 손익분기 미달이거나 단순 본전을 달성한 것으로 판단됨";
-            if (roas > 600) { grade="5점"; text="압도적인 수익이 발생되는 소재로 즉각적인 예산 증액을 통한 유지강화 필요"; }
-            else if (roas >= 400) { grade="4점"; text="높은 순이익을 기록하는 것으로 예상되며 예산 증액을 통한 유지강화 권장"; }
-            else if (roas >= 250) { grade="3점"; text="순이익이 발생되는 구간에 진입한 것으로 예상되며 추이를 지켜본 후 예상 증액 여부 판단을 권장"; }
-            else if (roas >= 150) { grade="2점"; text="손익분기에 근접하거나 소폭 순이익을 기록하는 상황으로 예상 됨"; }
-            return { grade, text: `${prefix}: [ROAS ${Math.round(roas)}% (${grade})] ${text}` };
-        };
-
-        function calculateScoresAndInsight(row) {
-            let sA=null, sB=null, sC=null, total=null, insight='데이터 부족', color='#94a3b8', mInsight='데이터를 입력해주세요.';
-            let daGrade=null, daFeed='', pmGrade=null, pmFeed='';
-            
-            // [FIX] Color separation logic
-            let daColor = '#94a3b8';
-            let pmColor = '#94a3b8';
-
-            const prefix = (row.media || row.placement || row.creativeName) ? `${row.media || 'N/A'}/${row.placement || 'N/A'}/${row.creativeName || 'N/A'}` : '매체 상품과 소재명 없음';
-            
-            const daMiss = row.cost===null||row.cost===0||row.imp===null||row.imp===0||row.click===null||row.targetCpm===null||row.targetCpc===null||row.targetCtr===null;
-            if (!daMiss) {
-                sA = getScoreCpm(row.actualCpm, row.targetCpm);
-                const b1 = getScoreCtr(row.actualCtr, row.targetCtr);
-                const b2 = getScoreCpc(row.actualCpc, row.targetCpc);
-                sB = (b1 + b2) / 2;
-                const daRes = getDaInsight(sA, sB);
-                daGrade = daRes.grade;
-                daFeed = getDaFeedback(sA, sB);
-                
-                // DA Color Logic
-                if (daGrade.includes("Top")) daColor = '#10b981';
-                else if (daGrade.includes("Mid")) daColor = '#f59e0b';
-                else if (daGrade.includes("Low")) daColor = '#ef4444';
-            }
-
-            const perfMiss = row.conv===null||row.targetCvr===null||row.targetCpa===null||row.click===null||row.click===0;
-            if (!perfMiss && row.actualCvr!==null && row.actualCpa!==null) {
-                const sc1 = getScoreCvr(row.actualCvr, row.targetCvr);
-                const sc2 = getScoreCpa(row.actualCpa, row.targetCpa);
-                if (sc1!==null && sc2!==null) {
-                    sC = (sc1 + sc2) / 2;
-                    const pmRes = getPerfInsight(sB, sC);
-                    pmGrade = pmRes.grade;
-                    pmFeed = getPerfFeedback(sB, sC);
-                    
-                    // PM Color Logic
-                    if (pmGrade.includes("Top")) pmColor = '#10b981';
-                    else if (pmGrade.includes("Mid")) pmColor = '#f59e0b';
-                    else if (pmGrade.includes("Low")) pmColor = '#ef4444';
-                }
-            }
-            
-            // Determine main insight for table display (fallback priority)
-            if (sC!==null && sB!==null) {
-                insight = pmGrade;
-                mInsight = `${getPerfInsight(sB, sC).text}`; 
-            } else if (sA!==null && sB!==null) {
-                insight = daGrade;
-                mInsight = `${getDaInsight(sA, sB).text}`; 
-            }
-            
-            // Main color (for table badge)
-            if (insight.includes("Top")) color = '#10b981';
-            else if (insight.includes("Mid")) color = '#f59e0b';
-            else if (insight.includes("Low")) color = '#ef4444';
-            
-            if (sA!==null && sB!==null) {
-                if (sC!==null) total = (sA + sB + sC) / 3;
-                else total = (sA + sB) / 2;
-            }
-            
-            if (daMiss) {
-                insight='미디어 성과를 작성해주세요'; mInsight=`${insight}`; color='#94a3b8';
-            }
-
-            return { 
-                ...row, scoreA: sA?parseFloat(sA.toFixed(2)):null, scoreB: sB?parseFloat(sB.toFixed(2)):null, scoreC: sC?parseFloat(sC.toFixed(2)):null, 
-                total: total?parseFloat(total.toFixed(2)):null, insight, color, mediaInsight: mInsight,
-                daInsight: daGrade, daAction: daFeed, pmInsight: pmGrade, pmAction: pmFeed,
-                roas: (row.cost > 0 && row.revenue !== null) ? (row.revenue / row.cost) * 100 : 0,
-                daColor, pmColor // Return separated colors
-            };
-        }
-        
-        function aggregateAndScoreData(dataSource) {
-            const raw = dataSource || validationData['MAIN'];
-            const scored = raw.filter(r => r.media||r.creativeName||r.cost!==null).map(r => { calculateValidationMetrics(r); return calculateScoresAndInsight(r); });
-            
-            let tCost=0, tImp=0, tClick=0, tConv=0, tRev=0;
-            scored.forEach(i => { tCost+=i.cost||0; tImp+=i.imp||0; tClick+=i.click||0; tConv+=i.conv||0; tRev+=i.revenue||0; });
-            
-            const avgCpm = tImp>0?(tCost/tImp)*1000:0;
-            const avgCtr = tImp>0?tClick/tImp:0;
-            const avgCpc = tClick>0?tCost/tClick:0;
-            const avgCvr = tClick>0?tConv/tClick:0;
-            const avgCpa = tConv>0?tCost/tConv:0;
-            const avgRoas = tCost>0?(tRev/tCost)*100:0;
-
-            return {
-                data: scored,
-                summary: [
-                    { label: '총 광고비', value: tCost, type: 'currency' },
-                    { label: '총 노출수', value: tImp, type: 'number', subMetrics: [{ label: '성과 CPM', value: avgCpm, type: 'currency' }] },
-                    { label: '총 클릭수', value: tClick, type: 'number', subMetrics: [{ label: '성과 CPC', value: avgCpc, type: 'currency' }, { label: '성과 CTR', value: avgCtr, type: 'percent' }] },
-                    { label: '총 전환수', value: tConv, type: 'number', subMetrics: [{ label: '성과 CVR', value: avgCvr, type: 'percent' }, { label: '성과 CPA', value: avgCpa, type: 'currency' }] },
-                    { label: '총 매출액', value: tRev, type: 'currency', subMetrics: [{ label: '성과 ROAS', value: avgRoas, type: 'percent' }] },
-                ],
-                headers: campaignData['MAIN'].headers
-            };
-        }
-
         function renderChart(data) {
             const matrixContainer = document.getElementById(data.isSample ? 'sample-quadrant-matrix' : 'quadrant-matrix');
             if (!matrixContainer) return;
@@ -1074,7 +836,7 @@
                             }
 
                             html += `<div class="mb-3 text-xs border-b border-gray-700 pb-2 last:border-0">
-                                <div class="font-bold text-sm text-white mb-1">${g.item.media}/${g.item.placement}/${g.item.creativeName}</div>
+                                <div class="font-bold text-sm text-white mb-1">${escapeHtml(g.item.media)}/${escapeHtml(g.item.placement)}/${escapeHtml(g.item.creativeName)}</div>
                                 <div class="mb-1">등급 : ${grade} (${typeLabel})</div>
                                 <div class="text-indigo-300 mb-0.5">${scoreDetail}</div>
                                 <div class="text-gray-400">${totalScore}</div>
@@ -1107,7 +869,7 @@
                     
                     dot.addEventListener('mouseenter', (e) => {
                         const tooltip = document.getElementById('chart-tooltip');
-                        const mediaName = `${g.item.media}/${g.item.placement}/${g.item.creativeName}`;
+                        const mediaName = `${escapeHtml(g.item.media)}/${escapeHtml(g.item.placement)}/${escapeHtml(g.item.creativeName)}`;
                         let html = `<div class="font-bold text-base">${mediaName}</div>`;
                         
                         if (g.type === 'da') {
@@ -1196,7 +958,7 @@
                 const header = document.createElement('li');
                 header.className = `pt-4 mb-2 font-extrabold text-lg border-b-2 pb-1`;
                 header.style.borderColor = color; header.style.color = color;
-                header.innerHTML = `[${title}]`;
+                header.innerHTML = `[${escapeHtml(title)}]`;
                 targetList.appendChild(header);
                 
                 items.forEach(item => {
@@ -1218,8 +980,8 @@
                     li.innerHTML = `
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-4 w-4 mt-1 mr-2 flex-shrink-0" style="color:${iconColor}" viewBox="0 0 20 20" fill="currentColor"><path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-8.707a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/></svg>
                         <span>
-                            <strong class="font-bold text-gray-900 block">${prefixContent}</strong>
-                            <span class="block mt-1">${textContent}</span>
+                            <strong class="font-bold text-gray-900 block">${escapeHtml(prefixContent)}</strong>
+                            <span class="block mt-1">${escapeHtml(textContent)}</span>
                         </span>
                     `;
                     targetList.appendChild(li);
@@ -1317,6 +1079,7 @@
                                 <span class="block text-xs text-gray-500">${item.pmAction}</span>
                             </div>`;
                         }
+                        html += '<div class="text-xs mt-2">' + (item.conv === null ? '전환 미입력' : item.conv === 0 ? '전환 0건 · CPA 산출 불가' : '') + '</div>';
                         td.innerHTML = html;
                         td.className = 'px-4 py-3 text-sm text-left min-w-[250px]'; 
                     } else {
@@ -1324,7 +1087,7 @@
                         if(['cost','revenue','actualCpm','actualCpc','actualCpa'].includes(header.key)) td.textContent = formatNumber(val, 'currency'); // [FIX] actual keys
                         else if(['imp','click','conv'].includes(header.key)) td.textContent = formatNumber(val, 'number');
                         else if(['actualCtr','actualCvr'].includes(header.key)) td.textContent = formatNumber(val, 'percent'); // [FIX] actual keys
-                        else if(['roas'].includes(header.key)) td.textContent = `${Math.round(val).toLocaleString('ko-KR')}%`;
+                        else if(['roas'].includes(header.key)) td.textContent = val === null ? '산출 불가' : `${Math.round(val).toLocaleString('ko-KR')}%`;
                         else if(['scoreA','scoreB','scoreC'].includes(header.key)) {
                             td.textContent = formatNumber(val, 'score');
                             td.classList.add('font-bold', 'text-gray-800');
@@ -1334,6 +1097,7 @@
                     }
                     tr.appendChild(td);
                 });
+                if (tableBodyId === 'table-body') { tr.tabIndex = 0; tr.setAttribute('aria-label', (item.creativeName || item.media || '소재') + ' 판단 근거 열기'); }
                 tableBody.appendChild(tr);
             });
         }
@@ -1437,7 +1201,7 @@
                 if (metric.subMetrics) {
                     metric.subMetrics.forEach(s => {
                         let sVal = formatNumber(s.value, s.type);
-                         if (s.label === '성과 ROAS') sVal = `${Math.round(s.value).toLocaleString('ko-KR')}%`;
+                         if (s.label === '성과 ROAS' && s.value !== null) sVal = `${Math.round(s.value).toLocaleString('ko-KR')}%`;
                         subs += `<div class="text-sm text-gray-600 mt-2"><span class="font-semibold">${s.label}:</span> ${sVal}</div>`;
                     });
                 }
@@ -1478,8 +1242,12 @@
             document.body.appendChild(tooltip);
 
             if(localStorage.getItem(DASHBOARD_STORAGE_KEY)) {
-                storageData = JSON.parse(localStorage.getItem(DASHBOARD_STORAGE_KEY));
-                currentProject = storageData.currentProject;
+                try {
+                    const loaded = JSON.parse(localStorage.getItem(DASHBOARD_STORAGE_KEY));
+                    if (!loaded || !loaded.projects || typeof loaded.projects !== 'object') throw new Error();
+                    storageData = loaded;
+                    currentProject = loaded.currentProject || 'default';
+                } catch { alert('저장 데이터 형식을 확인해 주세요. 기존 저장값은 보관됩니다.'); }
             }
             if(!storageData.projects['default']) storageData.projects['default'] = defaultValidationData;
             
@@ -1490,6 +1258,7 @@
             }
             
             // Initial Toggle State Ensure
+            isPrefillActive = false;
             isPerfInputVisible = false;
             isScoreVisible = false; // [NEW]
 
@@ -1502,6 +1271,7 @@
             newProjectButton.addEventListener('click', () => {
                 const name = prompt("새 프로젝트 이름을 입력하세요:");
                 if(name) {
+                    if (Object.hasOwn(storageData.projects, name) || ['__proto__','constructor','prototype'].includes(name)) return alert('이미 존재하거나 사용할 수 없는 프로젝트 이름입니다.');
                     storageData.projects[name] = { MAIN: mapCampaignDataToValidation([{}]) };
                     currentProject = name; storageData.currentProject = name;
                     validationData = storageData.projects[name];
@@ -1513,7 +1283,7 @@
                 if(currentProject === 'default') return alert("기본 프로젝트 이름은 수정할 수 없습니다.");
                 const newName = prompt("프로젝트 이름을 수정하세요:", currentProject);
                 if(newName && newName !== currentProject) {
-                    if (storageData.projects[newName]) return alert("이미 존재하는 프로젝트 이름입니다.");
+                    if (Object.hasOwn(storageData.projects, newName) || ['__proto__','constructor','prototype'].includes(newName)) return alert("이미 존재하는 프로젝트 이름입니다.");
                     storageData.projects[newName] = storageData.projects[currentProject];
                     delete storageData.projects[currentProject];
                     currentProject = newName; storageData.currentProject = newName;
@@ -1541,7 +1311,7 @@
 
             toggleValidationTableButton.addEventListener('click', toggleValidationTable);
             addValidationRowButton.addEventListener('click', addValidationRow);
-            runAnalysisButton.addEventListener('click', () => { liveAnalysisData = aggregateAndScoreData(); renderSummaryTable(); renderChart(liveAnalysisData); renderInsights(liveAnalysisData, document.getElementById('insight-list')); renderTable(liveAnalysisData, 'table-body'); });
+            runAnalysisButton.addEventListener('click', () => renderDashboard());
             
             saveDataButton.addEventListener('click', saveDataToLocalStorage);
             resetDataButton.addEventListener('click', () => {
@@ -1567,5 +1337,6 @@
             renderTable(liveAnalysisData, 'table-body');
         }
     </script>
+<script src="import-ui.js"></script>
 </body>
 </html>
